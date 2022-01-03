@@ -1,12 +1,15 @@
 import pygame
-from riblet import Riblet
+from ribbon import Ribbon
 from geospace import GeoSpace
 
 
 def main():
     pygame.init()
     pygame.display.set_caption("Fractal curve generator")
-    surf = pygame.display.set_mode(size=(200, 200))
+
+    surf = pygame.display.set_mode(size=(400, 400))
+
+    debug_square = [[[-1,1],[1,1]],[[1,1],[1,-1]],[[1,-1],[-1,-1]],[[-1,-1],[-1,1]]]
 
     extension = [
         [[-1, 1], [0, 1]],
@@ -16,11 +19,22 @@ def main():
         [[0, 1], [0, -1]]
     ]
 
-    geospace = GeoSpace(shrinkPoint=(1, 2))
+    shape = [(-1,0), (0,1), (1,0), (0,-1)]
 
-    line = Riblet(geospace)
+    line = Ribbon(shape, extension)
 
-    toDraw = line.getExtended(extension, 1)
+    toDraw = line.getLines()
+
+    for stroke in debug_square:
+        pygame.draw.line(
+            surf,
+            (255,
+             0,
+             0),
+            (200 + stroke[0][0] * 50,
+             200 + -stroke[0][1] * 50),
+            (200 + stroke[1][0] * 50,
+             200 + -stroke[1][1] * 50))
 
     for stroke in toDraw:
         pygame.draw.line(
@@ -28,10 +42,13 @@ def main():
             (255,
              255,
              255),
-            (100 + stroke[0][0] * 50,
-             100 + -stroke[0][1] * 50),
-            (100 + stroke[1][0] * 50,
-             100 + -stroke[1][1] * 50))
+            (200 + stroke[0][0] * 50,
+             200 + -stroke[0][1] * 50),
+            (200 + stroke[1][0] * 50,
+             200 + -stroke[1][1] * 50))
+    
+    
+
     pygame.display.update()
     exited = False
     while not exited:

@@ -27,11 +27,14 @@ class Riblet:
         Returns:
             List: List of transformed lines
         """
+
         result = []
         for line in pattern:
-            line[0][1] *= amount
-            line[1][1] *= amount
-            line[0] = self.geoSpace.getGlobalPos(line[0])
-            line[1] = self.geoSpace.getGlobalPos(line[1])
-            result.append(line)
+            x0, y0 =  line[0]
+            x1, y1 =  line[1]
+            y0 *= amount
+            y1 *= amount
+            x0, y0 = self.geoSpace.getGlobalPos((x0,y0))
+            x1, y1 = self.geoSpace.getGlobalPos((x1,y1))
+            result.append([[x0,y0],[x1,y1]])
         return result

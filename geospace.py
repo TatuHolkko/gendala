@@ -9,7 +9,7 @@ class GeoSpace:
     """
 
     def __init__(self, angle=0, xScale=1, yScale=1,
-                 origin=(0, 0), shrinkPoint=(0, 0)) -> None:
+                 origin=(0, 0), startGuide=0, endGuide=0) -> None:
         """
         Initialize the coordinate space
 
@@ -18,19 +18,21 @@ class GeoSpace:
             xScale (float, optional): Scaling along x-axis. Defaults to 1.
             yScale (float, optional): Scaling along y-axis. Defaults to 1.
             origin (((x,y), external), optional): Constant offset. Defaults to (0,0).
-            shrinkPoint (((x,y), local), oprtional): Perspective point. Defaults to (0,0).
+            startGuide ((float), optional): Y axis angle at x=-1. Defaults to 0.
+            endGuide ((float), optional):   Y axis angle at x= 1. Defaults to 0.
 
         The transformations are added in this order:
             Perspective, scale, rotation, offset
 
-        If the shrinkpoint is at (0,0), it has no effect. All points after the shrinkpoint
-        (away from origin) are clamped to the shrink point.
-
-        """
+        The perspective works in local space between x = -1 and x = 1. If perspective is
+        enabled, all points with x=[-1, 1] will get their Y axis tilted using the start and end point guides.
+        Y axis direction is linearly interpolated between the start and end points.
+         """
         self.angle = angle
         self.scale = [xScale, yScale]
         self.origin = origin
-        self.shrinkPoint = shrinkPoint
+        self.startGuide = startGuide
+        self.endGuide = endGuide
 
     def scaleBy(self, factor: float) -> None:
         """
@@ -96,7 +98,8 @@ class GeoSpace:
         self.angle = other.angle
         self.scale = other.scale
         self.origin = other.origin
-        self.shrinkPoint = other.shrinkPoint
+        self.startGuide = other.startGuide
+        self.endGuide = other.endGuide
 
     def getGlobalPos(self, pos: Tuple) -> Tuple:
         """
@@ -108,29 +111,28 @@ class GeoSpace:
         Returns:
             (x,y): External point
         """
-        if self.shrinkPoint is not [0, 0]:
-            yLimit = self.shrinkPoint[1]
-            pos = self.gradientPoint(
-                (pos[0], 0), self.shrinkPoint, self.yClamp(pos)[1] / yLimit)
+        pos = self.applyPerspective(pos)
         x, y = self.rotate_point((pos[0] * self.scale[0],
                                   pos[1] * self.scale[1]),
                                  (0, 0),
                                  self.angle)
         return self.origin[0] + x, self.origin[1] + y
-
-    def yClamp(self, p: Tuple) -> Tuple:
+    
+    def applyPerspective(self, point: Tuple) -> Tuple:
         """
-        Clamp the point p so that it does not cross the shrink point
+        Apply a linear approximation of perspective transform
 
         Args:
-            p (x,y): Point to clamp
+            point (x,y): Point to transform
 
         Returns:
-            (x,y): Point that is either at the shrink point or on the origin side of it
+            (x,y): Transformed point
         """
-        if self.shrinkPoint[1] < 0:
-            return (p[0], max(self.shrinkPoint[1], p[1]))
-        return (p[0], min(self.shrinkPoint[1], p[1]))
+        s = (point[0] + 1) / 2
+        angle = self.endGuide * s + self.startGuide * (1-s)
+        x = point[0] + point[1] * math.tan(angle)
+        return (x, point[1])
+
 
     @staticmethod
     def gradientPoint(p0: Tuple, p1: Tuple, s: float) -> Tuple:
@@ -165,7 +167,7 @@ class GeoSpace:
         """
         s = math.sin(theta)
         c = math.cos(theta)
-        xr = c * (point[0] - pivot[0]) - s * (point[1] - pivot[1]) + point[0]
+        xr = c * (point[0] - pivot[0]) - s * (point[1] - pivot[1]) + pivot[0]
         yr = s * (point[0] - pivot[0]) + c * (point[1] - pivot[1]) + pivot[1]
         return [xr, yr]
 
