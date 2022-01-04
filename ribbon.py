@@ -2,7 +2,7 @@ from math import atan2, hypot, pi
 from typing import List, Tuple
 from geospace import GeoSpace
 from riblet import Riblet
-from utility import delta
+from utility import delta, shorterDistance
 
 class Ribbon:
     """
@@ -36,8 +36,8 @@ class Ribbon:
             if i == 0:
                 anglePrev = angleCurrent
 
-            startGuide = (angleCurrent - anglePrev) / 2
-            endGuide = (angleCurrent - angleNext) / 2
+            startGuide = shorterDistance(angleCurrent, anglePrev) / 2
+            endGuide = shorterDistance(angleCurrent, angleNext) / 2
             
             scale = hypot(deltaCurrent[0],deltaCurrent[1]) / 2
             

@@ -1,5 +1,5 @@
 import math
-import copy
+from utility import clamp, shorterDistance, piWrap
 from typing import Tuple
 
 
@@ -129,10 +129,32 @@ class GeoSpace:
             (x,y): Transformed point
         """
         s = (point[0] + 1) / 2
-        angle = self.endGuide * s + self.startGuide * (1-s)
-        x = point[0] + point[1] * math.tan(angle)
+        angle = self.angleGradient(self.startGuide, self.endGuide, s)
+        x = point[0] + clamp(point[1] * -math.tan(angle), -100, 100)
         return (x, point[1])
+    
+    @staticmethod
+    def angleGradient(angle1, angle2, p):
+        """
+        Return an angle [-pi, pi] that is between angle1 and angle2,
+        choosing the shorter direction of travel.
 
+        Args:
+            angle1 (float): First angle
+            angle2 (float): Second angle
+            p (float): value between 0 and 1
+        
+        Returns:
+            (float): Angle between angle1 and angle2
+        """
+
+        if abs(angle1) > math.pi or abs(angle2) > math.pi:
+            raise Exception("Gradient angles not between [-pi,pi]")
+
+        delta = shorterDistance(angle1, angle2)
+        result = piWrap(angle1 + p * delta)
+        return result
+        
 
     @staticmethod
     def gradientPoint(p0: Tuple, p1: Tuple, s: float) -> Tuple:
