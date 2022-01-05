@@ -1,3 +1,5 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 from ribbon import Ribbon
 from geospace import GeoSpace
@@ -31,10 +33,10 @@ def main():
             (255,
              0,
              0),
-            (200 + stroke[0][0] * 50,
-             200 + -stroke[0][1] * 50),
-            (200 + stroke[1][0] * 50,
-             200 + -stroke[1][1] * 50))
+            (round(200 + stroke[0][0] * 50),
+             round(200 + -stroke[0][1] * 50)),
+            (round(200 + stroke[1][0] * 50),
+             round(200 + -stroke[1][1] * 50)))
 
     for stroke in toDraw:
         pygame.draw.line(
@@ -42,10 +44,10 @@ def main():
             (255,
              255,
              255),
-            (200 + stroke[0][0] * 50,
-             200 + -stroke[0][1] * 50),
-            (200 + stroke[1][0] * 50,
-             200 + -stroke[1][1] * 50))
+            (round(200 + stroke[0][0] * 50),
+             round(200 + -stroke[0][1] * 50)),
+            (round(200 + stroke[1][0] * 50),
+             round(200 + -stroke[1][1] * 50)))
     
     
 
