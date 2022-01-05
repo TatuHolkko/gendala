@@ -77,7 +77,7 @@ class Ribbon:
         return GeoSpace(
             currentAngle,
             scale,
-            scale,
+            1,
             midpoint,
             startGuide,
             endGuide)

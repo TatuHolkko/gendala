@@ -22,7 +22,7 @@ class GeoSpace:
             endGuide ((float), optional):   Y axis angle at x= 1. Defaults to 0.
 
         The transformations are added in this order:
-            Perspective, scale, rotation, offset
+            Scale, perspective, rotation, offset
 
         The perspective works in local space between x = -1 and x = 1. If perspective is
         enabled, all points with x=[-1, 1] will get their Y axis tilted using the start and end point guides.
@@ -111,13 +111,11 @@ class GeoSpace:
         Returns:
             (x,y): External point
         """
-        pos = self.applyPerspective(pos)
-        x, y = self.rotate_point((pos[0] * self.scale[0],
-                                  pos[1] * self.scale[1]),
-                                 (0, 0),
-                                 self.angle)
+        pos_ = [pos[0] * self.scale[0], pos[1] * self.scale[1]]
+        pos_ = self.applyPerspective(pos_)
+        x, y = self.rotate_point(pos_, (0, 0), self.angle)
         return self.origin[0] + x, self.origin[1] + y
-    
+
     def applyPerspective(self, point: Tuple) -> Tuple:
         """
         Apply a linear approximation of perspective transform
@@ -128,11 +126,11 @@ class GeoSpace:
         Returns:
             (x,y): Transformed point
         """
-        s = (point[0] + 1) / 2
+        s = (point[0]/self.scale[0] + 1) / 2
         angle = self.angleGradient(self.startGuide, self.endGuide, s)
         x = point[0] + clamp(point[1] * -math.tan(angle), -100, 100)
         return (x, point[1])
-    
+
     @staticmethod
     def angleGradient(angle1, angle2, p):
         """
@@ -143,7 +141,7 @@ class GeoSpace:
             angle1 (float): First angle
             angle2 (float): Second angle
             p (float): value between 0 and 1
-        
+
         Returns:
             (float): Angle between angle1 and angle2
         """
