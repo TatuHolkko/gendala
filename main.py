@@ -4,7 +4,6 @@ import pygame
 from ribbon import Ribbon
 from geospace import GeoSpace
 
-
 def main():
     pygame.init()
     pygame.display.set_caption("Fractal curve generator")
@@ -14,6 +13,7 @@ def main():
     debug_square = [[[-1,1],[1,1]],[[1,1],[1,-1]],[[1,-1],[-1,-1]],[[-1,-1],[-1,1]]]
 
     extension = [
+        [[-1,-1], [1,1]],
         [[-1, 1], [0, 1]],
         [[0, 1], [1, 1]],
         [[-1, -1], [0, -1]],
@@ -21,9 +21,9 @@ def main():
         [[0, 1], [0, -1]]
     ]
 
-    shape = [(-1,0), (0,1), (1,1), (1,0), (0,-1)]
+    shape = [(-1,0), (0,1), (1,0), (0,-1)]
 
-    line = Ribbon(shape, extension, False)
+    line = Ribbon(shape, extension, True)
 
     toDraw = line.getLines()
 

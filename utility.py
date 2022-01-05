@@ -46,29 +46,38 @@ def shorterDistance(angle1, angle2):
 
     return angle2 - angle1
 
+
 def angle(p1, p2):
-    d = delta(p1,p2)
+    d = delta(p1, p2)
     return math.atan2(d[1], d[0])
+
 
 def distance(p1, p2):
     d = delta(p1, p2)
     return math.hypot(d[0], d[1])
 
+
 def gradientPoint(p1, p2, s):
     d = delta(p1, p2)
     return (p1[0] + d[0] * s, p1[1] + d[1] * s)
 
+
+def gradient(v1, v2, s):
+    d = v2 - v1
+    return v1 + d * s
+
+
 def ext(indexes):
 
     extension = [
-        #hor
+        # hor
         [[-1, 1], [1, 1]],
         [[-1, 0], [1, 0]],
         [[-1, -1], [1, -1]],
-        #diag
-        [[1,-1],[-1,1]],
-        [[-1,-1],[1,1]],
-        #ver
+        # diag
+        [[1, -1], [-1, 1]],
+        [[-1, -1], [1, 1]],
+        # ver
         [[-1, 1], [-1, -1]],
         [[0, 1], [0, -1]],
         [[1, 1], [1, -1]],

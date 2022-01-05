@@ -2,7 +2,7 @@ from math import atan, atan2, hypot, pi
 from typing import List, Tuple
 from geospace import GeoSpace
 from riblet import Riblet
-from utility import angle, delta, distance, gradientPoint, shorterDistance
+from utility import angle, delta, distance, gradient, gradientPoint, shorterDistance
 
 
 class Ribbon:
@@ -22,6 +22,10 @@ class Ribbon:
         self.riblets = []
         self.pattern = pattern
 
+        lines = len(points)
+        if not closed:
+            lines -= 1
+        
         for i in range(len(points)):
 
             if not closed and i == len(points) - 1:
@@ -37,7 +41,92 @@ class Ribbon:
             if i < len(points) - 2 or closed:
                 p4 = points[(i + 2) % len(points)]
 
-            self.riblets.append(Riblet(self.createGeoSpace(p1, p2, p3, p4)))
+            
+            x0 = -1 + (i / lines) * 2
+            x1 = -1 + ((i + 1) / lines) * 2
+
+            self.riblets.append(
+                Riblet(
+                    self.createGeoSpace(
+                        p1,
+                        p2,
+                        p3,
+                        p4),
+                    self.slicePattern(x0,x1,pattern)))
+
+    def slicePattern(self,x0, x1, pattern):
+        result = []
+        for line in pattern:
+
+            lx0 = line[0][0]
+            lx1 = line[1][0]
+
+            if (lx0 < x0 and lx1 < x0) or (lx0 > x1 and lx1 > x1):
+                # entire line outside limits
+                continue
+            if ((lx0 >= x0 and lx1 >= x0) and (lx0 <= x1 and lx1 <= x1)):
+                # entire line inside limits
+                result.append(line)
+                continue
+
+            left = min(lx0, lx1)
+            right = max(lx0, lx1)
+            leftP = [0,0]
+            rightP = [0,0]
+            if left == lx0:
+                leftP[0] = line[0][0]
+                leftP[1] = line[0][1]
+                rightP[0] = line[1][0]
+                rightP[1] = line[1][1]
+            else:
+                leftP[0] = line[1][0]
+                leftP[1] = line[1][1]
+                rightP[0] = line[0][0]
+                rightP[1] = line[0][1]
+
+            if (lx0 <= x0 and lx1 >= x1) or (lx1 <= x0 and lx0 >= x1):
+                # both points outside limits but line crosses the area
+                underflowPortion = (x0 - left) / (right - left)
+                overflowPortion = (right - x1) / (right - left)
+                start = gradientPoint(leftP, rightP, underflowPortion)
+                end = gradientPoint(rightP, leftP, overflowPortion)
+                if lx0 < lx1:
+                    result.append([[start[0], start[1]], [end[0], end[1]]])
+                else:
+                    result.append([[end[0], end[1]], [start[0], start[1]]])
+                continue
+
+            # one point inside, one point outside
+
+            if left < x0:
+                # left point outside, right point inside
+                portionInside = (right - x0) / (right - left)
+                start = gradientPoint(rightP, leftP, portionInside)
+                end = rightP
+                if lx0 < lx1:
+                    result.append([[start[0], start[1]], [end[0], end[1]]])
+                else:
+                    result.append([[end[0], end[1]], [start[0], start[1]]])
+            else:
+                # right point outside, left point inside
+                portionInside = (x1 - left) / (right - left)
+                start = leftP
+                end = gradientPoint(leftP, rightP, portionInside)
+                if lx0 < lx1:
+                    result.append([[start[0], start[1]], [end[0], end[1]]])
+                else:
+                    result.append([[end[0], end[1]], [start[0], start[1]]])
+        
+        scale = 2/(x1-x0)
+        for line in result:
+            line[0][0] -= x0
+            line[1][0] -= x0
+            line[0][0] *= scale
+            line[1][0] *= scale
+            line[0][0] -= 1
+            line[1][0] -= 1
+
+        return result
 
     def createGeoSpace(
             self,
@@ -46,7 +135,7 @@ class Ribbon:
             p3: float,
             p4: float) -> GeoSpace:
         """
-        Create a geospace for line p2-p3. If p1 or p4 is not None, they define the 
+        Create a geospace for line p2-p3. If p1 or p4 is not None, they define the
         respective guide angles at ends of the line p2-p3.
 
         Args:
@@ -85,5 +174,5 @@ class Ribbon:
     def getLines(self):
         result = []
         for riblet in self.riblets:
-            result.extend(riblet.getExtended(self.pattern, 0.5))
+            result.extend(riblet.getExtended(0.5))
         return result

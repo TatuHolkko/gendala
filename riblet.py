@@ -7,7 +7,7 @@ class Riblet:
     Riblet contains a pattern and a geospace.
     """
 
-    def __init__(self, geoSpace: GeoSpace) -> None:
+    def __init__(self, geoSpace: GeoSpace, pattern: List) -> None:
         """
         Initialize
 
@@ -15,8 +15,9 @@ class Riblet:
             geoSpace (GeoSpace): Coordinate space used to transform the pattern
         """
         self.geoSpace = geoSpace
+        self.pattern = pattern
 
-    def getExtended(self, pattern: List, amount: float) -> List:
+    def getExtended(self, amount: float) -> List:
         """
         Extend and transform the given pattern into the local coordinate space
 
@@ -29,7 +30,7 @@ class Riblet:
         """
 
         result = []
-        for line in pattern:
+        for line in self.pattern:
             x0, y0 =  line[0]
             x1, y1 =  line[1]
             y0 *= amount
