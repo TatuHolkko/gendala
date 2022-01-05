@@ -19,9 +19,9 @@ def main():
         [[0, 1], [0, -1]]
     ]
 
-    shape = [(-1,0), (0,1), (1,0), (0,-1)]
+    shape = [(-1,0), (0,1), (1,1), (1,0), (0,-1)]
 
-    line = Ribbon(shape, extension)
+    line = Ribbon(shape, extension, True)
 
     toDraw = line.getLines()
 

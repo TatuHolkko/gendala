@@ -154,25 +154,6 @@ class GeoSpace:
         delta = shorterDistance(angle1, angle2)
         result = piWrap(angle1 + p * delta)
         return result
-        
-
-    @staticmethod
-    def gradientPoint(p0: Tuple, p1: Tuple, s: float) -> Tuple:
-        """
-        Get a point between p0 and p1.
-
-        Args:
-            p0 (x,y): point 0
-            p1 (x,y): point 1
-            s (float): float between 0 and 1 specifying the point between p0 and p1
-
-        Returns:
-            (x, y): Point between p0 and p1
-        """
-        delta = (p1[0] - p0[0], p1[1] - p0[1])
-        x = p0[0] + delta[0] * s
-        y = p0[1] + delta[1] * s
-        return (x, y)
 
     @staticmethod
     def rotate_point(point: Tuple, pivot: Tuple, theta: float):
