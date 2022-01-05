@@ -34,7 +34,7 @@ class Ribbon:
 
             if i > 0 or closed:
                 p1 = points[i - 1]
-            if i < len(points) - 1 or closed:
+            if i < len(points) - 2 or closed:
                 p4 = points[(i + 2) % len(points)]
 
             self.riblets.append(Riblet(self.createGeoSpace(p1, p2, p3, p4)))
@@ -85,5 +85,5 @@ class Ribbon:
     def getLines(self):
         result = []
         for riblet in self.riblets:
-            result.extend(riblet.getExtended(self.pattern, 0.3))
+            result.extend(riblet.getExtended(self.pattern, 0.5))
         return result

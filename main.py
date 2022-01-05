@@ -23,7 +23,7 @@ def main():
 
     shape = [(-1,0), (0,1), (1,1), (1,0), (0,-1)]
 
-    line = Ribbon(shape, extension, True)
+    line = Ribbon(shape, extension, False)
 
     toDraw = line.getLines()
 
