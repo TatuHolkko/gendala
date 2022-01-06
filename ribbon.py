@@ -10,7 +10,12 @@ class Ribbon:
     Ribbon describes a long continuous pattern defined by a series of points
     """
 
-    def __init__(self, points: List, pattern: List, closed: bool) -> None:
+    def __init__(
+            self,
+            points: List,
+            pattern: List,
+            closed: bool,
+            n: int = 0) -> None:
         """
         Initialize the ribbon
 
@@ -25,7 +30,7 @@ class Ribbon:
         lines = len(points)
         if not closed:
             lines -= 1
-        
+
         for i in range(len(points)):
 
             if not closed and i == len(points) - 1:
@@ -41,9 +46,12 @@ class Ribbon:
             if i < len(points) - 2 or closed:
                 p4 = points[(i + 2) % len(points)]
 
-            
-            x0 = -1 + (i / lines) * 2
-            x1 = -1 + ((i + 1) / lines) * 2
+            nPatterns = n
+            if nPatterns == 0 or nPatterns > lines:
+                nPatterns = lines
+
+            x0 = -1 + ((i * nPatterns / lines) % 1) * 2
+            x1 = -1 + (1 - ((1 - ((i + 1) * nPatterns / lines)) % 1)) * 2
 
             self.riblets.append(
                 Riblet(
@@ -52,27 +60,32 @@ class Ribbon:
                         p2,
                         p3,
                         p4),
-                    self.slicePattern(x0,x1,pattern)))
+                    self.slicePattern(x0, x1, pattern)))
 
-    def slicePattern(self,x0, x1, pattern):
+    def slicePattern(self, x0, x1, pattern):
         result = []
         for line in pattern:
 
             lx0 = line[0][0]
             lx1 = line[1][0]
 
+            left = min(lx0, lx1)
+            right = max(lx0, lx1)
+
+            if (right == x0 and left < right) or (left == x1 and left < right):
+                # only one point at the limit
+                continue
             if (lx0 < x0 and lx1 < x0) or (lx0 > x1 and lx1 > x1):
                 # entire line outside limits
                 continue
             if ((lx0 >= x0 and lx1 >= x0) and (lx0 <= x1 and lx1 <= x1)):
                 # entire line inside limits
-                result.append(line)
+                result.append([[line[0][0], line[0][1]],
+                              [line[1][0], line[1][1]]])
                 continue
 
-            left = min(lx0, lx1)
-            right = max(lx0, lx1)
-            leftP = [0,0]
-            rightP = [0,0]
+            leftP = [0, 0]
+            rightP = [0, 0]
             if left == lx0:
                 leftP[0] = line[0][0]
                 leftP[1] = line[0][1]
@@ -116,8 +129,8 @@ class Ribbon:
                     result.append([[start[0], start[1]], [end[0], end[1]]])
                 else:
                     result.append([[end[0], end[1]], [start[0], start[1]]])
-        
-        scale = 2/(x1-x0)
+
+        scale = 2 / (x1 - x0)
         for line in result:
             line[0][0] -= x0
             line[1][0] -= x0

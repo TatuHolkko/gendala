@@ -1,8 +1,12 @@
+import math
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 from ribbon import Ribbon
 from geospace import GeoSpace
+
+def ngon(n):
+    return [[math.cos(x/n*2*math.pi),math.sin(x/n*2*math.pi)] for x in range(n)]
 
 def main():
     pygame.init()
@@ -14,16 +18,17 @@ def main():
 
     extension = [
         [[-1,-1], [1,1]],
-        [[-1, 1], [0, 1]],
-        [[0, 1], [1, 1]],
-        [[-1, -1], [0, -1]],
+        [[-1, 1], [-1, -1]],
+        [[-1, 1], [1, 1]],
+        [[-1, -1], [1, -1]],
+        [[-1, -1], [0, 1]],
         [[0, -1], [1, -1]],
-        [[0, 1], [0, -1]]
+        #[[0, 1], [0, -1]]
     ]
 
     shape = [(-1,0), (0,1), (1,0), (0,-1)]
 
-    line = Ribbon(shape, extension, True)
+    line = Ribbon(ngon(64), extension, True, 16)
 
     toDraw = line.getLines()
 
