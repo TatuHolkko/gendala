@@ -66,6 +66,24 @@ def gradient(v1, v2, s):
     d = v2 - v1
     return v1 + d * s
 
+def rotatePoint(point, pivot, theta):
+        """
+        Rotate point around pivot by theta degrees
+
+        Args:
+            point (x,y): Point to rotate
+            pivot (x,y): Center of rotation
+            theta (float): Amount in radians
+
+        Returns:
+            (x,y): Rotated point
+        """
+        s = math.sin(theta)
+        c = math.cos(theta)
+        xr = c * (point[0] - pivot[0]) - s * (point[1] - pivot[1]) + pivot[0]
+        yr = s * (point[0] - pivot[0]) + c * (point[1] - pivot[1]) + pivot[1]
+        return [xr, yr]
+
 
 def ext(indexes):
 

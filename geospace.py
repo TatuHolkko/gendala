@@ -1,5 +1,5 @@
 import math
-from utility import clamp, shorterDistance, piWrap
+from utility import clamp, rotatePoint, shorterDistance, piWrap
 from typing import Tuple
 
 
@@ -113,7 +113,7 @@ class GeoSpace:
         """
         pos_ = [pos[0] * self.scale[0], pos[1] * self.scale[1]]
         pos_ = self.applyPerspective(pos_)
-        x, y = self.rotate_point(pos_, (0, 0), self.angle)
+        x, y = rotatePoint(pos_, (0, 0), self.angle)
         return self.origin[0] + x, self.origin[1] + y
 
     def applyPerspective(self, point: Tuple) -> Tuple:
@@ -152,26 +152,6 @@ class GeoSpace:
         delta = shorterDistance(angle1, angle2)
         result = piWrap(angle1 + p * delta)
         return result
-
-    @staticmethod
-    def rotate_point(point: Tuple, pivot: Tuple, theta: float):
-        """
-        Rotate point around pivot by theta degrees
-
-        Args:
-            point (x,y): Point to rotate
-            pivot (x,y): Center of rotation
-            theta (float): Amount in radians
-
-        Returns:
-            (x,y): Rotated point
-        """
-        s = math.sin(theta)
-        c = math.cos(theta)
-        xr = c * (point[0] - pivot[0]) - s * (point[1] - pivot[1]) + pivot[0]
-        yr = s * (point[0] - pivot[0]) + c * (point[1] - pivot[1]) + pivot[1]
-        return [xr, yr]
-
 
 class GeoSpaceStack:
     """

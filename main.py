@@ -1,12 +1,16 @@
+from geospace import GeoSpace
+from ribbon import Ribbon
+from curve import arc
+import pygame
 import math
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
-import pygame
-from ribbon import Ribbon
-from geospace import GeoSpace
+
 
 def ngon(n):
-    return [[math.cos(x/n*2*math.pi),math.sin(x/n*2*math.pi)] for x in range(n)]
+    return [[math.cos(x / n * 2 * math.pi),
+             math.sin(x / n * 2 * math.pi)] for x in range(n)]
+
 
 def main():
     pygame.init()
@@ -14,21 +18,33 @@ def main():
 
     surf = pygame.display.set_mode(size=(400, 400))
 
-    debug_square = [[[-1,1],[1,1]],[[1,1],[1,-1]],[[1,-1],[-1,-1]],[[-1,-1],[-1,1]]]
+    debug_square = [[[-1, 1], [1, 1]], [[1, 1], [1, -1]],
+                    [[1, -1], [-1, -1]], [[-1, -1], [-1, 1]]]
 
-    extension = [
-        [[-1,-1], [1,1]],
-        [[-1, 1], [-1, -1]],
-        [[-1, 1], [1, 1]],
-        [[-1, -1], [1, -1]],
-        [[-1, -1], [0, 1]],
-        [[0, -1], [1, -1]],
-        #[[0, 1], [0, -1]]
+    grid = [
+        #[[-1, 0], [0, 1]],
+        #[[-1, -1], [1, 1]],
+        #[[0, -1], [1, 0]],
+        #[[0,-1], [1,1]],
+        [[-1, 1], [1, 1]],  # top hor
+        #[[-1, 0], [1, 0]],  # mid hor
+        [[-1, -1], [1, -1]],  # bot hor
+        #[[0, 1], [0, -1]], #center ver
+        [[-1, 1], [-1, -1]], #left ver
+        [[1, 1], [1, -1]], #right ver
     ]
+    
 
-    shape = [(-1,0), (0,1), (1,0), (0,-1)]
-
-    line = Ribbon(ngon(64), extension, True, 16)
+    shape = arc([-1, 0], [1, 0], 1, subDivs=8)
+    del shape[-1]
+    shape.extend(arc([1, 0], [3, 0], -1, subDivs=8))
+    del shape[-1]
+    shape.extend(arc([3, 0], [-3, 0], -1, subDivs=16))
+    del shape[-1]
+    shape.extend(arc([-3, 0], [-1, 0], -1, subDivs=8))
+    del shape[-1]
+    
+    line = Ribbon(shape, grid, True, 4)
 
     toDraw = line.getLines()
 
@@ -53,8 +69,6 @@ def main():
              round(200 + -stroke[0][1] * 50)),
             (round(200 + stroke[1][0] * 50),
              round(200 + -stroke[1][1] * 50)))
-    
-    
 
     pygame.display.update()
     exited = False
