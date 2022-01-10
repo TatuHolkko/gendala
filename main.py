@@ -1,6 +1,6 @@
 from geospace import GeoSpace
 from ribbon import Ribbon
-from curve import arc
+from curve import arc, sine
 import pygame
 import math
 import os
@@ -23,7 +23,8 @@ def main():
 
     grid = [
         #[[-1, 0], [0, 1]],
-        #[[-1, -1], [1, 1]],
+        [[-1, -1], [1, 1]], # diag 1
+        [[1, -1], [-1, 1]], # diag 2
         #[[0, -1], [1, 0]],
         #[[0,-1], [1,1]],
         [[-1, 1], [1, 1]],  # top hor
@@ -35,16 +36,9 @@ def main():
     ]
     
 
-    shape = arc([-1, 0], [1, 0], 1, subDivs=8)
-    del shape[-1]
-    shape.extend(arc([1, 0], [3, 0], -1, subDivs=8))
-    del shape[-1]
-    shape.extend(arc([3, 0], [-3, 0], -1, subDivs=16))
-    del shape[-1]
-    shape.extend(arc([-3, 0], [-1, 0], -1, subDivs=8))
-    del shape[-1]
+    shape = sine([-3, 0], [3, 0], subDivs=16, amplitude=0.3)
     
-    line = Ribbon(shape, grid, True, 4)
+    line = Ribbon(shape, grid, False, 1)
 
     toDraw = line.getLines()
 

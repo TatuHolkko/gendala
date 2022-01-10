@@ -19,6 +19,23 @@ def pointsToLines(points: list) -> list:
     return result
 
 
+def sine(
+        p0: list,
+        p1: list,
+        subDivs: int = 16,
+        amplitude: float = 1) -> list:
+    result = [[p0[0], p0[1]]]
+    gspace = geoSpaceBetween(p0, p1)
+    for i in range(subDivs):
+        p = (i + 1) / (subDivs + 1)
+        phi = 2 * pi * p
+        x = 2 * p - 1
+        subDivPoint = gspace.getGlobalPos((x, sin(phi) * amplitude))
+        result.append([subDivPoint[0], subDivPoint[1]])
+    result.append([p1[0], p1[1]])
+    return result
+
+
 def line(
         p0: list,
         p1: list,
@@ -56,9 +73,9 @@ def arc(p0: list,
     omega = 2 * (pi - 2 * atan(1 / curvature))
     for i in range(subDivs):
         p = (i + 1) / (subDivs + 1)
-        phi = (1-p) * omega
+        phi = (1 - p) * omega
 
-        subDivPoint = rotatePoint((1,0), pivot, phi)
+        subDivPoint = rotatePoint((1, 0), pivot, phi)
         subDivPoint = gspace.getGlobalPos(subDivPoint)
         result.append([subDivPoint[0], subDivPoint[1]])
 
