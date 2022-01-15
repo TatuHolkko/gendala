@@ -1,6 +1,6 @@
 from geospace import GeoSpace
 from ribbon import Ribbon
-from curve import arc, sine
+from curve import Curve
 import pygame
 import math
 import os
@@ -34,13 +34,15 @@ def main():
         [[-1, 1], [-1, -1]], #left ver
         [[1, 1], [1, -1]], #right ver
     ]
-    
 
-    shape = sine([-3, 0], [3, 0], subDivs=16, amplitude=0.3)
-    
-    line = Ribbon(shape, grid, False, 1)
+    curv = Curve([-1,0])
 
-    toDraw = line.getLines()
+    curv.extend(curv.sine([1,0]))
+    curv.extend(curv.sine([3,-3]))
+    
+    rib = Ribbon(curv, grid, False, 2)
+
+    toDraw = rib.getLines()
 
     for stroke in debug_square:
         pygame.draw.line(

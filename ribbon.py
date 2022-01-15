@@ -1,5 +1,6 @@
 from math import atan, atan2, hypot, pi
 from typing import List, Tuple
+from curve import Curve
 from geospace import GeoSpace
 from riblet import Riblet
 from utility import angle, delta, distance, gradient, gradientPoint, shorterDistance
@@ -12,7 +13,7 @@ class Ribbon:
 
     def __init__(
             self,
-            points: List,
+            curve: Curve,
             pattern: List,
             closed: bool,
             n: int = 0) -> None:
@@ -26,6 +27,7 @@ class Ribbon:
         """
         self.riblets = []
         self.pattern = pattern
+        points = curve.getPoints()
 
         lines = len(points)
         if not closed:
