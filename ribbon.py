@@ -189,5 +189,5 @@ class Ribbon:
     def getLines(self):
         result = []
         for riblet in self.riblets:
-            result.extend(riblet.getExtended(0.5))
+            result.extend(riblet.getExtended(0.3))
         return result

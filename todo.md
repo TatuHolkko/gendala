@@ -1,2 +1,2 @@
-figure out why constructing Ribbon with certain n values do not work
+implement repeating a pattern inside one riblet, when the pattern fits multiple times in it
 comments

@@ -51,6 +51,9 @@ def angle(p1, p2):
     d = delta(p1, p2)
     return math.atan2(d[1], d[0])
 
+def innerAngle(p1,p2,p3):
+    return shorterDistance(angle(p2,p1),angle(p2,p3))
+
 
 def distance(p1, p2):
     d = delta(p1, p2)
@@ -83,26 +86,3 @@ def rotatePoint(point, pivot, theta):
         xr = c * (point[0] - pivot[0]) - s * (point[1] - pivot[1]) + pivot[0]
         yr = s * (point[0] - pivot[0]) + c * (point[1] - pivot[1]) + pivot[1]
         return [xr, yr]
-
-
-def ext(indexes):
-
-    extension = [
-        # hor
-        [[-1, 1], [1, 1]],
-        [[-1, 0], [1, 0]],
-        [[-1, -1], [1, -1]],
-        # diag
-        [[1, -1], [-1, 1]],
-        [[-1, -1], [1, 1]],
-        # ver
-        [[-1, 1], [-1, -1]],
-        [[0, 1], [0, -1]],
-        [[1, 1], [1, -1]],
-    ]
-
-    result = []
-    for i in indexes:
-        result.append(extension[i])
-
-    return result

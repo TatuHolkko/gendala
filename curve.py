@@ -2,7 +2,8 @@
 from copy import deepcopy
 from math import atan, pi, sin, tan
 from os import stat
-from utility import angle, clamp, distance, gradientPoint, rotatePoint
+from queue import Empty
+from utility import angle, clamp, distance, gradientPoint, innerAngle, rotatePoint, shorterDistance
 from geospace import GeoSpace
 
 
@@ -21,13 +22,63 @@ class Curve():
             self.closed = True
             del self.end
             self.end = self.points[-1]
-        self.round()
 
     def getPoints(self):
         return deepcopy(self.points)
+
+    def sharpCorners(self, maxAngle: float):
         
-    def round(self, maxAngle:float = 20):
-        pass
+        result = []
+
+        if self.closed:
+            p1 = self.points[-1]
+            p2 = self.points[0]
+            p3 = self.points[1]
+            angle_ = innerAngle(p1, p2, p3)
+            if abs(angle_) <= maxAngle:
+                result.append(0)
+
+        for i in range(len(self.points) - 2):
+            p1 = self.points[i]
+            p2 = self.points[i + 1]
+            p3 = self.points[i + 2]
+            angle_ = innerAngle(p1, p2, p3)
+            if abs(angle_) <= maxAngle:
+                result.append(i + 1)
+
+        if self.closed:
+            p1 = self.points[-2]
+            p2 = self.points[-1]
+            p3 = self.points[0]
+            angle_ = innerAngle(p1, p2, p3)
+            if abs(angle_) <= maxAngle:
+                result.append(len(self.points) - 1)
+
+        return result
+
+    def round(self, maxAngle: float = pi / 4):
+        pointsToRound = self.sharpCorners(maxAngle)
+        while pointsToRound:
+            rounds = []
+            for point in pointsToRound:
+                rounds.append([point, self.roundPoint(point)])
+            indexOffset = 0
+            for round in rounds:
+                index = round[0] + indexOffset
+                points = round[1]
+                self.points[index][0] = points[1][0]
+                self.points[index][1] = points[1][1]
+                self.points.insert(index, [points[0][0],points[0][1]])
+                indexOffset += 1
+            pointsToRound = self.sharpCorners(maxAngle)
+
+    def roundPoint(self, i):
+        p1 = self.points[i - 1]
+        p2 = self.points[i]
+        p3 = self.points[(i + 1) % len(self.points)]
+        rounded1 = gradientPoint(p2, p1, 0.3)
+        rounded2 = gradientPoint(p2, p3, 0.3)
+        return (rounded1, rounded2)
 
     def sine(self,
              end: list,

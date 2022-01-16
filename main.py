@@ -37,10 +37,12 @@ def main():
 
     curv = Curve([-1,0])
 
-    curv.extend(curv.sine([1,0]))
-    curv.extend(curv.sine([3,-3]))
+    curv.extend(curv.line([0,1]))
+    curv.extend(curv.line([1,0]))
     
-    rib = Ribbon(curv, grid, False, 2)
+    curv.round(maxAngle=math.pi/1.5)
+
+    rib = Ribbon(curv, grid, False)
 
     toDraw = rib.getLines()
 
