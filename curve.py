@@ -56,7 +56,7 @@ class Curve():
 
         return result
 
-    def round(self, maxAngle: float = pi / 4):
+    def round(self, maxAngle: float = pi - pi / 4):
         pointsToRound = self.sharpCorners(maxAngle)
         while pointsToRound:
             rounds = []

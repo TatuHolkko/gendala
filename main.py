@@ -24,27 +24,27 @@ def main():
     grid = [
         #[[-1, 0], [0, 1]],
         [[-1, -1], [1, 1]], # diag 1
-        [[1, -1], [-1, 1]], # diag 2
+        #[[1, -1], [-1, 1]], # diag 2
         #[[0, -1], [1, 0]],
         #[[0,-1], [1,1]],
         [[-1, 1], [1, 1]],  # top hor
         #[[-1, 0], [1, 0]],  # mid hor
         [[-1, -1], [1, -1]],  # bot hor
         #[[0, 1], [0, -1]], #center ver
-        [[-1, 1], [-1, -1]], #left ver
-        [[1, 1], [1, -1]], #right ver
+        #[[-1, 1], [-1, -1]], #left ver
+        #[[1, 1], [1, -1]], #right ver
     ]
 
     curv = Curve([-1,0])
 
-    curv.extend(curv.line([0,1]))
-    curv.extend(curv.line([1,0]))
-    
-    curv.round(maxAngle=math.pi/1.5)
+    curv.extend(curv.sine([1,0], subDivs=7, amplitude=0.5))
+    curv.extend(curv.arc([0,-1], curvature=1))
 
-    rib = Ribbon(curv, grid, False)
+    curv.round()
 
-    toDraw = rib.getLines()
+    rib = Ribbon(curv, grid, closed=False, n=12)
+
+    toDraw = rib.getLines(0.1)
 
     for stroke in debug_square:
         pygame.draw.line(

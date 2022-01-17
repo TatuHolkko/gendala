@@ -1,9 +1,10 @@
+from copy import deepcopy
 from math import atan, atan2, hypot, pi
 from typing import List, Tuple
 from curve import Curve
 from geospace import GeoSpace
 from riblet import Riblet
-from utility import angle, delta, distance, gradient, gradientPoint, shorterDistance
+from utility import angle, distance, gradientPoint, normalizeLines, offsetLines, repeatLines, scaleLines, shorterDistance, totalLength
 
 
 class Ribbon:
@@ -16,7 +17,7 @@ class Ribbon:
             curve: Curve,
             pattern: List,
             closed: bool,
-            n: int = 0) -> None:
+            n: int = 1) -> None:
         """
         Initialize the ribbon
 
@@ -26,13 +27,27 @@ class Ribbon:
             closed (bool): if true, endpoints are connected
         """
         self.riblets = []
-        self.pattern = pattern
-        points = curve.getPoints()
+        self.pattern = deepcopy(pattern)
+        normalizeLines(self.pattern)
+        self.closed = closed
 
+        points = curve.getPoints()
+        
         lines = len(points)
         if not closed:
             lines -= 1
+        
+        self.length = totalLength(points)
 
+        widthPerPattern = self.length / n
+        patternScale = widthPerPattern / 2
+
+        tempPattern = repeatLines(self.pattern, n)
+        offsetLines(tempPattern, 1)
+        scaleLines(tempPattern, patternScale)
+
+        x0 = 0
+        x1 = 0
         for i in range(len(points)):
 
             if not closed and i == len(points) - 1:
@@ -47,13 +62,8 @@ class Ribbon:
                 p1 = points[i - 1]
             if i < len(points) - 2 or closed:
                 p4 = points[(i + 2) % len(points)]
-
-            nPatterns = n
-            if nPatterns == 0 or nPatterns > lines:
-                nPatterns = lines
-
-            x0 = -1 + ((i * nPatterns / lines) % 1) * 2
-            x1 = -1 + (1 - ((1 - ((i + 1) * nPatterns / lines)) % 1)) * 2
+            
+            x1 += distance(p2, p3)
 
             self.riblets.append(
                 Riblet(
@@ -62,7 +72,9 @@ class Ribbon:
                         p2,
                         p3,
                         p4),
-                    self.slicePattern(x0, x1, pattern)))
+                    self.slicePattern(x0, x1, tempPattern)))
+            
+            x0 = x1
 
     def slicePattern(self, x0, x1, pattern):
         result = []
@@ -186,8 +198,8 @@ class Ribbon:
             startGuide,
             endGuide)
 
-    def getLines(self):
+    def getLines(self, width):
         result = []
         for riblet in self.riblets:
-            result.extend(riblet.getExtended(0.3))
+            result.extend(riblet.getExtended(width))
         return result

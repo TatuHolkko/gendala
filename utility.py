@@ -1,4 +1,5 @@
 
+from copy import deepcopy
 import math
 
 
@@ -55,9 +56,74 @@ def innerAngle(p1,p2,p3):
     return shorterDistance(angle(p2,p1),angle(p2,p3))
 
 
+def xLimits(points):
+    resultMin = None
+    resultMax = None
+    for point in points:
+        if resultMin is None or point[0] < resultMin:
+            resultMin = point[0]
+        if resultMax is None or point[0] > resultMax:
+            resultMax = point[0]
+    return [resultMin, resultMax]
+
 def distance(p1, p2):
     d = delta(p1, p2)
     return math.hypot(d[0], d[1])
+
+def totalLength(points, closed=False):
+        result = 0
+        for i in range(len(points) - 1):
+            result += distance(points[i], points[i+1])
+        if closed:
+            result += distance(points[-1], points[0])
+        return result
+
+def offsetLines(lines, deltaX):
+    for line in lines:
+        line[0][0] += deltaX
+        line[1][0] += deltaX
+
+def scaleLines(lines, scaleX):
+    for line in lines:
+        line[0][0] *= scaleX
+        line[1][0] *= scaleX
+
+
+def pointsFromLines(lines):
+    result = set()
+    for line in lines:
+        result.add(tuplify(line[0]))
+        result.add(tuplify(line[1]))
+    return list(result)
+
+def normalizeLines(lines):
+    xMin, xMax = xLimits(pointsFromLines(lines))
+    width = xMax - xMin
+    middle = (xMax + xMin) / 2
+    scale = 2 / width
+    offsetLines(lines, -middle)
+    scaleLines(lines, scale)
+
+
+def repeatLines(lines, n):
+    xMin, xMax = xLimits(pointsFromLines(lines))
+    width = xMax - xMin
+    result = set()
+    for i in range(n):
+        offset = width * i
+        tempLines = deepcopy(lines)
+        offsetLines(tempLines, offset)
+        for line in tempLines:
+            result.add(tuplify(line))
+    return listify(result)
+
+def tuplify(lst):
+    # convert list to tuple
+    return tuple(tuplify(i) if isinstance(i, list) else i for i in lst)
+
+def listify(tpl):
+    # convert tuple to list
+    return list(listify(i) if isinstance(i, tuple) else i for i in tpl)
 
 
 def gradientPoint(p1, p2, s):
