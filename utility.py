@@ -117,6 +117,16 @@ def repeatLines(lines, n):
             result.add(tuplify(line))
     return listify(result)
 
+def applyGeospace(lines, geospace):
+    result = []
+    for line in lines:
+        x1, y1 = geospace.getGlobalPos(line[0])
+        x2, y2 = geospace.getGlobalPos(line[1])
+        result.append([[x1,y1],[x2,y2]])
+    return result
+    
+
+
 def tuplify(lst):
     # convert list to tuple
     return tuple(tuplify(i) if isinstance(i, list) else i for i in lst)

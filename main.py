@@ -1,3 +1,4 @@
+from feature import Feature
 from geospace import GeoSpace
 from ribbon import Ribbon
 from curve import Curve
@@ -42,9 +43,13 @@ def main():
 
     curv.round()
 
+    feat = Feature(mirrorX=False, mirrorY=True)
+
     rib = Ribbon(curv, grid, closed=False, n=12)
 
-    toDraw = rib.getLines(0.1)
+    feat.add(rib)
+
+    toDraw = feat.getLines(0.1)
 
     for stroke in debug_square:
         pygame.draw.line(
