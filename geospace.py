@@ -1,7 +1,7 @@
 from __future__ import annotations
 import math
 from utility import Line, Point, clamp, rotatePoint, shorterDistance, piWrap
-from typing import List, Tuple
+from typing import List
 
 class GeoSpace:
     """
@@ -17,9 +17,9 @@ class GeoSpace:
             angle (float, optional): Rotation. Defaults to 0.
             xScale (float, optional): Scaling along x-axis. Defaults to 1.
             yScale (float, optional): Scaling along y-axis. Defaults to 1.
-            origin (((x,y), external), optional): Constant offset. Defaults to (0,0).
-            startGuide ((float), optional): Y axis angle at x=-1. Defaults to 0.
-            endGuide ((float), optional):   Y axis angle at x= 1. Defaults to 0.
+            origin (Point, optional): Constant offset. Defaults to (0,0).
+            startGuide (float, optional): Y axis angle at x=-1. Defaults to 0.
+            endGuide (float, optional):   Y axis angle at x= 1. Defaults to 0.
 
         The transformations are added in this order:
             Scale, perspective, rotation, offset
@@ -83,7 +83,7 @@ class GeoSpace:
         Offset the coordinate system
 
         Args:
-            pos ((x,y), local)): Offset in local coordinates
+            pos (Point): Offset in local coordinates
         """
 
         self.origin = self.getGlobalPos(pos)
@@ -106,10 +106,10 @@ class GeoSpace:
         Apply all transformations to a local point and return the external equivalent
 
         Args:
-            pos ((x,y), local): Local point
+            pos (Point): Local point
 
         Returns:
-            (x,y): External point
+            Point: External point
         """
         pos_ = Point(pos.x * self.scale[0], pos.y * self.scale[1])
         pos_ = self.applyPerspective(pos_)
@@ -121,10 +121,10 @@ class GeoSpace:
         Apply a linear approximation of perspective transform
 
         Args:
-            point (x,y): Point to transform
+            point (Point): Point to transform
 
         Returns:
-            (x,y): Transformed point
+            Point: Transformed point
         """
         s = (point.x/self.scale[0] + 1) / 2
         angle = self.angleGradient(self.startGuide, self.endGuide, s)
@@ -154,6 +154,16 @@ class GeoSpace:
         return result
 
 def applyGeospace(lines: List[Line], geospace: GeoSpace) -> List[Line]:
+    """
+    Apply the geospace transformations to a list of lines
+
+    Args:
+        lines (List[Line]): List of lines
+        geospace (GeoSpace): Geospace to apply
+
+    Returns:
+        List[Line]: Transformed list of lines
+    """
     result = []
     for line in lines:
         p1 = geospace.getGlobalPos(line.p0)

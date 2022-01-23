@@ -51,7 +51,7 @@ def main():
 
     feat.add(rib)
 
-    toDraw = feat.getLines(0.1)
+    toDraw = feat.render(0.1)
 
     for stroke in debug_square:
         pygame.draw.line(

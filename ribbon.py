@@ -79,6 +79,18 @@ class Ribbon:
             x0 = x1
 
     def slicePattern(self, x0:float, x1:float, pattern:List[Line]) -> List[Line]:
+        """
+        Return a slice of a given pattern. The slice will be normalized to stretch from
+        x=-1 to x=1.
+
+        Args:
+            x0 (float): Lower x limit
+            x1 (float): Higher x limit
+            pattern (List[Line]): Normalized pattern slice from x0 to x1
+
+        Returns:
+            List[Line]: Pattern slice
+        """
         result:List[Line] = []
         for line in pattern:
 
@@ -199,8 +211,17 @@ class Ribbon:
             startGuide,
             endGuide)
 
-    def getLines(self, width:float) -> List[Line]:
+    def render(self, width:float) -> List[Line]:
+        """
+        Render a list of lines created by this ribbon
+
+        Args:
+            width (float): Width of the pattern
+
+        Returns:
+            List[Line]: List of lines to draw
+        """
         result:List[Line] = []
         for riblet in self.riblets:
-            result.extend(riblet.getExtended(width))
+            result.extend(riblet.render(width))
         return result
