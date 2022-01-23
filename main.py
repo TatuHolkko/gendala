@@ -1,32 +1,27 @@
+from math import pi
 from feature import Feature
-from geospace import GeoSpace
+from layer import Layer
 from ribbon import Ribbon
+from utility import Point
 from curve import Curve
-import pygame
-import math
 import os
-
-from utility import Point, patternFromPoints
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+import pygame
 
-
-def ngon(n):
-    return [[math.cos(x / n * 2 * math.pi),
-             math.sin(x / n * 2 * math.pi)] for x in range(n)]
-
+windowSize = 1000
 
 def main():
     pygame.init()
-    pygame.display.set_caption("Fractal curve generator")
+    pygame.display.set_caption("Gendala")
 
-    surf = pygame.display.set_mode(size=(400, 400))
+    surf = pygame.display.set_mode(size=(windowSize, windowSize))
 
     debug_square = [[[-1, 1], [1, 1]], [[1, 1], [1, -1]],
                     [[1, -1], [-1, -1]], [[-1, -1], [-1, 1]]]
 
     grid = [
         #[[-1, 0], [0, 1]],
-        [[-1, -1], [1, 1]], # diag 1
+        #[[-1, -1], [1, 1]], # diag 1
         #[[1, -1], [-1, 1]], # diag 2
         #[[0, -1], [1, 0]],
         #[[0,-1], [1,1]],
@@ -37,32 +32,49 @@ def main():
         #[[-1, 1], [-1, -1]], #left ver
         #[[1, 1], [1, -1]], #right ver
     ]
+    
+    #patternCurve = Curve(Point(-1,-1),False)
 
-    curv = Curve(Point(-1,0))
+    
+    patternCurve = Curve(Point(-1,-1),True)
+    patternCurve.extend(patternCurve.line(Point(1,-1)))
+    patternCurve.extend(patternCurve.sine(Point(1,1), amplitude=-0.5, subDivs=8))
+    patternCurve.extend(patternCurve.line(Point(-1,1)))
+    patternCurve.extend(patternCurve.sine(Point(-1,-1), amplitude=0.5, subDivs=8))
+    #patternCurve.round(pi/2)
+    
+    featureCurve = Curve(Point(-1,0))
+    #featureCurve.extend(featureCurve.arc(Point(1,0), curvature=0))
+    #featureCurve.extend(featureCurve.line(Point(1,0)))
+    featureCurve.extend(featureCurve.sine(Point(1,0), amplitude=0, subDivs=0))
 
-    curv.extend(curv.sine(Point(1,0), subDivs=7, amplitude=0.5))
-    curv.extend(curv.arc(Point(0,-1), curvature=1))
+    ribbon = Ribbon(featureCurve, patternCurve.getLines(), closed=False)
 
-    curv.round()
+    feature = Feature(mirrorX=True, mirrorY=False)
+    feature.add(ribbon)
 
-    feat = Feature(mirrorX=True, mirrorY=True)
-
-    rib = Ribbon(curv, patternFromPoints(grid), closed=False, n=12)
-
-    feat.add(rib)
-
-    toDraw = feat.render(0.1)
+    s = 1
+    toDraw = []
+    layers = 8
+    r0 = 0.05
+    w = 0.1
+    for i in range(layers):
+        r = r0 + w*2
+        w = 0.1 - 0.099999*(i/layers)
+        toDraw.extend(Layer(r,w,feature.render(s), repeats=2**(i+1)).render())
+        r0 = r
 
     for stroke in debug_square:
+        continue
         pygame.draw.line(
             surf,
             (255,
              0,
              0),
-            (round(200 + stroke[0][0] * 50),
-             round(200 + -stroke[0][1] * 50)),
-            (round(200 + stroke[1][0] * 50),
-             round(200 + -stroke[1][1] * 50)))
+            (round(windowSize/2 + stroke[0][0] * windowSize/3),
+             round(windowSize/2 + -stroke[0][1] * windowSize/3)),
+            (round(windowSize/2 + stroke[1][0] * windowSize/3),
+             round(windowSize/2 + -stroke[1][1] * windowSize/3)))
 
     for stroke in toDraw:
         pygame.draw.line(
@@ -70,10 +82,10 @@ def main():
             (255,
              255,
              255),
-            (round(200 + stroke.p0.x * 50),
-             round(200 + -stroke.p0.y * 50)),
-            (round(200 + stroke.p1.x * 50),
-             round(200 + -stroke.p1.y * 50)))
+            (round(windowSize/2  + stroke.p0.x * windowSize/3),
+             round(windowSize/2  + -stroke.p0.y * windowSize/3)),
+            (round(windowSize/2  + stroke.p1.x * windowSize/3),
+             round(windowSize/2  + -stroke.p1.y * windowSize/3)))
 
     pygame.display.update()
     exited = False

@@ -29,7 +29,7 @@ class Feature:
             self.geoSpaces.append(right)
         elif mirrorY and not mirrorX:
             top = GeoSpace(yScale=0.5, origin=Point(0, 0.5))
-            bottom = GeoSpace(yScale=0.5, origin=Point(0, -0.5))
+            bottom = GeoSpace(yScale=-0.5, origin=Point(0, -0.5))
             self.geoSpaces.append(top)
             self.geoSpaces.append(bottom)
         elif mirrorX and mirrorY:

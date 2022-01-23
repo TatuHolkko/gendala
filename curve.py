@@ -45,6 +45,22 @@ class Curve():
             List[Point]: Points
         """
         return deepcopy(self.points)
+    
+    def getLines(self) -> List[Line]:
+        """
+        Get lines of this curve
+
+        Returns:
+            List[Line]: Lines
+        """
+        result:List[Line] = []
+        for i in range(len(self.points)-1):
+            p1 = self.points[i]
+            p2 = self.points[i+1]
+            result.append(Line(p1,p2))
+        if self.closed:
+            result.append(Line(self.points[-1], self.points[0]))
+        return result
 
     def sharpCorners(self, minAngle: float) -> List[int]:
         """
@@ -202,7 +218,7 @@ class Curve():
         """
 
         if curvature == 0:
-            return self.line(self.end, end, subDivs)
+            return self.line(end, subDivs)
         curvature = clamp(curvature, -1, 1)
 
         result: List[Point] = []

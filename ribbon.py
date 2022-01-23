@@ -39,7 +39,7 @@ class Ribbon:
         if not closed:
             lines -= 1
         
-        self.length = totalLength(points)
+        self.length = totalLength(points, self.closed)
 
         widthPerPattern = self.length / n
         patternScale = widthPerPattern / 2

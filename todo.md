@@ -1,2 +1,4 @@
-implement repeating a pattern inside one riblet, when the pattern fits multiple times in it
-comments
+tapering
+mirror ribbon shapes, not the rendered lines
+create features that are continuous when repeated along the x axis
+fix rounding when the curve is closed
