@@ -1,15 +1,15 @@
+from __future__ import annotations
 import math
-from utility import clamp, rotatePoint, shorterDistance, piWrap
-from typing import Tuple
-
+from utility import Line, Point, clamp, rotatePoint, shorterDistance, piWrap
+from typing import List, Tuple
 
 class GeoSpace:
     """
     A transformed coordinate space
     """
 
-    def __init__(self, angle=0, xScale=1, yScale=1,
-                 origin=(0, 0), startGuide=0, endGuide=0) -> None:
+    def __init__(self, angle:float=0, xScale:float=1, yScale:float=1,
+                 origin:Point=Point(0, 0), startGuide:float=0, endGuide:float=0) -> None:
         """
         Initialize the coordinate space
 
@@ -78,7 +78,7 @@ class GeoSpace:
             theta = math.pi - theta
         self.angle += theta
 
-    def setOrigin(self, pos: Tuple) -> None:
+    def setOrigin(self, pos: Point) -> None:
         """
         Offset the coordinate system
 
@@ -88,7 +88,7 @@ class GeoSpace:
 
         self.origin = self.getGlobalPos(pos)
 
-    def makeEqual(self, other) -> None:
+    def makeEqual(self, other:GeoSpace) -> None:
         """
         Copy all members from other.
 
@@ -101,7 +101,7 @@ class GeoSpace:
         self.startGuide = other.startGuide
         self.endGuide = other.endGuide
 
-    def getGlobalPos(self, pos: Tuple) -> Tuple:
+    def getGlobalPos(self, pos: Point) -> Point:
         """
         Apply all transformations to a local point and return the external equivalent
 
@@ -111,12 +111,12 @@ class GeoSpace:
         Returns:
             (x,y): External point
         """
-        pos_ = [pos[0] * self.scale[0], pos[1] * self.scale[1]]
+        pos_ = Point(pos.x * self.scale[0], pos.y * self.scale[1])
         pos_ = self.applyPerspective(pos_)
-        x, y = rotatePoint(pos_, (0, 0), self.angle)
-        return self.origin[0] + x, self.origin[1] + y
+        pos_ = rotatePoint(pos_, Point(0, 0), self.angle)
+        return Point(self.origin.x + pos_.x, self.origin.y + pos_.y)
 
-    def applyPerspective(self, point: Tuple) -> Tuple:
+    def applyPerspective(self, point: Point) -> Point:
         """
         Apply a linear approximation of perspective transform
 
@@ -126,13 +126,13 @@ class GeoSpace:
         Returns:
             (x,y): Transformed point
         """
-        s = (point[0]/self.scale[0] + 1) / 2
+        s = (point.x/self.scale[0] + 1) / 2
         angle = self.angleGradient(self.startGuide, self.endGuide, s)
-        x = point[0] + clamp(point[1] * -math.tan(angle), -100, 100)
-        return (x, point[1])
+        x = point.x + clamp(point.y * -math.tan(angle), -100, 100)
+        return Point(x, point.y)
 
     @staticmethod
-    def angleGradient(angle1, angle2, p):
+    def angleGradient(angle1:float, angle2:float, p:float) -> float:
         """
         Return an angle [-pi, pi] that is between angle1 and angle2,
         choosing the shorter direction of travel.
@@ -153,38 +153,10 @@ class GeoSpace:
         result = piWrap(angle1 + p * delta)
         return result
 
-class GeoSpaceStack:
-    """
-    Coordinate space stack. Uses a reference to a coordinate space to create deep copies of it into a stack
-    """
-
-    def __init__(self, coordinatespace: GeoSpace) -> None:
-        """
-        Initialize the stack
-
-        Args:
-            coordinatespace (GeoSpace): Reference to a coordinate space
-        """
-        self.local = coordinatespace
-        self.stack = []
-
-    def push(self) -> None:
-        """
-        Push a copy of the current coordinate space to the stack
-        """
-        self.stack.append(copy.deepcopy(self.local))
-
-    def revert(self) -> None:
-        """
-        Overwrite current coordinate space using the top of the stack
-        """
-        self.local.make_equal(self.stack[-1])
-
-    def pop(self) -> None:
-        """
-        Pop the last coordinate space
-
-        Returns:
-            GeoSpace: Coordinate space
-        """
-        return self.stack.pop()
+def applyGeospace(lines: List[Line], geospace: GeoSpace) -> List[Line]:
+    result = []
+    for line in lines:
+        p1 = geospace.getGlobalPos(line.p0)
+        p2 = geospace.getGlobalPos(line.p1)
+        result.append(Line(p1, p2))
+    return result

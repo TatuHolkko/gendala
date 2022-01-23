@@ -1,5 +1,7 @@
+from copy import deepcopy
 from typing import List
 from geospace import GeoSpace
+from utility import Line
 
 
 class Riblet:
@@ -7,7 +9,7 @@ class Riblet:
     Riblet contains a pattern and a geospace.
     """
 
-    def __init__(self, geoSpace: GeoSpace, pattern: List) -> None:
+    def __init__(self, geoSpace: GeoSpace, pattern: List[Line]) -> None:
         """
         Initialize
 
@@ -17,7 +19,7 @@ class Riblet:
         self.geoSpace = geoSpace
         self.pattern = pattern
 
-    def getExtended(self, amount: float) -> List:
+    def getExtended(self, amount: float) -> List[Line]:
         """
         Extend and transform the given pattern into the local coordinate space
 
@@ -29,13 +31,13 @@ class Riblet:
             List: List of transformed lines
         """
 
-        result = []
+        result:List[Line] = []
         for line in self.pattern:
-            x0, y0 =  line[0]
-            x1, y1 =  line[1]
-            y0 *= amount
-            y1 *= amount
-            x0, y0 = self.geoSpace.getGlobalPos((x0,y0))
-            x1, y1 = self.geoSpace.getGlobalPos((x1,y1))
-            result.append([[x0,y0],[x1,y1]])
+            p0 =  deepcopy(line.p0)
+            p1 =  deepcopy(line.p1)
+            p0.y *= amount
+            p1.y *= amount
+            p0 = self.geoSpace.getGlobalPos(p0)
+            p1 = self.geoSpace.getGlobalPos(p1)
+            result.append(Line(p0,p1))
         return result

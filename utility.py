@@ -1,28 +1,75 @@
 
+from __future__ import annotations
 from copy import deepcopy
 import math
+from typing import List, Tuple
+from dataclasses import dataclass
 
 
-def delta(start, end):
-    return (end[0] - start[0], end[1] - start[1])
+class Point:
+    def __init__(self, x: float, y: float) -> None:
+        self.x = x
+        self.y = y
+
+    def __add__(self, other: Point) -> Point:
+        return Point(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other: Point) -> Point:
+        return Point(self.x - other.x, self.y - other.y)
+
+    def __mul__(self, scale: float) -> Point:
+        return Point(self.x * scale, self.y * scale)
+    
+    def __mul__(self, other: Point) -> Point:
+        return Point(self.x * other.x, self.y * other.y)
+    
+    def __repr__(self) -> str:
+        return f"({self.x},{self.y})"
+    
+    def __eq__(self, __o: object) -> bool:
+        if not isinstance(__o, Point):
+            return False
+        return self.x == __o.x and self.y == __o.y
+    
+    def __hash__(self) -> int:
+        return int(((self.x + self.y)*(self.x + self.y + 1)/2) + self.y)
 
 
-def clamp(value, minLim, maxLim):
+class Line:
+    def __init__(self, p0:Point, p1:Point) -> None:
+        self.p0 = p0
+        self.p1 = p1
+
+    def __eq__(self, __o: object) -> bool:
+        if not isinstance(__o, Line):
+            return False
+        return self.p0 == __o.p0 and self.p1 == __o.p1
+
+    def __hash__(self) -> int:
+        return self.p0.__hash__() ^ self.p1.__hash__()
+
+
+
+def delta(start: Point, end: Point) -> Point:
+    return Point(end.x - start.x, end.y - start.y)
+
+
+def clamp(value: float, minLim: float, maxLim: float) -> float:
     return min(max(value, minLim), maxLim)
 
 
-def sign(value):
+def sign(value: float) -> int:
     return int(value >= 0) * 2 - 1
 
 
-def piWrap(angle):
+def piWrap(angle: float) -> float:
     """
     Wrap angle between pi and -pi
     """
     return (angle + math.pi) % (2 * math.pi) - math.pi
 
 
-def shorterDistance(angle1, angle2):
+def shorterDistance(angle1: float, angle2: float) -> float:
     """
     Return the shorter angle between wrapped angle1 and wrapped angle2.
     This function solves the problem where the angles have different signs
@@ -48,55 +95,61 @@ def shorterDistance(angle1, angle2):
     return angle2 - angle1
 
 
-def angle(p1, p2):
-    d = delta(p1, p2)
-    return math.atan2(d[1], d[0])
-
-def innerAngle(p1,p2,p3):
-    return shorterDistance(angle(p2,p1),angle(p2,p3))
+def angle(p1: Point, p2: Point) -> float:
+    d = p2 - p1
+    return math.atan2(d.y, d.x)
 
 
-def xLimits(points):
+def innerAngle(p1: Point, p2: Point, p3: Point) -> float:
+    return shorterDistance(angle(p2, p1), angle(p2, p3))
+
+
+def xLimits(points: List[Point]) -> tuple[float, float]:
     resultMin = None
     resultMax = None
     for point in points:
-        if resultMin is None or point[0] < resultMin:
-            resultMin = point[0]
-        if resultMax is None or point[0] > resultMax:
-            resultMax = point[0]
+        if resultMin is None or point.x < resultMin:
+            resultMin = point.x
+        if resultMax is None or point.x > resultMax:
+            resultMax = point.x
     return [resultMin, resultMax]
 
-def distance(p1, p2):
-    d = delta(p1, p2)
-    return math.hypot(d[0], d[1])
 
-def totalLength(points, closed=False):
-        result = 0
-        for i in range(len(points) - 1):
-            result += distance(points[i], points[i+1])
-        if closed:
-            result += distance(points[-1], points[0])
-        return result
+def distance(p1: Point, p2: Point):
+    d = p2 - p1
+    return math.hypot(d.x, d.y)
 
-def offsetLines(lines, deltaX):
+
+def totalLength(points: List[Point], closed: bool = False) -> float:
+    result = 0
+    for i in range(len(points) - 1):
+        result += distance(points[i], points[i + 1])
+    if closed:
+        result += distance(points[-1], points[0])
+    return result
+
+
+def offsetLines(lines: List[Line], deltaX: float) -> None:
     for line in lines:
-        line[0][0] += deltaX
-        line[1][0] += deltaX
+        line.p0.x += deltaX
+        line.p1.x += deltaX
 
-def scaleLines(lines, scaleX):
+
+def scaleLines(lines: List[Line], scaleX: float) -> None:
     for line in lines:
-        line[0][0] *= scaleX
-        line[1][0] *= scaleX
+        line.p0.x *= scaleX
+        line.p1.x *= scaleX
 
 
-def pointsFromLines(lines):
+def pointsFromLines(lines: List[Line]) -> List[Point]:
     result = set()
     for line in lines:
-        result.add(tuplify(line[0]))
-        result.add(tuplify(line[1]))
+        result.add(line.p0)
+        result.add(line.p1)
     return list(result)
 
-def normalizeLines(lines):
+
+def normalizeLines(lines: List[Line]) -> None:
     xMin, xMax = xLimits(pointsFromLines(lines))
     width = xMax - xMin
     middle = (xMax + xMin) / 2
@@ -105,7 +158,7 @@ def normalizeLines(lines):
     scaleLines(lines, scale)
 
 
-def repeatLines(lines, n):
+def repeatLines(lines: List[Line], n: int) -> None:
     xMin, xMax = xLimits(pointsFromLines(lines))
     width = xMax - xMin
     result = set()
@@ -114,51 +167,56 @@ def repeatLines(lines, n):
         tempLines = deepcopy(lines)
         offsetLines(tempLines, offset)
         for line in tempLines:
-            result.add(tuplify(line))
-    return listify(result)
-
-def applyGeospace(lines, geospace):
-    result = []
-    for line in lines:
-        x1, y1 = geospace.getGlobalPos(line[0])
-        x2, y2 = geospace.getGlobalPos(line[1])
-        result.append([[x1,y1],[x2,y2]])
-    return result
-    
+            result.add(line)
+    return list(result)
 
 
-def tuplify(lst):
+def tuplify(lst: List) -> tuple:
     # convert list to tuple
     return tuple(tuplify(i) if isinstance(i, list) else i for i in lst)
 
-def listify(tpl):
+
+def listify(tpl: tuple) -> List:
     # convert tuple to list
     return list(listify(i) if isinstance(i, tuple) else i for i in tpl)
 
 
-def gradientPoint(p1, p2, s):
-    d = delta(p1, p2)
-    return (p1[0] + d[0] * s, p1[1] + d[1] * s)
+def patternFromPoints(
+        lst: List[Tuple[Tuple[float, float], Tuple[float, float]]]) -> List[Line]:
+    result: List[Line] = []
+    for line in lst:
+        result.append(
+            Line(
+                Point(
+                    line[0][0], line[0][1]), Point(
+                    line[1][0], line[1][1])))
+    return result
 
 
-def gradient(v1, v2, s):
+def gradientPoint(p1: Point, p2: Point, s: float) -> Point:
+    d = p2 - p1
+    return Point(p1.x + d.x * s, p1.y + d.y * s)
+
+
+def gradient(v1: float, v2: float, s: float) -> float:
     d = v2 - v1
     return v1 + d * s
 
-def rotatePoint(point, pivot, theta):
-        """
-        Rotate point around pivot by theta degrees
 
-        Args:
-            point (x,y): Point to rotate
-            pivot (x,y): Center of rotation
-            theta (float): Amount in radians
+def rotatePoint(point: Point, pivot: Point, theta: float) -> Point:
+    """
+    Rotate point around pivot by theta degrees
 
-        Returns:
-            (x,y): Rotated point
-        """
-        s = math.sin(theta)
-        c = math.cos(theta)
-        xr = c * (point[0] - pivot[0]) - s * (point[1] - pivot[1]) + pivot[0]
-        yr = s * (point[0] - pivot[0]) + c * (point[1] - pivot[1]) + pivot[1]
-        return [xr, yr]
+    Args:
+        point (x,y): Point to rotate
+        pivot (x,y): Center of rotation
+        theta (float): Amount in radians
+
+    Returns:
+        (x,y): Rotated point
+    """
+    s = math.sin(theta)
+    c = math.cos(theta)
+    xr = c * (point.x - pivot.x) - s * (point.y - pivot.y) + pivot.x
+    yr = s * (point.x - pivot.x) + c * (point.y - pivot.y) + pivot.y
+    return Point(xr, yr)

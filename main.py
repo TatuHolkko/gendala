@@ -5,6 +5,8 @@ from curve import Curve
 import pygame
 import math
 import os
+
+from utility import Point, patternFromPoints
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 
@@ -36,16 +38,16 @@ def main():
         #[[1, 1], [1, -1]], #right ver
     ]
 
-    curv = Curve([-1,0])
+    curv = Curve(Point(-1,0))
 
-    curv.extend(curv.sine([1,0], subDivs=7, amplitude=0.5))
-    curv.extend(curv.arc([0,-1], curvature=1))
+    curv.extend(curv.sine(Point(1,0), subDivs=7, amplitude=0.5))
+    curv.extend(curv.arc(Point(0,-1), curvature=1))
 
     curv.round()
 
-    feat = Feature(mirrorX=False, mirrorY=True)
+    feat = Feature(mirrorX=True, mirrorY=True)
 
-    rib = Ribbon(curv, grid, closed=False, n=12)
+    rib = Ribbon(curv, patternFromPoints(grid), closed=False, n=12)
 
     feat.add(rib)
 
@@ -68,10 +70,10 @@ def main():
             (255,
              255,
              255),
-            (round(200 + stroke[0][0] * 50),
-             round(200 + -stroke[0][1] * 50)),
-            (round(200 + stroke[1][0] * 50),
-             round(200 + -stroke[1][1] * 50)))
+            (round(200 + stroke.p0.x * 50),
+             round(200 + -stroke.p0.y * 50)),
+            (round(200 + stroke.p1.x * 50),
+             round(200 + -stroke.p1.y * 50)))
 
     pygame.display.update()
     exited = False
