@@ -1,4 +1,5 @@
 from __future__ import annotations
+from copy import deepcopy
 import math
 from utility import Line, Point, clamp, rotatePoint, shorterDistance, piWrap
 from typing import List
@@ -33,6 +34,12 @@ class GeoSpace:
         self.origin = origin
         self.startGuide = startGuide
         self.endGuide = endGuide
+
+    def __repr__(self) -> str:
+        return f"{self.origin.__repr__()}, {int(self.angle/math.pi*180)}°, {self.scale}, [{int(self.startGuide/math.pi*180)}°,{int(self.endGuide/math.pi*180)}°]"
+
+    def setYScale(self, scale:float):
+        self.scale[1] = scale
 
     def scaleBy(self, factor: float) -> None:
         """
@@ -86,7 +93,7 @@ class GeoSpace:
             pos (Point): Offset in local coordinates
         """
 
-        self.origin = self.getGlobalPos(pos)
+        self.origin = self.getExternalPos(pos)
 
     def makeEqual(self, other:GeoSpace) -> None:
         """
@@ -101,7 +108,7 @@ class GeoSpace:
         self.startGuide = other.startGuide
         self.endGuide = other.endGuide
 
-    def getGlobalPos(self, pos: Point) -> Point:
+    def getExternalPos(self, pos: Point) -> Point:
         """
         Apply all transformations to a local point and return the external equivalent
 
@@ -153,20 +160,61 @@ class GeoSpace:
         result = piWrap(angle1 + p * delta)
         return result
 
-def applyGeospace(lines: List[Line], geospace: GeoSpace) -> List[Line]:
-    """
-    Apply the geospace transformations to a list of lines
+    def apply(self, lines:List[Line]) -> List[Line]:
+        """
+        Apply the geospace transformations to a list of lines
 
-    Args:
-        lines (List[Line]): List of lines
-        geospace (GeoSpace): Geospace to apply
+        Args:
+            lines (List[Line]): List of lines
+            geospace (GeoSpace): Geospace to apply
 
-    Returns:
-        List[Line]: Transformed list of lines
+        Returns:
+            List[Line]: Transformed list of lines
+        """
+        result = []
+        for line in lines:
+            p1 = self.getExternalPos(line.p0)
+            p2 = self.getExternalPos(line.p1)
+            result.append(Line(p1, p2))
+        return result
+    
+    def apply(self, ribbon:Ribbon) -> Ribbon:
+        pass
+    
+class GeoSpaceStack:
     """
-    result = []
-    for line in lines:
-        p1 = geospace.getGlobalPos(line.p0)
-        p2 = geospace.getGlobalPos(line.p1)
-        result.append(Line(p1, p2))
-    return result
+    Coordinate space stack. Uses a reference to a coordinate space to create deep copies of it into a stack
+    """
+    def __init__(self):
+        """
+        Initialize coordinate space stack
+        """
+        self.stack:List[GeoSpace] = []
+
+    def push(self, geoSpace:GeoSpace):
+        """
+        Push a new coordinate space into the stack
+        """
+        self.stack.append(deepcopy(geoSpace))
+
+    def pop(self):
+        """
+        Pop the last coordinate space in stack
+        :return: Coordinatespace
+        """
+        return self.stack.pop()
+    
+    def getGlobalPos(self, pos:Point) -> Point:
+        """
+        Apply the whole stack of geospaces to get the global position
+
+        Args:
+            pos (Point): Local point in the top most geospace
+
+        Returns:
+            Point: Global point
+        """
+        newPos = deepcopy(pos)
+        for geoSpace in reversed(self.stack):
+            newPos = geoSpace.getExternalPos(newPos)
+        return newPos

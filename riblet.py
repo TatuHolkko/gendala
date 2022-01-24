@@ -1,10 +1,11 @@
 from copy import deepcopy
 from typing import List
+from display import Display
 from geospace import GeoSpace
 from utility import Line
 
 
-class Riblet:
+class Riblet():
     """
     Riblet contains a pattern and a geospace.
     """
@@ -19,25 +20,28 @@ class Riblet:
         self.geoSpace = geoSpace
         self.pattern = pattern
 
-    def render(self, width: float) -> List[Line]:
+    def render(self, display:Display, width: float) -> None:
         """
-        Transform the given pattern into the local coordinate space
+        Render the pattern inside this riblet
 
         Args:
-            pattern (List): List of lines
+            display (Display): Display to draw on
             width (float): Y axis scaling of the pattern
-
-        Returns:
-            List: List of transformed lines
         """
+        self.geoSpace.setYScale(width)
 
+        display.pushGeoSpace(self.geoSpace)
+
+        for line in self.pattern:
+            display.drawLine(line)
+        
+        display.popGeoSpace()
+    
+    def getLines(self, width) -> List[Line]:
+        self.geoSpace.setYScale(width)
         result:List[Line] = []
         for line in self.pattern:
-            p0 =  deepcopy(line.p0)
-            p1 =  deepcopy(line.p1)
-            p0.y *= width
-            p1.y *= width
-            p0 = self.geoSpace.getGlobalPos(p0)
-            p1 = self.geoSpace.getGlobalPos(p1)
+            p0 = self.geoSpace.getExternalPos(line.p0)
+            p1 = self.geoSpace.getExternalPos(line.p1)
             result.append(Line(p0,p1))
         return result

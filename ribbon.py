@@ -1,13 +1,14 @@
+from __future__ import annotations
 from copy import deepcopy
-from math import atan, atan2, hypot, pi
-from typing import List, Tuple
+from typing import List
 from curve import Curve
+from display import Display
 from geospace import GeoSpace
 from riblet import Riblet
 from utility import Line, Point, angle, distance, gradientPoint, normalizeLines, offsetLines, repeatLines, scaleLines, shorterDistance, totalLength
 
 
-class Ribbon:
+class Ribbon():
     """
     Ribbon describes a long continuous pattern defined by a series of points
     """
@@ -28,17 +29,19 @@ class Ribbon:
             n (int, optional): Number of repeated patterns. Defaults to 1.
         """
 
-        self.riblets:List[Riblet] = []
+        self.riblets: List[Riblet] = []
         self.pattern = deepcopy(pattern)
         normalizeLines(self.pattern)
         self.closed = closed
+        self.curve = deepcopy(curve)
+        self.n = n
 
         points = curve.getPoints()
-        
+
         lines = len(points)
         if not closed:
             lines -= 1
-        
+
         self.length = totalLength(points, self.closed)
 
         widthPerPattern = self.length / n
@@ -64,7 +67,7 @@ class Ribbon:
                 p1 = points[i - 1]
             if i < len(points) - 2 or closed:
                 p4 = points[(i + 2) % len(points)]
-            
+
             x1 += distance(p2, p3)
 
             self.riblets.append(
@@ -75,10 +78,31 @@ class Ribbon:
                         p3,
                         p4),
                     self.slicePattern(x0, x1, tempPattern)))
-            
-            x0 = x1
 
-    def slicePattern(self, x0:float, x1:float, pattern:List[Line]) -> List[Line]:
+            x0 = x1
+    
+    def __repr__(self) -> str:
+        return self.curve.__repr__() + ", closed=" + str(self.closed) 
+
+    def reshaped(self, geoSpace: GeoSpace) -> Ribbon:
+        """
+        Create a copy of this ribbon, with it's curve reshaped in the given geospace
+
+        Args:
+            geoSpace (GeoSpace): Geospace to use
+
+        Returns:
+            Ribbon: Reshaped copy of this Ribbon
+        """
+        curve = deepcopy(self.curve)
+        curve.reshape(geoSpace)
+        return Ribbon(curve, self.pattern, self.closed, self.n)
+
+    def slicePattern(
+            self,
+            x0: float,
+            x1: float,
+            pattern: List[Line]) -> List[Line]:
         """
         Return a slice of a given pattern. The slice will be normalized to stretch from
         x=-1 to x=1.
@@ -91,7 +115,7 @@ class Ribbon:
         Returns:
             List[Line]: Pattern slice
         """
-        result:List[Line] = []
+        result: List[Line] = []
         for line in pattern:
 
             lx0 = line.p0.x
@@ -111,8 +135,8 @@ class Ribbon:
                 result.append(deepcopy(line))
                 continue
 
-            leftP = Point(0,0)
-            rightP = Point(0,0)
+            leftP = Point(0, 0)
+            rightP = Point(0, 0)
             if left == lx0:
                 leftP.x = line.p0.x
                 leftP.y = line.p0.y
@@ -131,9 +155,9 @@ class Ribbon:
                 start = gradientPoint(leftP, rightP, underflowPortion)
                 end = gradientPoint(rightP, leftP, overflowPortion)
                 if lx0 < lx1:
-                    result.append(Line(start,end))
+                    result.append(Line(start, end))
                 else:
-                    result.append(Line(end,start))
+                    result.append(Line(end, start))
                 continue
 
             # one point inside, one point outside
@@ -144,18 +168,18 @@ class Ribbon:
                 start = gradientPoint(rightP, leftP, portionInside)
                 end = rightP
                 if lx0 < lx1:
-                    result.append(Line(start,end))
+                    result.append(Line(start, end))
                 else:
-                    result.append(Line(end,start))
+                    result.append(Line(end, start))
             else:
                 # right point outside, left point inside
                 portionInside = (x1 - left) / (right - left)
                 start = leftP
                 end = gradientPoint(leftP, rightP, portionInside)
                 if lx0 < lx1:
-                    result.append(Line(start,end))
+                    result.append(Line(start, end))
                 else:
-                    result.append(Line(end,start))
+                    result.append(Line(end, start))
 
         scale = 2 / (x1 - x0)
         for line in result:
@@ -211,17 +235,19 @@ class Ribbon:
             startGuide,
             endGuide)
 
-    def render(self, width:float) -> List[Line]:
+    def render(self, display: Display, width: float) -> None:
         """
         Render a list of lines created by this ribbon
 
         Args:
+            display (Display): Display to draw on
             width (float): Width of the pattern
-
-        Returns:
-            List[Line]: List of lines to draw
         """
+        for riblet in self.riblets:
+            riblet.render(display, width)
+
+    def getLines(self, width) -> List[Line]:
         result:List[Line] = []
         for riblet in self.riblets:
-            result.extend(riblet.render(width))
+            result.extend(riblet.getLines(width))
         return result

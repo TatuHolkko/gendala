@@ -22,6 +22,9 @@ class Curve():
         self.start = self.points[0]
         self.end = self.points[0]
         self.closed = closed
+    
+    def __repr__(self) -> str:
+        return "[" + ",".join([p.__repr__() for p in self.points]) + "]"
 
     def extend(self, points: List[Point]) -> None:
         """
@@ -169,7 +172,7 @@ class Curve():
             p = (i + 1) / (subDivs + 1)
             phi = 2 * pi * p
             x = 2 * p - 1
-            subDivPoint = gspace.getGlobalPos(Point(x, sin(phi) * amplitude))
+            subDivPoint = gspace.getExternalPos(Point(x, sin(phi) * amplitude))
             result.append(subDivPoint)
         result.append(deepcopy(end))
         return result
@@ -236,11 +239,21 @@ class Curve():
             phi = (1 - p) * omega
 
             subDivPoint = rotatePoint(Point(1, 0), pivot, phi)
-            subDivPoint = gspace.getGlobalPos(subDivPoint)
+            subDivPoint = gspace.getExternalPos(subDivPoint)
             result.append(subDivPoint)
 
         result.append(deepcopy(end))
         return result
+    
+    def reshape(self, geoSpace:GeoSpace) -> None:
+        """
+        Transform all points of this curve into given geospace
+
+        Args:
+            geoSpace (GeoSpace): Geospace to tranform the points into
+        """
+        for i in range(len(self.points)):
+            self.points[i] = geoSpace.getExternalPos(self.points[i])
 
 
 def geoSpaceBetween(p0: Point, p1: Point) -> GeoSpace:

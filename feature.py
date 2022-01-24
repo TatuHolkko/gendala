@@ -1,6 +1,6 @@
-from telnetlib import WONT
 from typing import List
-from geospace import GeoSpace, applyGeospace
+from display import Display
+from geospace import GeoSpace
 from ribbon import Ribbon
 from utility import Line, Point
 
@@ -51,20 +51,26 @@ class Feature:
         Args:
             ribbon (Ribbon): Ribbon to add
         """
-        self.ribbons.append(ribbon)
+        for geospace in self.geoSpaces:
+            self.ribbons.append(ribbon.reshaped(geospace))
 
-    def render(self, width:float) -> List[Line]:
+    def render(self, display:Display, width:float) -> None:
         """
-        Render a list of lines created by this feature
+        Render lines created by this feature
 
         Args:
+            display (Display): Display to draw on
             width (float): Width of the pattern
-
-        Returns:
-            List[Line]: List of lines to draw
         """
+        if self.mirrorX or self.mirrorY:
+            width *= 0.5
+        for ribbon in self.ribbons:
+            ribbon.render(display, width)
+    
+    def getLines(self, width) -> List[Line]:
+        if self.mirrorX or self.mirrorY:
+            width *= 0.5
         result:List[Line] = []
         for ribbon in self.ribbons:
-            for gspace in self.geoSpaces:
-                result.extend(applyGeospace(ribbon.render(width), gspace))
+            result.extend(ribbon.getLines(width))
         return result

@@ -1,7 +1,6 @@
 
 from math import sin, cos, pi
-from timeit import repeat
-from tkinter.messagebox import NO
+from feature import Feature
 from typing import List
 from curve import Curve
 from ribbon import Ribbon
@@ -32,5 +31,5 @@ class Layer:
         self.ribbon = Ribbon(curve, feature, closed=True, n=repeats)
         self.width = width
     
-    def render(self):
-        return self.ribbon.render(self.width)
+    def render(self, display):
+        return self.ribbon.render(display, self.width)
