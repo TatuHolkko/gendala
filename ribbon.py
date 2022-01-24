@@ -96,7 +96,13 @@ class Ribbon():
         """
         curve = deepcopy(self.curve)
         curve.reshape(geoSpace)
-        return Ribbon(curve, self.pattern, self.closed, self.n)
+        xScale, yScale = geoSpace.getScale()
+        pattern = self.pattern
+        if xScale*yScale < 0:
+            flip = GeoSpace()
+            flip.scaleYBy(-1)
+            pattern = flip.apply(self.pattern)
+        return Ribbon(curve, pattern, self.closed, self.n)
 
     def slicePattern(
             self,

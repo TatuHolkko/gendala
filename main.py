@@ -30,7 +30,8 @@ def main():
 
     
     diagonalCurve = Curve(Point(-1,-1),False)
-    diagonalCurve.extend(diagonalCurve.arc(Point(1,1),curvature=1, subDivs=0))
+    #diagonalCurve.extend(diagonalCurve.arc(Point(1,1),curvature=-0.5, subDivs=1))
+    diagonalCurve.extend(diagonalCurve.sine(Point(1,1),amplitude=0.2, subDivs=5))
     #patternCurve = Curve(Point(-1,-1))
     #patternCurve.extend(patternCurve.line(Point(1,-1)))
     #patternCurve.extend(patternCurve.sine(Point(1,1), amplitude=-0.5, subDivs=8))
@@ -52,14 +53,14 @@ def main():
     toDraw = []
     layers = 10
     r0 = 0.01
-    w0 = 0.15
+    w0 = 0.1
     disp.setAutoFlush(True)
     disp.drawDebugGrid()
     #feature.render(disp, 1)
     for i in range(layers):
         w = w0 - 0.01
         r = r0 + w + w0
-        l = Layer(r,w*((i%2)*2 - 1),feature.getLines(s), repeats=2**(i+1))
+        l = Layer(r,w*((i%2)*2 - 1),feature.getLines(s), repeats=4*(i+1))
         l.render(disp)
         r0 = r
         w0 = w

@@ -40,6 +40,9 @@ class GeoSpace:
 
     def setYScale(self, scale:float):
         self.scale[1] = scale
+    
+    def getScale(self):
+        return self.scale
 
     def scaleBy(self, factor: float) -> None:
         """
@@ -177,9 +180,6 @@ class GeoSpace:
             p2 = self.getExternalPos(line.p1)
             result.append(Line(p1, p2))
         return result
-    
-    def apply(self, ribbon:Ribbon) -> Ribbon:
-        pass
     
 class GeoSpaceStack:
     """
