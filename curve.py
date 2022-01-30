@@ -280,19 +280,3 @@ def geoSpaceBetween(p0: Point, p1: Point) -> GeoSpace:
     angle_ = p0.angleTo(p1)
     midpoint = gradient(p0, p1, 0.5)
     return GeoSpace(angle_, scale, scale, midpoint)
-
-
-def pointsToLines(points: List[Point]) -> List[Line]:
-    """
-    Convert a list of points to list of lines by connecting adjacent points in the list
-
-    Args:
-        points (List[Point]): List of points
-
-    Returns:
-        List[Line]: List of lines
-    """
-    result:List[Line] = []
-    for i in range(len(points) - 1):
-        result.append(Line(deepcopy(points[i]), deepcopy(points[i + 1])))
-    return result

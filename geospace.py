@@ -106,31 +106,6 @@ class GeoSpace:
             theta = math.pi - theta
         self.angle += theta
 
-    def setOrigin(self, pos: Point) -> None:
-        """
-        Offset the coordinate system
-
-        Args:
-            pos (Point): Offset in local coordinates
-        """
-
-        self.origin = self.getExternalPos(pos)
-
-    def makeEqual(self, other: GeoSpace) -> None:
-        """
-        Copy all members from other.
-
-        Args:
-            other (GeoSpace): Other GeoSpace instance to copy members from
-        """
-        self.angle = other.angle
-        self.scale = other.scale
-        self.origin = other.origin
-        self.startAngle = other.startAngle
-        self.endAngle = other.endAngle
-        self.startScale = other.startScale
-        self.endScale = other.endScale
-
     def getExternalPos(self, pos: Point) -> Point:
         """
         Apply all transformations to a local point and return the external equivalent
@@ -178,24 +153,6 @@ class GeoSpace:
 
         delta = convexAngle(angle1, angle2)
         result = (angle1 + p * delta)
-        return result
-
-    def apply(self, lines: List[Line]) -> List[Line]:
-        """
-        Apply the geospace transformations to a list of lines
-
-        Args:
-            lines (List[Line]): List of lines
-            geospace (GeoSpace): Geospace to apply
-
-        Returns:
-            List[Line]: Transformed list of lines
-        """
-        result = []
-        for line in lines:
-            p1 = self.getExternalPos(line.p0)
-            p2 = self.getExternalPos(line.p1)
-            result.append(Line(p1, p2))
         return result
 
     @dispatch(Pattern)
