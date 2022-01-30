@@ -1,12 +1,14 @@
 from __future__ import annotations
 from copy import deepcopy
+from math import floor
+from tracemalloc import start
 from typing import List
 from curve import Curve
 from display import Display
 from geospace import GeoSpace
 from riblet import Riblet
 from geometry import Line, Pattern, Point, convexAngle
-from utility import gradient
+from utility import clamp, gradient
 
 
 class Ribbon():
@@ -19,6 +21,7 @@ class Ribbon():
             curve: Curve,
             pattern: Pattern,
             closed: bool,
+            taperLength: float = 0,
             n: int = 1) -> None:
         """
         Initialize the Ribbon class
@@ -27,6 +30,7 @@ class Ribbon():
             curve (Curve): Curve defining the shape of the ribbon
             pattern (Pattern): Pattern of the ribbon
             closed (bool): If true, endpoints are connected
+            taperLength (float): Percentage of line length used in both ends for tapering
             n (int, optional): Number of repeated patterns. Defaults to 1.
         """
 
@@ -35,9 +39,10 @@ class Ribbon():
         self.pattern = pattern
         self.pattern.normalizeX()
         self.closed = closed
+        self.taperLength = taperLength
         self.n = n
-
         points = curve.getPoints()
+        self.taperLengthIndex = floor(taperLength * (len(points) - 1))
 
         lines = len(points)
         if not closed:
@@ -55,6 +60,7 @@ class Ribbon():
 
         x0 = 0
         x1 = 0
+
         for i in range(len(points)):
 
             if not closed and i == len(points) - 1:
@@ -64,6 +70,9 @@ class Ribbon():
             p2 = points[i]
             p3 = points[(i + 1) % len(points)]
             p4 = None
+
+            startTaper = self.taperScale(i)
+            endTaper = self.taperScale(i+1)
 
             if i > 0 or closed:
                 p1 = points[i - 1]
@@ -78,13 +87,27 @@ class Ribbon():
                         p1,
                         p2,
                         p3,
-                        p4),
+                        p4,
+                        startTaper,
+                        endTaper),
                     self.slicePattern(x0, x1, tempPattern)))
 
             x0 = x1
-    
+
+    def taperScale(self, index: int) -> float:
+
+        if self.taperLengthIndex < 1 or self.closed:
+            return 1
+ 
+        startTaper = index / self.taperLengthIndex
+        inverseIndex = len(self.curve.getPoints()) - index - 1
+        endTaper = inverseIndex / self.taperLengthIndex
+        startTaper = clamp(startTaper, 0, 1)
+        endTaper = clamp(endTaper, 0, 1)
+        return min(startTaper, endTaper)
+
     def __repr__(self) -> str:
-        return self.curve.__repr__() + ", closed=" + str(self.closed) 
+        return self.curve.__repr__() + ", closed=" + str(self.closed)
 
     def reshaped(self, geoSpace: GeoSpace) -> Ribbon:
         """
@@ -100,11 +123,11 @@ class Ribbon():
         curve.reshape(geoSpace)
         xScale, yScale = geoSpace.getScale()
         pattern = deepcopy(self.pattern)
-        if xScale*yScale < 0:
+        if xScale * yScale < 0:
             flip = GeoSpace()
             flip.scaleYBy(-1)
             flip.transform(pattern)
-        return Ribbon(curve, pattern, self.closed, self.n)
+        return Ribbon(curve, pattern, self.closed, self.taperLength, self.n)
 
     def slicePattern(
             self,
@@ -202,7 +225,9 @@ class Ribbon():
             p1: Point,
             p2: Point,
             p3: Point,
-            p4: Point) -> GeoSpace:
+            p4: Point,
+            startTaper: float,
+            endTaper: float) -> GeoSpace:
         """
         Create a geospace for line p2-p3. If p1 or p4 is not None, they define the
         respective guide angles at ends of the line p2-p3.
@@ -212,6 +237,8 @@ class Ribbon():
             p2 (Point): Start of the line
             p3 (Point): End of the line
             p4 (Point): Next point after the line
+            startTaper (float): Taper scaling at p2
+            endTaper (float): Taper scaling at p3
 
         Returns:
             GeoSpace: GeoSpace for line p2-p3
@@ -238,7 +265,9 @@ class Ribbon():
             1,
             midpoint,
             startGuide,
-            endGuide)
+            endGuide,
+            startTaper,
+            endTaper)
 
     def render(self, display: Display, width: float) -> None:
         """

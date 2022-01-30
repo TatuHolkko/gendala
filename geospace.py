@@ -3,7 +3,7 @@ from dis import dis
 from multipledispatch import dispatch
 from copy import deepcopy
 import math
-from utility import clamp
+from utility import clamp, gradient
 from geometry import Angle, Line, Pattern, Point, convexAngle
 from typing import List
 
@@ -21,8 +21,10 @@ class GeoSpace:
             origin: Point = Point(
                 0,
                 0),
-            startGuide: Angle = 0,
-            endGuide: Angle = 0) -> None:
+            startAngle: Angle = 0,
+            endAngle: Angle = 0,
+            startScale: float = 1,
+            endScale: float = 1) -> None:
         """
         Initialize the coordinate space
 
@@ -31,24 +33,28 @@ class GeoSpace:
             xScale (float, optional): Scaling along x-axis. Defaults to 1.
             yScale (float, optional): Scaling along y-axis. Defaults to 1.
             origin (Point, optional): Constant offset. Defaults to (0,0).
-            startGuide (Angle, optional): Y axis angle at x=-1. Defaults to 0.
-            endGuide (Angle, optional):   Y axis angle at x= 1. Defaults to 0.
+            startAngle (Angle, optional): Y axis angle at x=-1. Defaults to 0.
+            endAngle (Angle, optional):   Y axis angle at x= 1. Defaults to 0.
+            startScale (float, optional): Y scaling at the start. Defaults to 1.
+            endScale (float, optional): Y scaling at the end. Defaults to 1.
 
         The transformations are added in this order:
             Scale, perspective, rotation, offset
 
         The perspective works in local space between x = -1 and x = 1. If perspective is
-        enabled, all points with x=[-1, 1] will get their Y axis tilted using the start and end point guides.
+        enabled, all points with x=[-1, 1] will get their Y axis tilted using the start and end point angles.
         Y axis direction is linearly interpolated between the start and end points.
          """
         self.angle = angle
         self.scale = [xScale, yScale]
         self.origin = origin
-        self.startGuide = startGuide
-        self.endGuide = endGuide
+        self.startAngle = startAngle
+        self.endAngle = endAngle
+        self.startScale = startScale
+        self.endScale = endScale
 
     def __repr__(self) -> str:
-        return f"{self.origin.__repr__()}, {int(self.angle/math.pi*180)}°, {self.scale}, [{int(self.startGuide/math.pi*180)}°,{int(self.endGuide/math.pi*180)}°]"
+        return f"{self.origin.__repr__()}, {int(self.angle/math.pi*180)}°, {self.scale}, [{int(self.startAngle/math.pi*180)}°,{int(self.endAngle/math.pi*180)}°]"
 
     def setYScale(self, scale: float):
         self.scale[1] = scale
@@ -120,8 +126,10 @@ class GeoSpace:
         self.angle = other.angle
         self.scale = other.scale
         self.origin = other.origin
-        self.startGuide = other.startGuide
-        self.endGuide = other.endGuide
+        self.startAngle = other.startAngle
+        self.endAngle = other.endAngle
+        self.startScale = other.startScale
+        self.endScale = other.endScale
 
     def getExternalPos(self, pos: Point) -> Point:
         """
@@ -148,8 +156,10 @@ class GeoSpace:
             point (Point): Point to transform
         """
         s = (point.x / self.scale[0] + 1) / 2
-        angle = self.angleGradient(self.startGuide, self.endGuide, s)
-        point.x = point.x + clamp(point.y * -math.tan(angle), -100, 100)
+        yScale = gradient(self.startScale, self.endScale, s)
+        angle = self.angleGradient(self.startAngle, self.endAngle, s)
+        point.x = point.x + clamp(yScale * point.y * -math.tan(angle), -100, 100)
+        point.y *= yScale
 
     @staticmethod
     def angleGradient(angle1: Angle, angle2: Angle, p: float) -> Angle:

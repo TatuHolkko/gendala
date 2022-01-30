@@ -1,6 +1,3 @@
-from dis import dis
-from math import pi
-from xmlrpc.client import TRANSPORT_ERROR
 from feature import Feature
 from layer import Layer
 from ribbon import Ribbon
@@ -13,20 +10,21 @@ disp = Display(1200,1000)
 def main():
     
     diagonalCurve = Curve(Point(-1,0),False)
-    diagonalCurve.extend(diagonalCurve.sine(Point(1,0), amplitude=1, subDivs=15))
-
+    diagonalCurve.extend(diagonalCurve.arc(Point(1,0), amplitude=0.5, subDivs=7))
+    diagonalCurve.extend(diagonalCurve.arc(Point(0,-1), amplitude=-0.5, subDivs=7))
+    diagonalCurve.extend(diagonalCurve.arc(Point(-1,0), amplitude=-0.5, subDivs=7))
     
     xAxisCurve = Curve(Point(-1,0))
-    xAxisCurve.extend(xAxisCurve.sine(Point(1,0), amplitude=0.1, subDivs=7))
+    xAxisCurve.extend(xAxisCurve.sine(Point(1,0), amplitude=0, subDivs=12))
 
-    ribbon = Ribbon(xAxisCurve, diagonalCurve.getPattern(), closed=False)
+    ribbon = Ribbon(xAxisCurve, diagonalCurve.getPattern(), closed=False, taperLength=0.5, n=7)
 
-    feature = Feature(mirrorX=True, mirrorY=True)
+    feature = Feature(mirrorX=False, mirrorY=False)
     feature.add(ribbon)
 
     s = 1
-    layers = 2
-    r0 = 0.5
+    layers = 5
+    r0 = 0.1
     w0 = 0.1
     disp.setAutoFlush(True)
     disp.drawDebugGrid()
@@ -34,7 +32,7 @@ def main():
     for i in range(layers):
         w = w0 - 0.01
         r = r0 + w + w0
-        l = Layer(r,w*((i%2)*2 - 1),feature.getPattern(s), repeats=4*(i+1))
+        l = Layer(r,w*((i%2)*2 - 1),feature.getPattern(s), repeats=2**(i+1))
         l.render(disp)
         r0 = r
         w0 = w
