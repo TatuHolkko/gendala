@@ -5,7 +5,8 @@ from curve import Curve
 from display import Display
 from geospace import GeoSpace
 from riblet import Riblet
-from utility import Line, Point, angle, distance, gradientPoint, normalizeLines, offsetLines, repeatLines, scaleLines, shorterDistance, totalLength
+from geometry import Line, Pattern, Point, convexAngle
+from utility import gradient
 
 
 class Ribbon():
@@ -16,7 +17,7 @@ class Ribbon():
     def __init__(
             self,
             curve: Curve,
-            pattern: List[Line],
+            pattern: Pattern,
             closed: bool,
             n: int = 1) -> None:
         """
@@ -24,16 +25,16 @@ class Ribbon():
 
         Args:
             curve (Curve): Curve defining the shape of the ribbon
-            pattern (List[Line]): Pattern of the ribbon
+            pattern (Pattern): Pattern of the ribbon
             closed (bool): If true, endpoints are connected
             n (int, optional): Number of repeated patterns. Defaults to 1.
         """
 
         self.riblets: List[Riblet] = []
-        self.pattern = deepcopy(pattern)
-        normalizeLines(self.pattern)
+        self.curve = curve
+        self.pattern = pattern
+        self.pattern.normalizeX()
         self.closed = closed
-        self.curve = deepcopy(curve)
         self.n = n
 
         points = curve.getPoints()
@@ -42,14 +43,15 @@ class Ribbon():
         if not closed:
             lines -= 1
 
-        self.length = totalLength(points, self.closed)
+        self.length = self.curve.length()
 
         widthPerPattern = self.length / n
         patternScale = widthPerPattern / 2
 
-        tempPattern = repeatLines(self.pattern, n)
-        offsetLines(tempPattern, 1)
-        scaleLines(tempPattern, patternScale)
+        tempPattern = deepcopy(self.pattern)
+        tempPattern.repeat(n)
+        tempPattern.offsetX(1)
+        tempPattern.scaleX(patternScale)
 
         x0 = 0
         x1 = 0
@@ -68,7 +70,7 @@ class Ribbon():
             if i < len(points) - 2 or closed:
                 p4 = points[(i + 2) % len(points)]
 
-            x1 += distance(p2, p3)
+            x1 += p2.distanceTo(p3)
 
             self.riblets.append(
                 Riblet(
@@ -97,18 +99,18 @@ class Ribbon():
         curve = deepcopy(self.curve)
         curve.reshape(geoSpace)
         xScale, yScale = geoSpace.getScale()
-        pattern = self.pattern
+        pattern = deepcopy(self.pattern)
         if xScale*yScale < 0:
             flip = GeoSpace()
             flip.scaleYBy(-1)
-            pattern = flip.apply(self.pattern)
+            flip.transform(pattern)
         return Ribbon(curve, pattern, self.closed, self.n)
 
     def slicePattern(
             self,
             x0: float,
             x1: float,
-            pattern: List[Line]) -> List[Line]:
+            pattern: Pattern) -> Pattern:
         """
         Return a slice of a given pattern. The slice will be normalized to stretch from
         x=-1 to x=1.
@@ -116,13 +118,13 @@ class Ribbon():
         Args:
             x0 (float): Lower x limit
             x1 (float): Higher x limit
-            pattern (List[Line]): Normalized pattern slice from x0 to x1
+            pattern (Pattern): Pattern to slice
 
         Returns:
-            List[Line]: Pattern slice
+            Pattern: Normalized pattern slice from x0 to x1
         """
-        result: List[Line] = []
-        for line in pattern:
+        result = Pattern()
+        for line in pattern.lines:
 
             lx0 = line.p0.x
             lx1 = line.p1.x
@@ -138,7 +140,7 @@ class Ribbon():
                 continue
             if ((lx0 >= x0 and lx1 >= x0) and (lx0 <= x1 and lx1 <= x1)):
                 # entire line inside limits
-                result.append(deepcopy(line))
+                result.add(deepcopy(line))
                 continue
 
             leftP = Point(0, 0)
@@ -158,12 +160,12 @@ class Ribbon():
                 # both points outside limits but line crosses the area
                 underflowPortion = (x0 - left) / (right - left)
                 overflowPortion = (right - x1) / (right - left)
-                start = gradientPoint(leftP, rightP, underflowPortion)
-                end = gradientPoint(rightP, leftP, overflowPortion)
+                start = gradient(leftP, rightP, underflowPortion)
+                end = gradient(rightP, leftP, overflowPortion)
                 if lx0 < lx1:
-                    result.append(Line(start, end))
+                    result.add(Line(start, end))
                 else:
-                    result.append(Line(end, start))
+                    result.add(Line(end, start))
                 continue
 
             # one point inside, one point outside
@@ -171,30 +173,27 @@ class Ribbon():
             if left < x0:
                 # left point outside, right point inside
                 portionInside = (right - x0) / (right - left)
-                start = gradientPoint(rightP, leftP, portionInside)
+                start = gradient(rightP, leftP, portionInside)
                 end = rightP
                 if lx0 < lx1:
-                    result.append(Line(start, end))
+                    result.add(Line(start, end))
                 else:
-                    result.append(Line(end, start))
+                    result.add(Line(end, start))
             else:
                 # right point outside, left point inside
                 portionInside = (x1 - left) / (right - left)
                 start = leftP
-                end = gradientPoint(leftP, rightP, portionInside)
+                end = gradient(leftP, rightP, portionInside)
                 if lx0 < lx1:
-                    result.append(Line(start, end))
+                    result.add(Line(start, end))
                 else:
-                    result.append(Line(end, start))
+                    result.add(Line(end, start))
 
         scale = 2 / (x1 - x0)
-        for line in result:
-            line.p0.x -= x0
-            line.p1.x -= x0
-            line.p0.x *= scale
-            line.p1.x *= scale
-            line.p0.x -= 1
-            line.p1.x -= 1
+
+        result.offsetX(-x0)
+        result.scaleX(scale)
+        result.offsetX(-1)
 
         return result
 
@@ -217,21 +216,21 @@ class Ribbon():
         Returns:
             GeoSpace: GeoSpace for line p2-p3
         """
-        currentAngle = angle(p2, p3)
+        currentAngle = p2.angleTo(p3)
         previousAngle = currentAngle
         nextAngle = currentAngle
 
         if p1 is not None:
-            previousAngle = angle(p1, p2)
+            previousAngle = p1.angleTo(p2)
         if p4 is not None:
-            nextAngle = angle(p3, p4)
+            nextAngle = p3.angleTo(p4)
 
-        startGuide = shorterDistance(currentAngle, previousAngle) / 2
-        endGuide = shorterDistance(currentAngle, nextAngle) / 2
+        startGuide = convexAngle(currentAngle, previousAngle) / 2
+        endGuide = convexAngle(currentAngle, nextAngle) / 2
 
-        scale = distance(p2, p3) / 2
+        scale = p2.distanceTo(p3) / 2
 
-        midpoint = gradientPoint(p2, p3, 0.5)
+        midpoint = gradient(p2, p3, 0.5)
 
         return GeoSpace(
             currentAngle,
@@ -252,8 +251,9 @@ class Ribbon():
         for riblet in self.riblets:
             riblet.render(display, width)
 
-    def getLines(self, width) -> List[Line]:
-        result:List[Line] = []
+    def getPattern(self, width) -> Pattern:
+        result = Pattern()
         for riblet in self.riblets:
-            result.extend(riblet.getLines(width))
+            for line in riblet.getPattern(width).lines:
+                result.add(line)
         return result

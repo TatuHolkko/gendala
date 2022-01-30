@@ -4,7 +4,7 @@ import os
 from typing import List
 from geospace import GeoSpace, GeoSpaceStack
 
-from utility import Line, Point
+from geometry import Line, Point
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 

@@ -1,26 +1,38 @@
 from __future__ import annotations
+from dis import dis
+from multipledispatch import dispatch
 from copy import deepcopy
 import math
-from utility import Line, Point, clamp, rotatePoint, shorterDistance, piWrap
+from utility import clamp
+from geometry import Angle, Line, Pattern, Point, convexAngle
 from typing import List
+
 
 class GeoSpace:
     """
     A transformed coordinate space
     """
 
-    def __init__(self, angle:float=0, xScale:float=1, yScale:float=1,
-                 origin:Point=Point(0, 0), startGuide:float=0, endGuide:float=0) -> None:
+    def __init__(
+            self,
+            angle: Angle = Angle(0),
+            xScale: float = 1,
+            yScale: float = 1,
+            origin: Point = Point(
+                0,
+                0),
+            startGuide: Angle = 0,
+            endGuide: Angle = 0) -> None:
         """
         Initialize the coordinate space
 
         Args:
-            angle (float, optional): Rotation. Defaults to 0.
+            angle (Angle, optional): Rotation. Defaults to 0.
             xScale (float, optional): Scaling along x-axis. Defaults to 1.
             yScale (float, optional): Scaling along y-axis. Defaults to 1.
             origin (Point, optional): Constant offset. Defaults to (0,0).
-            startGuide (float, optional): Y axis angle at x=-1. Defaults to 0.
-            endGuide (float, optional):   Y axis angle at x= 1. Defaults to 0.
+            startGuide (Angle, optional): Y axis angle at x=-1. Defaults to 0.
+            endGuide (Angle, optional):   Y axis angle at x= 1. Defaults to 0.
 
         The transformations are added in this order:
             Scale, perspective, rotation, offset
@@ -38,9 +50,9 @@ class GeoSpace:
     def __repr__(self) -> str:
         return f"{self.origin.__repr__()}, {int(self.angle/math.pi*180)}°, {self.scale}, [{int(self.startGuide/math.pi*180)}°,{int(self.endGuide/math.pi*180)}°]"
 
-    def setYScale(self, scale:float):
+    def setYScale(self, scale: float):
         self.scale[1] = scale
-    
+
     def getScale(self):
         return self.scale
 
@@ -71,12 +83,12 @@ class GeoSpace:
         """
         self.scale[1] = self.scale[1] * factor
 
-    def rotate(self, theta: float) -> None:
+    def rotate(self, theta: Angle) -> None:
         """
         Rotate the coordinate system around local origin.
 
         Args:
-            theta (float): Angle in radians.
+            theta (Angle): Angle in radians.
         """
         x_mirrored = self.scale[0] < 0
         y_mirrored = self.scale[1] < 0
@@ -98,7 +110,7 @@ class GeoSpace:
 
         self.origin = self.getExternalPos(pos)
 
-    def makeEqual(self, other:GeoSpace) -> None:
+    def makeEqual(self, other: GeoSpace) -> None:
         """
         Copy all members from other.
 
@@ -122,48 +134,43 @@ class GeoSpace:
             Point: External point
         """
         pos_ = Point(pos.x * self.scale[0], pos.y * self.scale[1])
-        pos_ = self.applyPerspective(pos_)
-        pos_ = rotatePoint(pos_, Point(0, 0), self.angle)
-        return Point(self.origin.x + pos_.x, self.origin.y + pos_.y)
+        self.applyPerspective(pos_)
+        pos_ = pos_.rotate(Point(0, 0), self.angle)
+        pos_.x += self.origin.x
+        pos_.y += self.origin.y
+        return pos_
 
-    def applyPerspective(self, point: Point) -> Point:
+    def applyPerspective(self, point: Point) -> None:
         """
         Apply a linear approximation of perspective transform
 
         Args:
             point (Point): Point to transform
-
-        Returns:
-            Point: Transformed point
         """
-        s = (point.x/self.scale[0] + 1) / 2
+        s = (point.x / self.scale[0] + 1) / 2
         angle = self.angleGradient(self.startGuide, self.endGuide, s)
-        x = point.x + clamp(point.y * -math.tan(angle), -100, 100)
-        return Point(x, point.y)
+        point.x = point.x + clamp(point.y * -math.tan(angle), -100, 100)
 
     @staticmethod
-    def angleGradient(angle1:float, angle2:float, p:float) -> float:
+    def angleGradient(angle1: Angle, angle2: Angle, p: float) -> Angle:
         """
         Return an angle [-pi, pi] that is between angle1 and angle2,
         choosing the shorter direction of travel.
 
         Args:
-            angle1 (float): First angle
-            angle2 (float): Second angle
+            angle1 (Angle): First angle
+            angle2 (Angle): Second angle
             p (float): value between 0 and 1
 
         Returns:
-            (float): Angle between angle1 and angle2
+            (Angle): Angle between angle1 and angle2
         """
 
-        if abs(angle1) > math.pi or abs(angle2) > math.pi:
-            raise Exception("Gradient angles not between [-pi,pi]")
-
-        delta = shorterDistance(angle1, angle2)
-        result = piWrap(angle1 + p * delta)
+        delta = convexAngle(angle1, angle2)
+        result = (angle1 + p * delta)
         return result
 
-    def apply(self, lines:List[Line]) -> List[Line]:
+    def apply(self, lines: List[Line]) -> List[Line]:
         """
         Apply the geospace transformations to a list of lines
 
@@ -180,18 +187,41 @@ class GeoSpace:
             p2 = self.getExternalPos(line.p1)
             result.append(Line(p1, p2))
         return result
-    
+
+    @dispatch(Pattern)
+    def transform(self, pattern: Pattern) -> None:
+        points = set()
+        for line in pattern.lines:
+            points.add(line.p0)
+            points.add(line.p1)
+        for point in points:
+            self.transform(point)
+
+    @dispatch(Line)
+    def transform(self, line: Line) -> None:
+        self.transform(line.p0)
+        if line.p0 is not line.p1:
+            self.transform(line.p1)
+
+    @dispatch(Point)
+    def transform(self, point: Point) -> None:
+        newPoint = self.getExternalPos(point)
+        point.x = newPoint.x
+        point.y = newPoint.y
+
+
 class GeoSpaceStack:
     """
     Coordinate space stack. Uses a reference to a coordinate space to create deep copies of it into a stack
     """
+
     def __init__(self):
         """
         Initialize coordinate space stack
         """
-        self.stack:List[GeoSpace] = []
+        self.stack: List[GeoSpace] = []
 
-    def push(self, geoSpace:GeoSpace):
+    def push(self, geoSpace: GeoSpace):
         """
         Push a new coordinate space into the stack
         """
@@ -203,8 +233,8 @@ class GeoSpaceStack:
         :return: Coordinatespace
         """
         return self.stack.pop()
-    
-    def getGlobalPos(self, pos:Point) -> Point:
+
+    def getGlobalPos(self, pos: Point) -> Point:
         """
         Apply the whole stack of geospaces to get the global position
 

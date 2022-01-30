@@ -2,7 +2,7 @@ from typing import List
 from display import Display
 from geospace import GeoSpace
 from ribbon import Ribbon
-from utility import Line, Point
+from geometry import Line, Pattern, Point
 
 
 class Feature:
@@ -67,10 +67,11 @@ class Feature:
         for ribbon in self.ribbons:
             ribbon.render(display, width)
     
-    def getLines(self, width) -> List[Line]:
+    def getPattern(self, width) -> Pattern:
         if self.mirrorX or self.mirrorY:
             width *= 0.5
-        result:List[Line] = []
+        result = Pattern()
         for ribbon in self.ribbons:
-            result.extend(ribbon.getLines(width))
+            for line in ribbon.getPattern(width).lines:
+                result.add(line)
         return result

@@ -2,7 +2,8 @@
 from copy import deepcopy
 from math import atan, pi, sin, tan
 from typing import List, Tuple
-from utility import Line, Point, angle, clamp, distance, gradientPoint, innerAngle, rotatePoint
+from utility import clamp, gradient
+from geometry import Line, Pattern, Point, cornerAngle
 from geospace import GeoSpace
 
 
@@ -18,7 +19,7 @@ class Curve():
             start (Point): Starting point
             closed (bool, optional): Whether the curve is a closed loop. Defaults to False.
         """
-        self.points = [deepcopy(start)]
+        self.points = [start]
         self.start = self.points[0]
         self.end = self.points[0]
         self.closed = closed
@@ -47,22 +48,22 @@ class Curve():
         Returns:
             List[Point]: Points
         """
-        return deepcopy(self.points)
+        return self.points
     
-    def getLines(self) -> List[Line]:
+    def getPattern(self) -> Pattern:
         """
-        Get lines of this curve
+        Create Pattern from this curve
 
         Returns:
-            List[Line]: Lines
+            Pattern: Pattern from points of this curve
         """
-        result:List[Line] = []
+        result = Pattern()
         for i in range(len(self.points)-1):
             p1 = self.points[i]
             p2 = self.points[i+1]
-            result.append(Line(p1,p2))
+            result.add(Line(p1,p2))
         if self.closed:
-            result.append(Line(self.points[-1], self.points[0]))
+            result.add(Line(self.points[-1], self.points[0]))
         return result
 
     def sharpCorners(self, minAngle: float) -> List[int]:
@@ -81,7 +82,7 @@ class Curve():
             p1 = self.points[-1]
             p2 = self.points[0]
             p3 = self.points[1]
-            angle_ = innerAngle(p1, p2, p3)
+            angle_ = cornerAngle(p1, p2, p3)
             if abs(angle_) <= minAngle:
                 result.append(0)
 
@@ -89,7 +90,7 @@ class Curve():
             p1 = self.points[i]
             p2 = self.points[i + 1]
             p3 = self.points[i + 2]
-            angle_ = innerAngle(p1, p2, p3)
+            angle_ = cornerAngle(p1, p2, p3)
             if abs(angle_) <= minAngle:
                 result.append(i + 1)
 
@@ -97,7 +98,7 @@ class Curve():
             p1 = self.points[-2]
             p2 = self.points[-1]
             p3 = self.points[0]
-            angle_ = innerAngle(p1, p2, p3)
+            angle_ = cornerAngle(p1, p2, p3)
             if abs(angle_) <= minAngle:
                 result.append(len(self.points) - 1)
 
@@ -144,8 +145,8 @@ class Curve():
         p1 = self.points[i - 1]
         p2 = self.points[i]
         p3 = self.points[(i + 1) % len(self.points)]
-        rounded1 = gradientPoint(p2, p1, 0.3)
-        rounded2 = gradientPoint(p2, p3, 0.3)
+        rounded1 = gradient(p2, p1, 0.3)
+        rounded2 = gradient(p2, p3, 0.3)
         return (rounded1, rounded2)
 
     def sine(self,
@@ -195,7 +196,7 @@ class Curve():
 
         for i in range(subDivs):
             p = (i + 1) / (subDivs + 1)
-            gradPoint = gradientPoint(self.end, end, p)
+            gradPoint = gradient(self.end, end, p)
             result.append(gradPoint)
 
         result.append(deepcopy(end))
@@ -203,26 +204,26 @@ class Curve():
 
     def arc(self,
             end: Point,
-            curvature: float,
+            amplitude: float,
             subDivs: int = 7) -> List[Point]:
         """
         Generate points along a circular arc from current endpoint to the given endpoint.
-        The curvature is a number between -1 and 1. 1 means that the center of the circle is
+        The amplitude is a number between -1 and 1. 1 means that the center of the circle is
         directly between the start and the endpoint, which creates a full semi circle. 0 creates
         a flat line, and -1 creates the mirror image of the one created with 1. 
 
         Args:
             end (Point): New endpoint of the curve
-            curvature (float): Curvature of the arc
+            amplitude (float): Curvature of the arc
             subDivs (int, optional): Number of points between the start and the end. Defaults to 7.
 
         Returns:
             List[Point]: Points along the arc
         """
 
-        if curvature == 0:
+        if amplitude == 0:
             return self.line(end, subDivs)
-        curvature = clamp(curvature, -1, 1)
+        curvature = clamp(amplitude, -1, 1)
 
         result: List[Point] = []
 
@@ -238,8 +239,8 @@ class Curve():
             p = (i + 1) / (subDivs + 1)
             phi = (1 - p) * omega
 
-            subDivPoint = rotatePoint(Point(1, 0), pivot, phi)
-            subDivPoint = gspace.getExternalPos(subDivPoint)
+            subDivPoint = Point(1, 0).rotate(pivot, phi)
+            gspace.transform(subDivPoint)
             result.append(subDivPoint)
 
         result.append(deepcopy(end))
@@ -253,7 +254,15 @@ class Curve():
             geoSpace (GeoSpace): Geospace to tranform the points into
         """
         for i in range(len(self.points)):
-            self.points[i] = geoSpace.getExternalPos(self.points[i])
+            geoSpace.transform(self.points[i])
+    
+    def length(self) -> float:
+        result = 0
+        for i in range(len(self.points) - 1):
+            result += self.points[i].distanceTo(self.points[i + 1])
+        if self.closed:
+            result += self.points[-1].distanceTo(self.points[0])
+        return result
 
 
 def geoSpaceBetween(p0: Point, p1: Point) -> GeoSpace:
@@ -267,9 +276,9 @@ def geoSpaceBetween(p0: Point, p1: Point) -> GeoSpace:
     Returns:
         GeoSpace: Geospace between the points
     """
-    scale = distance(p0, p1) / 2
-    angle_ = angle(p0, p1)
-    midpoint = gradientPoint(p0, p1, 0.5)
+    scale = p0.distanceTo(p1) / 2
+    angle_ = p0.angleTo(p1)
+    midpoint = gradient(p0, p1, 0.5)
     return GeoSpace(angle_, scale, scale, midpoint)
 
 

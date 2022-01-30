@@ -4,7 +4,7 @@ from feature import Feature
 from typing import List
 from curve import Curve
 from ribbon import Ribbon
-from utility import Line, Point
+from geometry import Line, Pattern, Point
 
 
 def ngon(n, radius) -> List[Point]:
@@ -18,7 +18,7 @@ class Layer:
             self,
             radius: float,
             width: float,
-            feature: List[Line],
+            pattern: Pattern,
             repeats:int = None) -> None:
 
         n = max(64, int(radius * 16 + 48))
@@ -28,7 +28,7 @@ class Layer:
         points = ngon(n, radius)
         curve = Curve(points[0], closed=True)
         curve.extend(points[1:])
-        self.ribbon = Ribbon(curve, feature, closed=True, n=repeats)
+        self.ribbon = Ribbon(curve, pattern, closed=True, n=repeats)
         self.width = width
     
     def render(self, display):
