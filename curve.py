@@ -253,8 +253,11 @@ class Curve():
         Args:
             geoSpace (GeoSpace): Geospace to tranform the points into
         """
-        for i in range(len(self.points)):
-            geoSpace.transform(self.points[i])
+        transformed = set()
+        for point in self.points:
+            if point not in transformed:
+                geoSpace.transform(point)
+                transformed.add(point)
     
     def length(self) -> float:
         result = 0
