@@ -4,11 +4,8 @@ from math import atan2, cos, hypot, pi, sin
 from textwrap import wrap
 from typing import List
 
-"""
-Float value representing radians
-"""
+#Float value representing radians
 Angle = float
-
 
 class Point:
     def __init__(self, x: float, y: float) -> None:
@@ -82,14 +79,23 @@ class Pattern:
         self.updateLimits(line.p0)
         self.updateLimits(line.p1)
 
-    def updateLimits(self, point: Point) -> None:
+    def updateLimits(self, point: Point = None) -> None:
+        
+        if point is None:
+            for point in self.points:
+                self.updateLimits(point)
+        
         self.xMax = max(self.xMax, point.x)
         self.xMin = min(self.xMin, point.x)
         self.yMax = max(self.yMax, point.y)
         self.yMin = min(self.yMin, point.y)
 
+    def getWidth(self) -> float:
+        self.updateLimits()
+        return self.xMax - self.xMin
+
     def normalizeX(self) -> None:
-        width = self.xMax - self.xMin
+        width = self.getWidth()
         middle = (self.xMax + self.xMin) / 2
         scale = 2 / width
         self.offsetX(-middle)
@@ -104,7 +110,7 @@ class Pattern:
             p.x *= scaleX
 
     def repeat(self, n: int) -> None:
-        width = self.xMax - self.xMin
+        width = self.getWidth()
         newSet = Pattern()
         for i in range(n-1):
             offset = width * (i+1)

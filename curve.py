@@ -6,6 +6,10 @@ from utility import clamp, gradient
 from geometry import Line, Pattern, Point, cornerAngle
 from geospace import GeoSpace
 
+#Smallest distance allowed when detecting point location equality
+collisionThreshold = 0.01
+#Smallest angle allowed when detecting too sharp angles
+parallelAngleThreshold = 20 / 360 * 2 *pi
 
 class Curve():
     """
@@ -23,7 +27,7 @@ class Curve():
         self.start = self.points[0]
         self.end = self.points[0]
         self.closed = closed
-    
+
     def __repr__(self) -> str:
         return "[" + ",".join([p.__repr__() for p in self.points]) + "]"
 
@@ -36,9 +40,9 @@ class Curve():
         """
         self.points.extend(points)
         self.end = points[-1]
-        if self.end == self.start:
+        if self.end.distanceTo(self.start) < collisionThreshold:
             self.closed = True
-            del self.end
+            self.points.pop()
             self.end = self.points[-1]
 
     def getPoints(self) -> List[Point]:
@@ -49,7 +53,7 @@ class Curve():
             List[Point]: Points
         """
         return self.points
-    
+
     def getPattern(self) -> Pattern:
         """
         Create Pattern from this curve
@@ -58,10 +62,10 @@ class Curve():
             Pattern: Pattern from points of this curve
         """
         result = Pattern()
-        for i in range(len(self.points)-1):
+        for i in range(len(self.points) - 1):
             p1 = self.points[i]
-            p2 = self.points[i+1]
-            result.add(Line(p1,p2))
+            p2 = self.points[i + 1]
+            result.add(Line(p1, p2))
         if self.closed:
             result.add(Line(self.points[-1], self.points[0]))
         return result
@@ -76,7 +80,7 @@ class Curve():
         Returns:
             List[int]: Indices of the sharp corners
         """
-        result:List[int] = []
+        result: List[int] = []
 
         if self.closed:
             p1 = self.points[-1]
@@ -104,7 +108,7 @@ class Curve():
 
         return result
 
-    def round(self, minAngle: float = pi * 3 / 4) -> None:
+    def round(self, minAngle: float = pi / 2) -> None:
         """
         Replace sharp corners with pairs of less sharp corners
 
@@ -114,7 +118,7 @@ class Curve():
         sharp, the process is repeated.
 
         Args:
-            minAngle (float, optional): Minimum angle between adjacent lines. Defaults to pi*3/4.
+            minAngle (float, optional): Minimum angle between adjacent lines. Defaults to pi/2.
         """
         pointsToRound = self.sharpCorners(minAngle)
         while pointsToRound:
@@ -129,11 +133,12 @@ class Curve():
                 self.points[index].y = points[1].y
                 self.points.insert(index, deepcopy(points[0]))
                 indexOffset += 1
+            self.removeDuplicates()
             pointsToRound = self.sharpCorners(minAngle)
 
     def roundPoint(self, i: int) -> Tuple[Point, Point]:
         """
-        Return two points that should replace the point at index i in order
+        Return points that should replace the point at index i in order
         to remove the sharp corner at index i.
 
         Args:
@@ -145,9 +150,25 @@ class Curve():
         p1 = self.points[i - 1]
         p2 = self.points[i]
         p3 = self.points[(i + 1) % len(self.points)]
-        rounded1 = gradient(p2, p1, 0.3)
-        rounded2 = gradient(p2, p3, 0.3)
+        d1 = p2.distanceTo(p1)
+        d2 = p2.distanceTo(p3)
+        d = min(d1, d2)
+        rounded1 = gradient(p2, p1, 0.3 * (d / d1))
+        rounded2 = gradient(p2, p3, 0.3 * (d / d2))
         return (rounded1, rounded2)
+    
+    def removeDuplicates(self):
+        toRemove:List[int] = []
+        for i in range(len(self.points)):
+            if i == len(self.points) - 1 and not self.closed:
+                break
+            nextIndex = (i + 1) % len(self.points)
+            p1 = self.points[i]
+            p2 = self.points[nextIndex]
+            if p1.distanceTo(p2) < collisionThreshold:
+                toRemove.append(nextIndex)
+        for i in sorted(toRemove, reverse=True):
+            self.points.pop(i)
 
     def sine(self,
              end: Point,
@@ -210,7 +231,7 @@ class Curve():
         Generate points along a circular arc from current endpoint to the given endpoint.
         The amplitude is a number between -1 and 1. 1 means that the center of the circle is
         directly between the start and the endpoint, which creates a full semi circle. 0 creates
-        a flat line, and -1 creates the mirror image of the one created with 1. 
+        a flat line, and -1 creates the mirror image of the one created with 1.
 
         Args:
             end (Point): New endpoint of the curve
@@ -245,8 +266,8 @@ class Curve():
 
         result.append(deepcopy(end))
         return result
-    
-    def reshape(self, geoSpace:GeoSpace) -> None:
+
+    def reshape(self, geoSpace: GeoSpace) -> None:
         """
         Transform all points of this curve into given geospace
 
@@ -258,7 +279,7 @@ class Curve():
             if point not in transformed:
                 geoSpace.transform(point)
                 transformed.add(point)
-    
+
     def length(self) -> float:
         result = 0
         for i in range(len(self.points) - 1):
