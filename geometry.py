@@ -79,6 +79,10 @@ class Pattern:
         self.updateLimits(line.p0)
         self.updateLimits(line.p1)
 
+    def combine(self, other:Pattern) -> None:
+        for line in other.lines:
+            self.add(line)
+
     def updateLimits(self, point: Point = None) -> None:
         
         if point is None:

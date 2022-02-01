@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 from typing import List
+import random
 
 def clamp(value: float, minLim: float, maxLim: float) -> float:
     return min(max(value, minLim), maxLim)
@@ -19,3 +20,6 @@ def listify(tpl: tuple) -> List:
 def gradient(v1, v2, s: float) -> float:
     d = v2 - v1
     return v1 + d * s
+
+def coinFlip() -> bool:
+    return random.choice([True, False])
