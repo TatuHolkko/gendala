@@ -86,6 +86,10 @@ class Pattern:
     def updateLimits(self, point: Point = None) -> None:
         
         if point is None:
+            self.xMax = 0
+            self.xMin = 0
+            self.yMax = 0
+            self.yMin = 0
             for point in self.points:
                 self.updateLimits(point)
         

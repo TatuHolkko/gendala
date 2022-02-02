@@ -3,7 +3,7 @@ import random
 from feature import Feature
 from layer import Layer
 from generator.generator import Generator
-from generator.patternGenerators import crossedBox, verticalLine
+from generator.patternGenerators import crossedBox, topAndBottom, verticalLine
 from geometry import Point
 from curve import Curve
 from display import Display
@@ -12,29 +12,23 @@ from ribbon import Ribbon
 disp = Display(1200,1000)
 
 def main():
-    
-    diagonalCurve = Curve(Point(-1,0),closed=True)
-    diagonalCurve.extend(diagonalCurve.arc(Point(1,0), amplitude=-1, subDivs=2))
-    diagonalCurve.extend(diagonalCurve.arc(Point(-1,0), amplitude=-1, subDivs=1))
-    
-    #diagonalCurve.round()
+
+    arcCurve = Curve(Point(-1,0))
+    arcCurve.extend(arcCurve.arc(Point(1,0), amplitude=1, subDivs=1))
 
     xAxisCurve = Curve(Point(-1,0))
     xAxisCurve.extend(xAxisCurve.arc(Point(1,0), amplitude=0, subDivs=1))
 
-    #ribbon = Ribbon(xAxisCurve, diagonalCurve.getPattern(), closed=False, taperLength=0, n=3)
-
-
-    feature = Generator().getFeature()
-    pat = feature.getPattern(0.1)
-    pat.combine(verticalLine(1))
+    pat = Ribbon(arcCurve, topAndBottom(), closed=False).getPattern(0)
+    pat.normalizeX()
     pat.combine(verticalLine(-1))
-    #pat.normalizeX()
+    pat.combine(verticalLine(1))
 
     disp.setAutoFlush(True)
     disp.drawDebugGrid()
-    if False:
-        Ribbon(xAxisCurve, pat, closed=False).render(disp, 1)
+
+    if True:
+        Layer(0.5,0.2, pat, repeats=2).render(display=disp)
     else:
         s = 0.1
         layers = 4

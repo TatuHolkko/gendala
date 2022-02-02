@@ -1,15 +1,10 @@
 
-from math import sin, cos, pi
+from math import floor
 from feature import Feature
 from typing import List
 from curve import Curve
 from ribbon import Ribbon
 from geometry import Line, Pattern, Point
-
-
-def ngon(n, radius) -> List[Point]:
-    return [Point(radius * cos(x / n * 2 * pi),
-                  radius * sin(x / n * 2 * pi)) for x in range(n)]
 
 
 class Layer:
@@ -21,13 +16,13 @@ class Layer:
             pattern: Pattern,
             repeats:int = None) -> None:
 
-        n = max(64, int(radius * 16 + 48))
         if repeats is None:
             repeats = int(4 + 16 * radius)
 
-        points = ngon(n, radius)
-        curve = Curve(points[0], closed=True)
-        curve.extend(points[1:])
+        n = max(64, int(radius * 16 + 48))
+        curve = Curve(Point(radius, 0), closed=True)
+        curve.extend(curve.arc(Point(-radius, 0), amplitude=1, subDivs=floor(n/2)))
+        curve.extend(curve.arc(Point(radius, 0), amplitude=1, subDivs=floor(n/2)))
         self.ribbon = Ribbon(curve, pattern, closed=True, n=repeats)
         self.width = width
     
