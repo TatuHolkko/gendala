@@ -44,6 +44,11 @@ class Display:
                  round(self.height / 2 - pos1.y * self.scale)))
         self.lineBuffer = []
         pygame.display.update()
+    
+    def clear(self):
+        self.lineBuffer = []
+        self.surf.fill((0,0,0))
+        pygame.display.update()
 
     def setColor(self, r, g, b):
         self.color[0] = r
@@ -68,10 +73,3 @@ class Display:
 
     def popGeoSpace(self):
         self.geoSpaceStack.pop()
-
-    def eventLoop(self):
-        exited = False
-        while not exited:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    exited = True

@@ -22,6 +22,9 @@ class Environment():
         self.surf = pygame.display.set_mode(size=(1000, 1000))
         self.display = Display(self.surf)
         self.display.setAutoFlush(True)
+        self.renderThread = False
+        self.haltRender = False
+        self.debugActive = False
 
     def debugRender(self):
         arcCurve = Curve(Point(0, 0))
@@ -42,26 +45,55 @@ class Environment():
 
             pat = Generator().getFeature().getPattern()
 
+            if self.haltRender:
+                break
+
             n = random.randint(1, 4)
             repeats = (i + 1) * 4 + n * int(i / 4)
 
             l = Layer(r, w * ((i % 2) * 2 - 1), pat, repeats=repeats)
+            
+            if self.haltRender:
+                break
+
             l.render(self.display)
+
+            if self.haltRender:
+                break
 
             r0 = r
             w0 = w
 
-    def run(self, debug=False):
+    def render(self):
+        
+        self.display.clear()
 
-        if debug:
+        if self.debugActive:
             self.display.drawDebugGrid()
-            renderThread = threading.Thread(target=self.debugRender, daemon=True)
-            renderThread.start()
+            self.renderThread = threading.Thread(target=self.debugRender)
         else:
-            renderThread = threading.Thread(target=self.layers, daemon=True)
-            renderThread.start()
+            self.renderThread = threading.Thread(target=self.layers)
+        
+        self.renderThread.start()
 
-        self.display.eventLoop()
+    def run(self):
+        self.render()
+        self.eventLoop()
     
     def debug(self):
-        self.run(debug=True)
+        self.debugActive = True
+        self.run()
+
+    def eventLoop(self):
+        exited = False
+        while not exited:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    exited = True
+                    break
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        self.haltRender = True
+                        self.renderThread.join()
+                        self.haltRender = False
+                        self.render()
