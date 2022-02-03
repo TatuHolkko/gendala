@@ -6,10 +6,16 @@ from utility import clamp, gradient
 from geometry import Line, Pattern, Point, cornerAngle
 from geospace import GeoSpace
 
-#Smallest distance allowed when detecting point location equality
+# Smallest distance allowed when detecting point location equality
 collisionThreshold = 0.01
-#Smallest angle allowed when detecting too sharp angles
-parallelAngleThreshold = 20 / 360 * 2 *pi
+# Smallest angle allowed when detecting too sharp angles
+parallelAngleThreshold = 20 / 360 * 2 * pi
+
+
+class GeometryException(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
 
 class Curve():
     """
@@ -134,6 +140,9 @@ class Curve():
                 self.points.insert(index, deepcopy(points[0]))
                 indexOffset += 1
             self.removeDuplicates()
+            if (len(self.points) < 2) or (
+                    len(self.points) < 3 and self.closed):
+                raise GeometryException("Curve not roundable.")
             pointsToRound = self.sharpCorners(minAngle)
 
     def roundPoint(self, i: int) -> Tuple[Point, Point]:
@@ -156,9 +165,9 @@ class Curve():
         rounded1 = gradient(p2, p1, 0.3 * (d / d1))
         rounded2 = gradient(p2, p3, 0.3 * (d / d2))
         return (rounded1, rounded2)
-    
+
     def removeDuplicates(self):
-        toRemove:List[int] = []
+        toRemove: List[int] = []
         for i in range(len(self.points)):
             if i == len(self.points) - 1 and not self.closed:
                 break

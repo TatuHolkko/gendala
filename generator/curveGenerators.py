@@ -57,7 +57,7 @@ def randomCurve(closed=False) -> Curve:
     for point in points[1:]:
         extend(curve, point)
     curve.removeDuplicates()
-    if len(curve.points) < 2:
+    if (len(curve.points) < 2) or (len(curve.points) < 3 and closed):
         #if all random points landed on top of each other
         return randomCurve(closed=closed)
     return curve
