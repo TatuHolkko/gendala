@@ -30,7 +30,7 @@ class Ribbon():
             curve (Curve): Curve defining the shape of the ribbon
             pattern (Pattern): Pattern of the ribbon
             closed (bool): If true, endpoints are connected
-            width (float): Width of the ribbon. Defaults to 0.2.
+            width (float): Width of the ribbon
             taperLength (float): Percentage of line length used in both ends for tapering
             n (int, optional): Number of repeated patterns. Defaults to 1.
         """
