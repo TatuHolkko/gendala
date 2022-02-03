@@ -1,4 +1,4 @@
 define width at preprocessing instead of during rendering
-create features that are continuous when repeated along the x axis
+detail allocation points
 if performance becomes issue, remove unneccessary deep copies
-refactor repeated pattern rendering
+refactor repeated pattern rendering -> no need to repeat the pattern in memory
