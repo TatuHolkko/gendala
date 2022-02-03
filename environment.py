@@ -28,6 +28,7 @@ class Environment():
         self.renderingDone = False
         self.saveQueued = False
         self.debugActive = False
+        self.exited = False
 
     def debugRender(self):
         arcCurve = Curve(Point(0, 0))
@@ -103,10 +104,18 @@ class Environment():
     def debug(self):
         self.debugActive = True
         self.run()
+    
+    def restartRender(self):
+        self.haltRender = True
+        self.renderThread.join()
+        if not self.exited:
+            self.haltRender = False
+            self.saveQueued = False
+            self.startRender()
 
     def eventLoop(self):
-        exited = False
-        while not exited:
+        
+        while not self.exited:
 
             if self.saveQueued and self.renderingDone:
                 pygame.image.save(self.surf,
@@ -117,18 +126,15 @@ class Environment():
 
                 if event.type == pygame.QUIT:
 
-                    exited = True
+                    self.exited = True
+                    self.haltRender = True
                     break
 
                 if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_r:
-
-                        self.haltRender = True
-                        self.renderThread.join()
-                        self.haltRender = False
-                        self.saveQueued = False
-                        self.startRender()
+                        thread = threading.Thread(target=self.restartRender)
+                        thread.start()
 
                     elif event.key == pygame.K_s:
                         self.saveQueued = True
