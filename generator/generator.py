@@ -14,7 +14,7 @@ class Generator:
 
     def getFeature(self):
         feature = Feature(mirrorY=coinFlip(), mirrorX=coinFlip())
-        n = random.randint(1,1)
+        n = random.choice([1,1,2])
         for _ in range(n):
             feature.add(self.getRibbon())
         return feature
