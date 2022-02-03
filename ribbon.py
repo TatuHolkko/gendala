@@ -53,7 +53,7 @@ class Ribbon():
         patternScale = widthPerPattern / 2
 
         tempPattern = deepcopy(self.pattern)
-        tempPattern.repeat(n)
+        tempPattern.repeat(n+1)
         tempPattern.offsetX(1)
         tempPattern.scaleX(patternScale)
 
