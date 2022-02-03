@@ -37,7 +37,6 @@ class Ribbon():
         self.riblets: List[Riblet] = []
         self.curve = curve
         self.pattern = pattern
-        self.pattern.normalizeX()
         self.closed = closed
         self.taperLength = taperLength
         self.n = n

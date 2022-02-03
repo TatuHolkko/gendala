@@ -1,10 +1,8 @@
 
 from math import floor
-from feature import Feature
-from typing import List
 from curve import Curve
 from ribbon import Ribbon
-from geometry import Line, Pattern, Point
+from geometry import Pattern, Point
 
 
 class Layer:

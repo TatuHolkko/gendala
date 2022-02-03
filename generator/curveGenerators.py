@@ -14,21 +14,30 @@ def randomPoint():
     y *= 1-edgePadding
     return Point(x,y)
 
+def randomCoordinate():
+    return (random.random()*2 - 1) * (1-edgePadding)
+
 def getPoints() -> List[Point]:
-    edgeY = random.random()*2 - 1
-    edgeY *= (1-edgePadding)
     points = []
+    continuous = coinFlip()
+    edgeY = randomCoordinate()
 
-    points.append(Point(-1,edgeY))
+    if continuous:
+        points.append(Point(-1,edgeY))
 
-    points.append(randomPoint())
-
+    if coinFlip():
+        points.append(randomPoint())
     if coinFlip():
         points.append(randomPoint())
     if coinFlip():
         points.append(randomPoint())
     
-    points.append(Point(1, edgeY))
+    if not continuous and len(points) < 2:
+        points.append(randomPoint())
+        points.append(randomPoint())
+    
+    if continuous:
+        points.append(Point(1,edgeY))
 
     return points
 
@@ -48,4 +57,7 @@ def randomCurve(closed=False) -> Curve:
     for point in points[1:]:
         extend(curve, point)
     curve.removeDuplicates()
+    if len(curve.points) < 2:
+        #if all random points landed on top of each other
+        return randomCurve(closed=closed)
     return curve

@@ -50,7 +50,7 @@ class Line:
     def __init__(self, p0: Point, p1: Point) -> None:
         self.p0 = p0
         self.p1 = p1
-
+    
     def __eq__(self, __o: object) -> bool:
         if not isinstance(__o, Line):
             return False
@@ -118,7 +118,7 @@ class Pattern:
             p.x *= scaleX
 
     def repeat(self, n: int) -> None:
-        width = self.getWidth()
+        width = 2
         newSet = Pattern()
         for i in range(n-1):
             offset = width * (i+1)
