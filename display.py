@@ -1,29 +1,25 @@
-import pygame
+import os                                           # nopep8
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"   # nopep8
+import pygame                                       # nopep8
 from copy import deepcopy
-import os
 from typing import List
 from geospace import GeoSpace, GeoSpaceStack
-
 from geometry import Line, Point
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 
 class Display:
 
-    def __init__(self, width, height) -> None:
-        self.width = width
-        self.height = height
-        self.scale = min(width, height) / 3
+    def __init__(self, surf) -> None:
+        self.surf = surf
+        self.width = surf.get_width()
+        self.height = surf.get_height()
+        self.scale = min(self.width, self.height) / 3
         self.lineBuffer: List[Line] = []
         self.autoFlush = False
         self.geoSpace = GeoSpace()
         self.geoSpaceStack = GeoSpaceStack()
         self.geoSpaceStack.push(self.geoSpace)
         self.color = [255, 255, 255]
-        pygame.init()
-        pygame.display.set_caption("Gendala")
-
-        self.surf = pygame.display.set_mode(size=(width, height))
 
     def drawLine(self, line):
         self.lineBuffer.append(deepcopy(line))
