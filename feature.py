@@ -67,11 +67,9 @@ class Feature:
         for ribbon in self.ribbons:
             ribbon.render(display, width)
     
-    def getPattern(self, width) -> Pattern:
-        if self.mirrorX or self.mirrorY:
-            width *= 0.5
+    def getPattern(self) -> Pattern:
         result = Pattern()
         for ribbon in self.ribbons:
-            for line in ribbon.getPattern(width).lines:
+            for line in ribbon.getPattern().lines:
                 result.add(line)
         return result

@@ -21,8 +21,7 @@ class Layer:
         curve = Curve(Point(radius, 0), closed=True)
         curve.extend(curve.arc(Point(-radius, 0), amplitude=1, subDivs=floor(n/2)))
         curve.extend(curve.arc(Point(radius, 0), amplitude=1, subDivs=floor(n/2)))
-        self.ribbon = Ribbon(curve, pattern, closed=True, n=repeats)
-        self.width = width
+        self.ribbon = Ribbon(curve, pattern, closed=True, n=repeats, width=width)
     
     def render(self, display):
-        return self.ribbon.render(display, self.width)
+        return self.ribbon.render(display)

@@ -22,15 +22,13 @@ class Riblet():
         self.geoSpace = geoSpace
         self.pattern = pattern
 
-    def render(self, display:Display, width: float) -> None:
+    def render(self, display:Display) -> None:
         """
         Render the pattern inside this riblet
 
         Args:
             display (Display): Display to draw on
-            width (float): Y axis scaling of the pattern
         """
-        self.geoSpace.setYScale(width)
 
         display.pushGeoSpace(self.geoSpace)
 
@@ -39,8 +37,7 @@ class Riblet():
         
         display.popGeoSpace()
     
-    def getPattern(self, width) -> Pattern:
-        self.geoSpace.setYScale(width)
+    def getPattern(self) -> Pattern:
         result = Pattern()
         for line in self.pattern.lines:
             p0 = self.geoSpace.getExternalPos(line.p0)

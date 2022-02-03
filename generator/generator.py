@@ -2,7 +2,7 @@ import random
 from curve import GeometryException
 from ribbon import Ribbon
 from feature import Feature
-from generator.patternGenerators import centerLine, randomPattern
+from generator.patternGenerators import randomPattern
 from generator.curveGenerators import randomCurve
 from utility import coinFlip
 
@@ -23,6 +23,7 @@ class Generator:
     def getRibbon(self):
         closed = coinFlip()
         curve = None
+        width = random.random()*0.2
         while(True):
             curve = randomCurve(closed=closed)
             try:
@@ -38,4 +39,5 @@ class Generator:
             pattern=pattern,
             closed=closed,
             taperLength=taperLength,
+            width=width,
             n=n)

@@ -23,23 +23,27 @@ def debugRender():
     Layer(1,0.5, feature.getPattern(0.1), repeats=4).render(disp)
 
 def layers():
-    s = 0.1
-    layers = 5
-    r0 = 0.01
-    w0 = 0.1
-
+    layers = 12
+    r0 = 0.001
+    w0 = 0.08
     for i in range(layers):
-        w = w0 - 0.01
+        w = w0
         r = r0 + w + w0
-        pat = Generator().getFeature().getPattern(s)
-        l = Layer(r,w*((i%2)*2 - 1), pat, repeats=4+2**(i))
+        
+        pat = Generator().getFeature().getPattern()
+        
+        n = random.randint(1,4)
+        repeats = (i+1)*4 + n*int(i/4)
+
+        l = Layer(r,w*((i%2)*2 - 1), pat, repeats=repeats)
         l.render(disp)
+
         r0 = r
         w0 = w
 
 def main():
     disp.setAutoFlush(True)
-    disp.drawDebugGrid()
+    #disp.drawDebugGrid()
 
     if 0:
         debugRender()

@@ -1,7 +1,6 @@
 from __future__ import annotations
 from copy import deepcopy
 from math import floor
-from tracemalloc import start
 from typing import List
 from curve import Curve
 from display import Display
@@ -21,6 +20,7 @@ class Ribbon():
             curve: Curve,
             pattern: Pattern,
             closed: bool,
+            width: float,
             taperLength: float = 0,
             n: int = 1) -> None:
         """
@@ -30,16 +30,20 @@ class Ribbon():
             curve (Curve): Curve defining the shape of the ribbon
             pattern (Pattern): Pattern of the ribbon
             closed (bool): If true, endpoints are connected
+            width (float): Width of the ribbon. Defaults to 0.2.
             taperLength (float): Percentage of line length used in both ends for tapering
             n (int, optional): Number of repeated patterns. Defaults to 1.
         """
 
-        self.riblets: List[Riblet] = []
         self.curve = curve
         self.pattern = pattern
         self.closed = closed
+        self.width = width
         self.taperLength = taperLength
         self.n = n
+
+        self.riblets: List[Riblet] = []
+        
         points = curve.getPoints()
         self.taperLengthIndex = floor(taperLength * (len(points) - 1))
 
@@ -53,7 +57,7 @@ class Ribbon():
         patternScale = widthPerPattern / 2
 
         tempPattern = deepcopy(self.pattern)
-        tempPattern.repeat(n+1)
+        tempPattern.repeat(n + 1)
         tempPattern.offsetX(1)
         tempPattern.scaleX(patternScale)
 
@@ -71,7 +75,7 @@ class Ribbon():
             p4 = None
 
             startTaper = self.taperScale(i)
-            endTaper = self.taperScale(i+1)
+            endTaper = self.taperScale(i + 1)
 
             if i > 0 or closed:
                 p1 = points[i - 1]
@@ -83,12 +87,13 @@ class Ribbon():
             self.riblets.append(
                 Riblet(
                     self.createGeoSpace(
-                        p1,
-                        p2,
-                        p3,
-                        p4,
-                        startTaper,
-                        endTaper),
+                        p1=p1,
+                        p2=p2,
+                        p3=p3,
+                        p4=p4,
+                        startTaper=startTaper,
+                        endTaper=endTaper,
+                        yScale=width),
                     self.slicePattern(x0, x1, tempPattern)))
 
             x0 = x1
@@ -97,7 +102,7 @@ class Ribbon():
 
         if self.taperLengthIndex < 1 or self.closed:
             return 1
- 
+
         startTaper = index / self.taperLengthIndex
         inverseIndex = len(self.curve.getPoints()) - index - 1
         endTaper = inverseIndex / self.taperLengthIndex
@@ -126,7 +131,13 @@ class Ribbon():
             flip = GeoSpace()
             flip.scaleYBy(-1)
             flip.transform(pattern)
-        return Ribbon(curve, pattern, self.closed, self.taperLength, self.n)
+        return Ribbon(
+            curve=curve,
+            pattern=pattern,
+            closed=self.closed,
+            taperLength=self.taperLength,
+            n=self.n,
+            width=self.width)
 
     def slicePattern(
             self,
@@ -226,7 +237,8 @@ class Ribbon():
             p3: Point,
             p4: Point,
             startTaper: float,
-            endTaper: float) -> GeoSpace:
+            endTaper: float,
+            yScale: float) -> GeoSpace:
         """
         Create a geospace for line p2-p3. If p1 or p4 is not None, they define the
         respective guide angles at ends of the line p2-p3.
@@ -238,6 +250,7 @@ class Ribbon():
             p4 (Point): Next point after the line
             startTaper (float): Taper scaling at p2
             endTaper (float): Taper scaling at p3
+            yScale (float): Y scaling of the pattern
 
         Returns:
             GeoSpace: GeoSpace for line p2-p3
@@ -251,37 +264,36 @@ class Ribbon():
         if p4 is not None:
             nextAngle = p3.angleTo(p4)
 
-        startGuide = convexAngle(currentAngle, previousAngle) / 2
-        endGuide = convexAngle(currentAngle, nextAngle) / 2
+        startAngle = convexAngle(currentAngle, previousAngle) / 2
+        endAngle = convexAngle(currentAngle, nextAngle) / 2
 
-        scale = p2.distanceTo(p3) / 2
+        xScale = p2.distanceTo(p3) / 2
 
         midpoint = gradient(p2, p3, 0.5)
 
         return GeoSpace(
-            currentAngle,
-            scale,
-            1,
-            midpoint,
-            startGuide,
-            endGuide,
-            startTaper,
-            endTaper)
+            angle=currentAngle,
+            xScale=xScale,
+            yScale=yScale,
+            origin=midpoint,
+            startAngle=startAngle,
+            endAngle=endAngle,
+            startScale=startTaper,
+            endScale=endTaper)
 
-    def render(self, display: Display, width: float) -> None:
+    def render(self, display: Display) -> None:
         """
         Render a list of lines created by this ribbon
 
         Args:
             display (Display): Display to draw on
-            width (float): Width of the pattern
         """
         for riblet in self.riblets:
-            riblet.render(display, width)
+            riblet.render(display)
 
-    def getPattern(self, width) -> Pattern:
+    def getPattern(self) -> Pattern:
         result = Pattern()
         for riblet in self.riblets:
-            for line in riblet.getPattern(width).lines:
+            for line in riblet.getPattern().lines:
                 result.add(line)
         return result
