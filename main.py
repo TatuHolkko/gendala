@@ -1,5 +1,6 @@
-from math import pi
 import random
+import threading
+from math import pi
 from feature import Feature
 from layer import Layer
 from generator.generator import Generator
@@ -48,7 +49,8 @@ def main():
     if 0:
         debugRender()
     else:
-       layers()
+        renderThread = threading.Thread(target=layers, daemon=True)
+        renderThread.start()
     
     disp.eventLoop()
 
