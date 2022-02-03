@@ -62,6 +62,20 @@ def centerLine() -> Pattern:
     pattern.combine(horizontalLine(0))
     return pattern
 
+def rope() -> Pattern:
+    pattern = Pattern()
+    pattern.combine(topAndBottom())
+    line = Curve(Point(1, 1))
+    line.extend(line.line(Point(-1, -1)))
+    pattern.combine(line.getPattern())
+    line = Curve(Point(0, 1))
+    line.extend(line.line(Point(-1, 0)))
+    pattern.combine(line.getPattern())
+    line = Curve(Point(1, 0))
+    line.extend(line.line(Point(0, -1)))
+    pattern.combine(line.getPattern())
+    return pattern
+
 
 def randomPattern() -> Pattern:
     func = random.choice([topAndBottom,
