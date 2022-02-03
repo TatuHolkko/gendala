@@ -1,6 +1,7 @@
 import os                                           # nopep8
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"   # nopep8
 import pygame                                       # nopep8
+import uuid
 import random
 import threading
 from curve import Curve
@@ -24,6 +25,8 @@ class Environment():
         self.display.setAutoFlush(True)
         self.renderThread = False
         self.haltRender = False
+        self.renderingDone = False
+        self.saveQueued = False
         self.debugActive = False
 
     def debugRender(self):
@@ -31,7 +34,12 @@ class Environment():
         arcCurve.extend(arcCurve.arc(Point(1, 0), amplitude=1, subDivs=1))
 
         feature = Feature()
-        feature.add(Ribbon(arcCurve, horizontalLine(0), closed=False, width=0.1))
+        feature.add(
+            Ribbon(
+                arcCurve,
+                horizontalLine(0),
+                closed=False,
+                width=0.1))
 
         Layer(1, 0.5, feature.getPattern(), repeats=4).render(self.display)
 
@@ -52,7 +60,7 @@ class Environment():
             repeats = (i + 1) * 4 + n * int(i / 4)
 
             l = Layer(r, w * ((i % 2) * 2 - 1), pat, repeats=repeats)
-            
+
             if self.haltRender:
                 break
 
@@ -64,22 +72,34 @@ class Environment():
             r0 = r
             w0 = w
 
-    def render(self):
-        
+    def generateRenderFunction(self, renderFunction):
+
+        def rend():
+            self.renderingDone = False
+            renderFunction()
+            self.renderingDone = True
+
+        return rend
+
+    def startRender(self):
+
         self.display.clear()
 
         if self.debugActive:
             self.display.drawDebugGrid()
-            self.renderThread = threading.Thread(target=self.debugRender)
+            self.renderThread = threading.Thread(
+                target=self.generateRenderFunction(
+                    self.debugRender))
         else:
-            self.renderThread = threading.Thread(target=self.layers)
-        
+            self.renderThread = threading.Thread(
+                target=self.generateRenderFunction(self.layers))
+
         self.renderThread.start()
 
     def run(self):
-        self.render()
+        self.startRender()
         self.eventLoop()
-    
+
     def debug(self):
         self.debugActive = True
         self.run()
@@ -87,13 +107,28 @@ class Environment():
     def eventLoop(self):
         exited = False
         while not exited:
+
+            if self.saveQueued and self.renderingDone:
+                pygame.image.save(self.surf,
+                                  "results/" + str(uuid.uuid4()) + ".png")
+                self.saveQueued = False
+
             for event in pygame.event.get():
+
                 if event.type == pygame.QUIT:
+
                     exited = True
                     break
+
                 if event.type == pygame.KEYDOWN:
+
                     if event.key == pygame.K_r:
+
                         self.haltRender = True
                         self.renderThread.join()
                         self.haltRender = False
-                        self.render()
+                        self.saveQueued = False
+                        self.startRender()
+
+                    elif event.key == pygame.K_s:
+                        self.saveQueued = True
