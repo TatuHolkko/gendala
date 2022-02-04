@@ -54,18 +54,15 @@ class Feature:
         for geospace in self.geoSpaces:
             self.ribbons.append(ribbon.reshaped(geospace))
 
-    def render(self, display:Display, width:float) -> None:
+    def render(self, display:Display) -> None:
         """
         Render lines created by this feature
 
         Args:
             display (Display): Display to draw on
-            width (float): Width of the pattern
         """
-        if self.mirrorX or self.mirrorY:
-            width *= 0.5
         for ribbon in self.ribbons:
-            ribbon.render(display, width)
+            ribbon.render(display)
     
     def getPattern(self) -> Pattern:
         result = Pattern()
