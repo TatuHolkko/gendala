@@ -16,18 +16,28 @@ class Display:
         self.scale = min(self.width, self.height) / 3
         self.lineBuffer: List[Line] = []
         self.autoFlush = False
+        self.renderDisabled = False
         self.geoSpace = GeoSpace()
         self.geoSpaceStack = GeoSpaceStack()
         self.geoSpaceStack.push(self.geoSpace)
         self.color = [255, 255, 255]
 
     def drawLine(self, line):
+        if self.renderDisabled:
+            return
+
         self.lineBuffer.append(deepcopy(line))
         if self.autoFlush:
             self.flushBuffer()
 
     def setAutoFlush(self, value):
         self.autoFlush = value
+    
+    def disableRender(self):
+        self.renderDisabled = True
+    
+    def enableRender(self):
+        self.renderDisabled = False
 
     def flushBuffer(self):
         for line in self.lineBuffer:

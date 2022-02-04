@@ -107,9 +107,11 @@ class Environment():
     
     def restartRender(self):
         self.haltRender = True
+        self.display.disableRender()
         self.renderThread.join()
         if not self.exited:
             self.haltRender = False
+            self.display.enableRender()
             self.saveQueued = False
             self.startRender()
 
@@ -128,6 +130,7 @@ class Environment():
 
                     self.exited = True
                     self.haltRender = True
+                    self.display.disableRender()
                     break
 
                 if event.type == pygame.KEYDOWN:
