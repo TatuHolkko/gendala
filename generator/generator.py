@@ -39,10 +39,12 @@ class Generator:
         pattern = randomPattern()
         n = random.randint(1, 10)
         taperLength = max(0, random.random() - 0.5)
-        return Ribbon(
+        r = Ribbon(
             curve=curve,
             pattern=pattern,
             closed=closed,
             taperLength=taperLength,
             width=width,
             n=n)
+        r.unCollideWidth()
+        return r

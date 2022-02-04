@@ -280,6 +280,17 @@ class Ribbon():
             endAngle=endAngle,
             startScale=startTaper,
             endScale=endTaper)
+        
+    def unCollideWidth(self):
+        collisionWidth = self.width
+        for riblet in self.riblets:
+            collision = riblet.collisionHeight()
+            if collision != 0:
+                collisionWidth = min(collisionWidth, abs(collision))
+        if collisionWidth != self.width:
+            for riblet in self.riblets:
+                riblet.geoSpace.setYScale(collisionWidth)
+            self.width = collisionWidth
 
     def render(self, display: Display) -> None:
         """

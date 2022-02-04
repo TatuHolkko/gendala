@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import List
 from display import Display
-from geometry import Pattern
+from geometry import Pattern, Point
 from geospace import GeoSpace
 from geometry import Line
 
@@ -37,6 +37,29 @@ class Riblet():
         
         display.popGeoSpace()
     
+    def collisionHeight(self) -> float:
+        """
+        Calculate the y coordinate at which the start and end angles
+        cause a collision of points at x=1 and x=-1. If collision is
+        very far away, return 0.
+
+        Returns:
+            float: y coordinate
+        """
+        deltaY = 0.01
+        deltaThreshold = 0.001
+        tempGS = GeoSpace(startAngle=self.geoSpace.startAngle, endAngle=self.geoSpace.endAngle)
+        p1 = tempGS.getExternalPos(Point(-1,0))
+        p2 = tempGS.getExternalPos(Point(1,0))
+        d0 = p1.distanceTo(p2)
+        p1 = tempGS.getExternalPos(Point(-1,deltaY))
+        p2 = tempGS.getExternalPos(Point(1,deltaY))
+        d1 = p1.distanceTo(p2)
+        dd = d1 - d0
+        if abs(dd) < deltaThreshold:
+            return 0
+        return d0 / dd * deltaY * self.geoSpace.scale[0]
+
     def getPattern(self) -> Pattern:
         result = Pattern()
         for line in self.pattern.lines:
