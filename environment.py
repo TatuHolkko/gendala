@@ -46,11 +46,12 @@ class Environment():
 
     def layers(self):
         layers = 12
-        r0 = 0.001
+        r0 = 0.02
         w0 = 0.08
+        wp = 0
         for i in range(layers):
-            w = w0
-            r = r0 + w + w0
+            w = w0 + random.random()*0.06 - 0.03
+            r = r0 + wp + w
 
             pat = Generator().getFeature().getPattern()
 
@@ -58,7 +59,7 @@ class Environment():
                 break
 
             n = random.randint(1, 4)
-            repeats = (i + 1) * 4 + n * int(i / 4)
+            repeats = (i + 1) * 4 + n * int(i / 2)
 
             l = Layer(r, w * ((i % 2) * 2 - 1), pat, repeats=repeats)
 
@@ -71,7 +72,7 @@ class Environment():
                 break
 
             r0 = r
-            w0 = w
+            wp = w
 
     def generateRenderFunction(self, renderFunction):
 
