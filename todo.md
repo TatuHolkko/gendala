@@ -1,4 +1,6 @@
-define width at preprocessing instead of during rendering
+refactor reference passing, no line should share points
+multiple feature patterns for layer
+comments
 detail allocation points
 image saving
 if performance becomes issue, remove unneccessary deep copies
