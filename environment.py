@@ -7,7 +7,7 @@ import threading
 from curve import Curve
 from feature import Feature
 from generator.generator import Generator
-from generator.patternGenerators import horizontalLine
+from generator.patternGenerators import box, crossedBox, horizontalLine, topAndBottom
 from geometry import Point
 from layer import Layer
 from ribbon import Ribbon
@@ -31,18 +31,22 @@ class Environment():
         self.exited = False
 
     def debugRender(self):
-        arcCurve = Curve(Point(0, 0))
-        arcCurve.extend(arcCurve.arc(Point(1, 0), amplitude=1, subDivs=1))
+        arcCurve = Curve(Point(-1, 0), closed=True)
+        arcCurve.extend(arcCurve.arc(Point(1, 0),amplitude=1,subDivs=1))
+        arcCurve.extend(arcCurve.arc(Point(-1, 0),amplitude=1,subDivs=1))
 
-        feature = Feature()
-        feature.add(
-            Ribbon(
+        r = Ribbon(
                 arcCurve,
-                horizontalLine(0),
-                closed=False,
-                width=0.1))
+                topAndBottom(),
+                closed=True,
+                width=1,
+                n=4)
+        r.unCollideWidth()
+        feature = Feature()
+        feature.add(r)
 
-        Layer(1, 0.5, feature.getPattern(), repeats=4).render(self.display)
+        feature.render(self.display)
+        #Layer(1, 0.5, feature.getPattern(), repeats=4).render(self.display)
 
     def layers(self):
         layers = 12
