@@ -218,3 +218,19 @@ class GeoSpaceStack:
         for geoSpace in reversed(self.stack):
             newPos = geoSpace.getExternalPos(newPos)
         return newPos
+
+def geoSpaceBetween(p0: Point, p1: Point) -> GeoSpace:
+    """
+    Create a GeoSpace between two points
+
+    Args:
+        p0 (Point): First point
+        p1 (Point): Second point
+
+    Returns:
+        GeoSpace: GeoSpace between the points
+    """
+    scale = p0.distanceTo(p1) / 2
+    angle_ = p0.angleTo(p1)
+    midpoint = gradient(p0, p1, 0.5)
+    return GeoSpace(angle_, scale, scale, midpoint)

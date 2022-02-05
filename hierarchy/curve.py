@@ -5,7 +5,7 @@ from typing import List, Tuple
 from common.utility import clamp, gradient
 from geometry.line import Line
 from geometry.point import Point
-from geometry.geospace import GeoSpace
+from geometry.geospace import GeoSpace, geoSpaceBetween
 from geometry.utility import cornerAngle
 from hierarchy.pattern import Pattern
 
@@ -295,20 +295,3 @@ class Curve():
         if self.closed:
             result += self.points[-1].distanceTo(self.points[0])
         return result
-
-
-def geoSpaceBetween(p0: Point, p1: Point) -> GeoSpace:
-    """
-    Create a geospace between two points
-
-    Args:
-        p0 (Point): First point
-        p1 (Point): Second point
-
-    Returns:
-        GeoSpace: Geospace between the points
-    """
-    scale = p0.distanceTo(p1) / 2
-    angle_ = p0.angleTo(p1)
-    midpoint = gradient(p0, p1, 0.5)
-    return GeoSpace(angle_, scale, scale, midpoint)
