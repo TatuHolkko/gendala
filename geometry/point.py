@@ -3,7 +3,8 @@ from math import atan2, cos, hypot, sin
 
 # Float value representing radians
 Angle = float
-
+# Smallest distance allowed when detecting point location equality
+collisionThreshold = 0.01
 
 class Point:
     def __init__(self, x: float, y: float) -> None:
@@ -23,7 +24,9 @@ class Point:
         return f"({self.x:.2f},{self.y:.2f})"
 
     def __eq__(self, __o: object) -> bool:
-        return self is __o
+        if not isinstance(__o, Point):
+            return False
+        return self.distanceTo(__o) < collisionThreshold
 
     def __hash__(self) -> int:
         return int(((self.x + self.y) * (self.x + self.y + 1) / 2) + self.y)

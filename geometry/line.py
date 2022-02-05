@@ -1,10 +1,10 @@
 from geometry.point import Point
-
+from copy import deepcopy
 
 class Line:
     def __init__(self, p0: Point, p1: Point) -> None:
-        self.p0 = p0
-        self.p1 = p1
+        self.p0 = deepcopy(p0)
+        self.p1 = deepcopy(p1)
 
     def __eq__(self, __o: object) -> bool:
         if not isinstance(__o, Line):

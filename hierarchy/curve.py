@@ -9,8 +9,6 @@ from geometry.geospace import GeoSpace
 from geometry.utility import cornerAngle
 from hierarchy.pattern import Pattern
 
-# Smallest distance allowed when detecting point location equality
-collisionThreshold = 0.01
 # Smallest angle allowed when detecting too sharp angles
 parallelAngleThreshold = 20 / 360 * 2 * pi
 
@@ -49,7 +47,7 @@ class Curve():
         """
         self.points.extend(points)
         self.end = points[-1]
-        if self.end.distanceTo(self.start) < collisionThreshold:
+        if self.end == self.start:
             self.closed = True
             self.points.pop()
             self.end = self.points[-1]
@@ -177,7 +175,7 @@ class Curve():
             nextIndex = (i + 1) % len(self.points)
             p1 = self.points[i]
             p2 = self.points[nextIndex]
-            if p1.distanceTo(p2) < collisionThreshold:
+            if p1 == p2:
                 toRemove.append(nextIndex)
         for i in sorted(toRemove, reverse=True):
             self.points.pop(i)

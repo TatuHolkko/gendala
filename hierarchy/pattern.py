@@ -7,16 +7,13 @@ from copy import deepcopy
 class Pattern:
     def __init__(self) -> None:
         self.lines: set[Line] = set()
-        self.points: set[Point] = set()
         self.xMin = 0
         self.xMax = 0
         self.yMin = 0
         self.yMax = 0
 
     def add(self, line: Line) -> None:
-        self.lines.add(line)
-        self.points.add(line.p0)
-        self.points.add(line.p1)
+        self.lines.add(deepcopy(line))
         self.updateLimits(line.p0)
         self.updateLimits(line.p1)
 
@@ -31,8 +28,9 @@ class Pattern:
             self.xMin = 0
             self.yMax = 0
             self.yMin = 0
-            for point in self.points:
-                self.updateLimits(point)
+            for line in self.lines:
+                self.updateLimits(line.p0)
+                self.updateLimits(line.p1)
 
         self.xMax = max(self.xMax, point.x)
         self.xMin = min(self.xMin, point.x)
@@ -51,12 +49,14 @@ class Pattern:
         self.scaleX(scale)
 
     def offsetX(self, deltaX: float) -> None:
-        for p in self.points:
-            p.x += deltaX
+        for l in self.lines:
+            l.p0.x += deltaX
+            l.p1.x += deltaX
 
     def scaleX(self, scaleX: float) -> None:
-        for p in self.points:
-            p.x *= scaleX
+        for l in self.lines:
+            l.p0.x *= scaleX
+            l.p1.x *= scaleX
 
     def repeat(self, n: int) -> None:
         width = 2
