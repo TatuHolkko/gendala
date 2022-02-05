@@ -3,8 +3,9 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"   # nopep8
 import pygame                                       # nopep8
 from copy import deepcopy
 from typing import List
-from geospace import GeoSpace, GeoSpaceStack
-from geometry import Line, Point
+from geometry.geospace import GeoSpace, GeoSpaceStack
+from geometry.line import Line
+from geometry.point import Point
 
 
 class Display:
@@ -32,10 +33,10 @@ class Display:
 
     def setAutoFlush(self, value):
         self.autoFlush = value
-    
+
     def disableRender(self):
         self.renderDisabled = True
-    
+
     def enableRender(self):
         self.renderDisabled = False
 
@@ -54,10 +55,10 @@ class Display:
                  round(self.height / 2 - pos1.y * self.scale)))
         self.lineBuffer = []
         pygame.display.update()
-    
+
     def clear(self):
         self.lineBuffer = []
-        self.surf.fill((0,0,0))
+        self.surf.fill((0, 0, 0))
         pygame.display.update()
 
     def setColor(self, r, g, b):

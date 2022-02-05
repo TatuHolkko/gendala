@@ -1,9 +1,8 @@
-from copy import deepcopy
-from typing import List
-from display import Display
-from geometry import Pattern, Point
-from geospace import GeoSpace
-from geometry import Line
+from system.display import Display
+from geometry.point import Point
+from geometry.line import Line
+from geometry.geospace import GeoSpace
+from hierarchy.pattern import Pattern
 
 
 class Riblet():
@@ -22,7 +21,7 @@ class Riblet():
         self.geoSpace = geoSpace
         self.pattern = pattern
 
-    def render(self, display:Display) -> None:
+    def render(self, display: Display) -> None:
         """
         Render the pattern inside this riblet
 
@@ -34,9 +33,9 @@ class Riblet():
 
         for line in self.pattern.lines:
             display.drawLine(line)
-        
+
         display.popGeoSpace()
-    
+
     def collisionHeight(self) -> float:
         """
         Calculate the y coordinate at which the start and end angles
@@ -48,12 +47,14 @@ class Riblet():
         """
         deltaY = 0.01
         deltaThreshold = 0.001
-        tempGS = GeoSpace(startAngle=self.geoSpace.startAngle, endAngle=self.geoSpace.endAngle)
-        p1 = tempGS.getExternalPos(Point(-1,0))
-        p2 = tempGS.getExternalPos(Point(1,0))
+        tempGS = GeoSpace(
+            startAngle=self.geoSpace.startAngle,
+            endAngle=self.geoSpace.endAngle)
+        p1 = tempGS.getExternalPos(Point(-1, 0))
+        p2 = tempGS.getExternalPos(Point(1, 0))
         d0 = p1.distanceTo(p2)
-        p1 = tempGS.getExternalPos(Point(-1,deltaY))
-        p2 = tempGS.getExternalPos(Point(1,deltaY))
+        p1 = tempGS.getExternalPos(Point(-1, deltaY))
+        p2 = tempGS.getExternalPos(Point(1, deltaY))
         d1 = p1.distanceTo(p2)
         dd = d1 - d0
         if abs(dd) < deltaThreshold:
@@ -65,5 +66,5 @@ class Riblet():
         for line in self.pattern.lines:
             p0 = self.geoSpace.getExternalPos(line.p0)
             p1 = self.geoSpace.getExternalPos(line.p1)
-            result.add(Line(p0,p1))
+            result.add(Line(p0, p1))
         return result

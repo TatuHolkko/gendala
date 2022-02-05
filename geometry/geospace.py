@@ -1,10 +1,12 @@
 from __future__ import annotations
-from dis import dis
 from multipledispatch import dispatch
 from copy import deepcopy
 import math
-from utility import clamp, gradient
-from geometry import Angle, Line, Pattern, Point, convexAngle
+from common.utility import clamp, gradient
+from geometry.point import Point
+from geometry.line import Line
+from geometry.utility import Angle, convexAngle
+from hierarchy.pattern import Pattern
 from typing import List
 
 
@@ -118,7 +120,7 @@ class GeoSpace:
         """
         pos_ = Point(pos.x * self.scale[0], pos.y * self.scale[1])
         self.applyPerspective(pos_)
-        pos_ = pos_.rotate(Point(0, 0), self.angle)
+        pos_ = pos_.rotated(Point(0, 0), self.angle)
         pos_.x += self.origin.x
         pos_.y += self.origin.y
         return pos_
@@ -133,7 +135,8 @@ class GeoSpace:
         s = (point.x / self.scale[0] + 1) / 2
         yScale = gradient(self.startScale, self.endScale, s)
         angle = self.angleGradient(self.startAngle, self.endAngle, s)
-        point.x = point.x + clamp(yScale * point.y * -math.tan(angle), -100, 100)
+        point.x = point.x + \
+            clamp(yScale * point.y * -math.tan(angle), -100, 100)
         point.y *= yScale
 
     @staticmethod

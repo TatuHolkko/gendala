@@ -1,11 +1,11 @@
 import random
-from curve import Curve, GeometryException
-from geometry import Point
-from ribbon import Ribbon
-from feature import Feature
-from generator.patternGenerators import centerLine, randomPattern
-from generator.curveGenerators import randomCurve
-from utility import coinFlip
+from hierarchy.curve import Curve, GeometryException
+from hierarchy.ribbon import Ribbon
+from hierarchy.feature import Feature
+from geometry.point import Point
+from generation.pattern import centerLine, randomPattern
+from generation.curve import randomCurve
+from common.utility import coinFlip
 
 
 class Generator:
@@ -15,20 +15,24 @@ class Generator:
 
     def getFeature(self):
         feature = Feature(mirrorY=coinFlip(), mirrorX=coinFlip())
-        n = random.choice([1,1,2])
+        n = random.choice([1, 1, 2])
         for _ in range(n):
             feature.add(self.getRibbon())
         if coinFlip() or coinFlip():
-            line = Curve(Point(-1,1))
-            line.extend(line.line(Point(1,1)))
-            feature.add(Ribbon(curve=line, pattern=centerLine(), closed=False, width=1))
+            line = Curve(Point(-1, 1))
+            line.extend(line.line(Point(1, 1)))
+            feature.add(
+                Ribbon(
+                    curve=line,
+                    pattern=centerLine(),
+                    closed=False,
+                    width=1))
         return feature
-
 
     def getRibbon(self):
         closed = coinFlip()
         curve = None
-        width = random.random()*0.2
+        width = random.random() * 0.2
         while(True):
             curve = randomCurve(closed=closed)
             try:

@@ -1,6 +1,7 @@
 import random
-from curve import Curve
-from geometry import Pattern, Point
+from geometry.point import Point
+from hierarchy.curve import Curve
+from hierarchy.pattern import Pattern
 
 
 def verticalLine(x=0) -> Pattern:
@@ -57,10 +58,12 @@ def crossedBox() -> Pattern:
     pattern.combine(diagonal(flipped=True))
     return pattern
 
+
 def centerLine() -> Pattern:
     pattern = Pattern()
     pattern.combine(horizontalLine(0))
     return pattern
+
 
 def rope() -> Pattern:
     pattern = Pattern()

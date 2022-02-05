@@ -5,7 +5,7 @@
            "name": "Python: Current File",
            "type": "python",
            "request": "launch",
-           "program": "${workspaceRoot}\\main.py",
+           "program": "${workspaceRoot}\\common\\main.py",
            "console": "integratedTerminal",
            "env": { "PYTHONPATH": "${workspaceRoot}"}
         }

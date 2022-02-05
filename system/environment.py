@@ -4,15 +4,14 @@ import pygame                                       # nopep8
 import uuid
 import random
 import threading
-from curve import Curve
-from feature import Feature
-from generator.generator import Generator
-from generator.patternGenerators import box, crossedBox, horizontalLine, topAndBottom
-from geometry import Point
-from layer import Layer
-from ribbon import Ribbon
-
-from display import Display
+from geometry.point import Point
+from hierarchy.curve import Curve
+from hierarchy.ribbon import Ribbon
+from hierarchy.layer import Layer
+from hierarchy.feature import Feature
+from generation.pattern import box, crossedBox, horizontalLine, topAndBottom
+from generation.generator import Generator
+from system.display import Display
 
 
 class Environment():
@@ -32,15 +31,15 @@ class Environment():
 
     def debugRender(self):
         arcCurve = Curve(Point(-1, 0), closed=True)
-        arcCurve.extend(arcCurve.arc(Point(1, 0),amplitude=1,subDivs=1))
-        arcCurve.extend(arcCurve.arc(Point(-1, 0),amplitude=1,subDivs=1))
+        arcCurve.extend(arcCurve.arc(Point(1, 0), amplitude=1, subDivs=1))
+        arcCurve.extend(arcCurve.arc(Point(-1, 0), amplitude=1, subDivs=1))
 
         r = Ribbon(
-                arcCurve,
-                topAndBottom(),
-                closed=True,
-                width=1,
-                n=4)
+            arcCurve,
+            topAndBottom(),
+            closed=True,
+            width=1,
+            n=4)
         r.unCollideWidth()
         feature = Feature()
         feature.add(r)
@@ -54,7 +53,7 @@ class Environment():
         w0 = 0.08
         wp = 0
         for i in range(layers):
-            w = w0 + random.random()*0.06 - 0.03
+            w = w0 + random.random() * 0.06 - 0.03
             r = r0 + wp + w
 
             pat = Generator().getFeature().getPattern()
@@ -109,7 +108,7 @@ class Environment():
     def debug(self):
         self.debugActive = True
         self.run()
-    
+
     def restartRender(self):
         self.haltRender = True
         self.display.disableRender()
@@ -121,12 +120,12 @@ class Environment():
             self.startRender()
 
     def eventLoop(self):
-        
+
         while not self.exited:
 
             if self.saveQueued and self.renderingDone:
                 pygame.image.save(self.surf,
-                                  "results/" + str(uuid.uuid4()) + ".png")
+                                  "../results/" + str(uuid.uuid4()) + ".png")
                 self.saveQueued = False
 
             for event in pygame.event.get():

@@ -2,9 +2,12 @@
 from copy import deepcopy
 from math import atan, pi, sin, tan
 from typing import List, Tuple
-from utility import clamp, gradient
-from geometry import Line, Pattern, Point, cornerAngle
-from geospace import GeoSpace
+from common.utility import clamp, gradient
+from geometry.line import Line
+from geometry.point import Point
+from geometry.geospace import GeoSpace
+from geometry.utility import cornerAngle
+from hierarchy.pattern import Pattern
 
 # Smallest distance allowed when detecting point location equality
 collisionThreshold = 0.01
@@ -269,7 +272,7 @@ class Curve():
             p = (i + 1) / (subDivs + 1)
             phi = (1 - p) * omega
 
-            subDivPoint = Point(1, 0).rotate(pivot, phi)
+            subDivPoint = Point(1, 0).rotated(pivot, phi)
             gspace.transform(subDivPoint)
             result.append(subDivPoint)
 

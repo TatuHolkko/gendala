@@ -2,12 +2,15 @@ from __future__ import annotations
 from copy import deepcopy
 from math import floor
 from typing import List
-from curve import Curve
-from display import Display
-from geospace import GeoSpace
-from riblet import Riblet
-from geometry import Line, Pattern, Point, convexAngle
-from utility import clamp, gradient
+from common.utility import clamp, gradient
+from geometry.utility import convexAngle
+from geometry.point import Point
+from geometry.line import Line
+from geometry.geospace import GeoSpace
+from hierarchy.pattern import Pattern
+from hierarchy.curve import Curve
+from hierarchy.riblet import Riblet
+from system.display import Display
 
 
 class Ribbon():
@@ -43,7 +46,7 @@ class Ribbon():
         self.n = n
 
         self.riblets: List[Riblet] = []
-        
+
         points = curve.getPoints()
         self.taperLengthIndex = floor(taperLength * (len(points) - 1))
 
@@ -280,7 +283,7 @@ class Ribbon():
             endAngle=endAngle,
             startScale=startTaper,
             endScale=endTaper)
-        
+
     def unCollideWidth(self):
         collisionWidth = self.width
         for riblet in self.riblets:
