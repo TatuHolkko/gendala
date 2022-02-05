@@ -9,7 +9,7 @@ from hierarchy.curve import Curve
 from hierarchy.ribbon import Ribbon
 from hierarchy.layer import Layer
 from hierarchy.feature import Feature
-from generation.pattern import box, crossedBox, horizontalLine, topAndBottom
+from generation.pattern import box, centerLine, crossedBox, horizontalLine, topAndBottom
 from generation.generator import Generator
 from system.display import Display
 
@@ -30,21 +30,23 @@ class Environment():
         self.exited = False
 
     def debugRender(self):
-        arcCurve = Curve(Point(-1, 0), closed=True)
-        arcCurve.extend(arcCurve.arc(Point(1, 0), amplitude=1, subDivs=1))
-        arcCurve.extend(arcCurve.arc(Point(-1, 0), amplitude=1, subDivs=1))
+        closed = False
+        arcCurve = Curve(Point(-1, 0), closed=closed)
+        arcCurve.extend(arcCurve.arc(Point(1, 0), amplitude=0, subDivs=1))
+        #arcCurve.extend(arcCurve.arc(Point(-1, 0), amplitude=1, subDivs=1))
 
         r = Ribbon(
             arcCurve,
-            topAndBottom(),
-            closed=True,
-            width=1,
+            centerLine(),
+            closed=closed,
+            width=0.3,
             n=4)
-        r.unCollideWidth()
-        feature = Feature()
-        feature.add(r)
+        #r.unCollideWidth()
+        r.render(self.display)
+        #feature = Feature()
+        #feature.add(r)
+        #feature.render(self.display)
 
-        feature.render(self.display)
         #Layer(1, 0.5, feature.getPattern(), repeats=4).render(self.display)
 
     def layers(self):
