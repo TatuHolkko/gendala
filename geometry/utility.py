@@ -1,7 +1,14 @@
+from typing import List
 from geometry.point import Point
 from math import pi
 
 Angle = float
+
+def avgPoint(points:List[Point]) -> Point:
+    p = Point(0,0)
+    for point in points:
+        p = p + point
+    return p * (1 / len(points))
 
 def deg(a: Angle) -> float:
     """
