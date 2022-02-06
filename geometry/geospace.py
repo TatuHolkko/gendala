@@ -160,6 +160,12 @@ class GeoSpace:
 
     @dispatch(Pattern)
     def transform(self, pattern: Pattern) -> None:
+        """
+        Apply this GeoSpace to the given pattern
+
+        Args:
+            pattern (Pattern): Pattern to transform
+        """
         points = set()
         for line in pattern.lines:
             points.add(line.p0)
@@ -169,12 +175,24 @@ class GeoSpace:
 
     @dispatch(Line)
     def transform(self, line: Line) -> None:
+        """
+        Apply this GeoSpace to the given line
+
+        Args:
+            line (Line): Line to transform
+        """
         self.transform(line.p0)
         if line.p0 is not line.p1:
             self.transform(line.p1)
 
     @dispatch(Point)
     def transform(self, point: Point) -> None:
+        """
+        Apply this GeoSpace to the given point
+
+        Args:
+            point (Point): Point to transform
+        """
         newPoint = self.getExternalPos(point)
         point.x = newPoint.x
         point.y = newPoint.y
@@ -182,7 +200,7 @@ class GeoSpace:
 
 class GeoSpaceStack:
     """
-    Coordinate space stack. Uses a reference to a coordinate space to create deep copies of it into a stack
+    Coordinate space stack.
     """
 
     def __init__(self):
@@ -197,10 +215,12 @@ class GeoSpaceStack:
         """
         self.stack.append(deepcopy(geoSpace))
 
-    def pop(self):
+    def pop(self) -> GeoSpace:
         """
-        Pop the last coordinate space in stack
-        :return: Coordinatespace
+        Return the top GeoSpace and remove it from the stack
+
+        Returns:
+            GeoSpace: Top most GeoSpace
         """
         return self.stack.pop()
 

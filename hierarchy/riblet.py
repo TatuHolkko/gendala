@@ -7,7 +7,7 @@ from hierarchy.pattern import Pattern
 
 class Riblet():
     """
-    Riblet contains a pattern and a geospace.
+    Riblet is a piece of Ribbon that contains a Pattern and a GeoSpace.
     """
 
     def __init__(self, geoSpace: GeoSpace, pattern: Pattern) -> None:
@@ -62,6 +62,12 @@ class Riblet():
         return d0 / dd * deltaY * self.geoSpace.scale[0]
 
     def getPattern(self) -> Pattern:
+        """
+        Create a pattern from this Riblet
+
+        Returns:
+            Pattern: Pattern from this Riblet
+        """
         result = Pattern()
         for line in self.pattern.lines:
             p0 = self.geoSpace.getExternalPos(line.p0)

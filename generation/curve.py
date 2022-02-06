@@ -7,7 +7,13 @@ from typing import List
 edgePadding = 0.1
 
 
-def randomPoint():
+def randomPoint() -> Point:
+    """
+    Return a random point inside the unit square.
+
+    Returns:
+        Point: Point inside the unit square
+    """
     x = random.random() * 2 - 1
     y = random.random() * 2 - 1
     x *= 1 - edgePadding
@@ -15,11 +21,23 @@ def randomPoint():
     return Point(x, y)
 
 
-def randomCoordinate():
+def randomCoordinate() -> float:
+    """
+    Return a random coordinate between -1 and 1
+
+    Returns:
+        float: The coordinate
+    """
     return (random.random() * 2 - 1) * (1 - edgePadding)
 
 
 def getPoints() -> List[Point]:
+    """
+    Generate a random set of points
+
+    Returns:
+        List[Point]: A random set of points
+    """
     points = []
     continuous = coinFlip()
     edgeY = randomCoordinate()
@@ -44,7 +62,15 @@ def getPoints() -> List[Point]:
     return points
 
 
-def extend(curve: Curve, point: Point) -> List[Point]:
+def extend(curve: Curve, point: Point) -> None:
+    """
+    Extend the given curve to the given point using a random
+    curve function.
+
+    Args:
+        curve (Curve): Curve to extend
+        point (Point): New endpoint
+    """
     subDivs = random.randint(1, 9)
     curveType = random.choice(["sine", "arc", "line"])
     if curveType == "sine":
@@ -67,6 +93,15 @@ def extend(curve: Curve, point: Point) -> List[Point]:
 
 
 def randomCurve(closed=False) -> Curve:
+    """
+    Generate a random curve
+
+    Args:
+        closed (bool, optional): Wether to close the curve. Defaults to False.
+
+    Returns:
+        Curve: A random Curve
+    """
     points = getPoints()
     curve = Curve(points[0], closed=closed)
     for point in points[1:]:

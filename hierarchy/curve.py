@@ -40,7 +40,9 @@ class Curve():
 
     def extend(self, points: List[Point]) -> None:
         """
-        Add a list of points to the curve
+        Add a list of points to the curve. If last given point
+        equals the current starting point, self.closed is set to
+        True.
 
         Args:
             points (List[Point]): Points to add
@@ -63,7 +65,8 @@ class Curve():
 
     def getPattern(self) -> Pattern:
         """
-        Create Pattern from this curve
+        Create Pattern from this curve by connecting
+        adjacent points.
 
         Returns:
             Pattern: Pattern from points of this curve
@@ -82,7 +85,7 @@ class Curve():
         Get a list of indices of points, which cause a sharp corner in the curve
 
         Args:
-            minAngle (float): Minimum angle between adjacent lines
+            minAngle (float): Minimum inner angle between adjacent lines
 
         Returns:
             List[int]: Indices of the sharp corners
@@ -117,15 +120,12 @@ class Curve():
 
     def round(self, minAngle: float = pi / 2) -> None:
         """
-        Replace sharp corners with pairs of less sharp corners
+        Remove sharp corners.
 
-        If an angle between adjacent lines is smaller than minAngle, it is considered sharp.
-        Points at sharp corners are removed from the curve, and replaced with two points, which
-        are placed along the lines of the corner. If the resulting two shallower angles are still
-        sharp, the process is repeated.
+        Corners are either removed or replaced with two less sharp corners.
 
         Args:
-            minAngle (float, optional): Minimum angle between adjacent lines. Defaults to pi/2.
+            minAngle (float, optional): Minimum inner angle between adjacent lines. Defaults to pi/2.
         """
         pointsToRound = self.sharpCorners(minAngle)
         while pointsToRound:
@@ -167,7 +167,10 @@ class Curve():
         rounded2 = gradient(p2, p3, 0.3 * (d / d2))
         return (rounded1, rounded2)
 
-    def removeDuplicates(self):
+    def removeDuplicates(self) -> None:
+        """
+        Remove adjacent points that are too close to each other.
+        """
         toRemove: List[int] = []
         for i in range(len(self.points)):
             if i == len(self.points) - 1 and not self.closed:
@@ -289,6 +292,12 @@ class Curve():
 
 
     def length(self) -> float:
+        """
+        Get the lenght of this curve
+
+        Returns:
+            float: Lenght of this curve
+        """
         result = 0
         for i in range(len(self.points) - 1):
             result += self.points[i].distanceTo(self.points[i + 1])

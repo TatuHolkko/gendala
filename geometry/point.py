@@ -7,6 +7,9 @@ Angle = float
 collisionThreshold = 0.01
 
 class Point:
+    """
+    A simple object describing two coordinate in a cartesian coordinate system
+    """
     def __init__(self, x: float, y: float) -> None:
         self.x = x
         self.y = y
@@ -40,6 +43,16 @@ class Point:
         return hypot(d.x, d.y)
 
     def rotated(self, pivot: Point, angle: Angle) -> Point:
+        """
+        Return a rotated copy of this point
+
+        Args:
+            pivot (Point): Center of rotation
+            angle (Angle): Angle to rotate
+
+        Returns:
+            Point: Rotated point
+        """
         s = sin(angle)
         c = cos(angle)
         xr = c * (self.x - pivot.x) - s * (self.y - pivot.y) + pivot.x

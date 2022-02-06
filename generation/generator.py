@@ -9,11 +9,20 @@ from common.utility import coinFlip
 
 
 class Generator:
+    """
+    Object for generating random hierarchy structures
+    """
 
     def __init__(self) -> None:
         pass
 
-    def getFeature(self):
+    def getFeature(self) -> Feature:
+        """
+        Generate a random Feature
+
+        Returns:
+            Feature: A random Feature
+        """
         feature = Feature(mirrorY=coinFlip(), mirrorX=coinFlip())
         n = random.choice([1, 1, 2])
         for _ in range(n):
@@ -29,7 +38,13 @@ class Generator:
                     width=1))
         return feature
 
-    def getRibbon(self):
+    def getRibbon(self) -> Ribbon:
+        """
+        Generate a random Ribbon
+
+        Returns:
+            Ribbon: A random Ribbon
+        """
         closed = coinFlip()
         curve = None
         width = random.random() * 0.2

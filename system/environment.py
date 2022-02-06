@@ -15,7 +15,9 @@ from system.display import Display
 
 
 class Environment():
-
+    """
+    Environment controls the user input and rendering control
+    """
     def __init__(self) -> None:
         pygame.init()
         pygame.display.set_caption("Gendala")
@@ -30,6 +32,9 @@ class Environment():
         self.exited = False
 
     def debugRender(self):
+        """
+        Drawign function for debugging
+        """
         closed = False
         arcCurve = Curve(Point(-1, 0), closed=closed)
         arcCurve.extend(arcCurve.arc(Point(1, 0), amplitude=0, subDivs=1))
@@ -50,6 +55,9 @@ class Environment():
         #Layer(1, 0.5, feature.getPattern(), repeats=4).render(self.display)
 
     def layers(self):
+        """
+        Generate and render a set of layers
+        """
         layers = 12
         r0 = 0.02
         w0 = 0.08
@@ -80,7 +88,15 @@ class Environment():
             wp = w
 
     def generateRenderFunction(self, renderFunction):
+        """
+        Generate a function for rendering thread
 
+        Args:
+            renderFunction (function): function that renders everything
+        
+        Return:
+            function: a function to be given for the rendering thread
+        """
         def rend():
             self.renderingDone = False
             renderFunction()
@@ -89,7 +105,9 @@ class Environment():
         return rend
 
     def startRender(self):
-
+        """
+        Start the rendering thread
+        """
         self.display.clear()
 
         if self.debugActive:
@@ -104,14 +122,23 @@ class Environment():
         self.renderThread.start()
 
     def run(self):
+        """
+        Start the event loop
+        """
         self.startRender()
         self.eventLoop()
 
     def debug(self):
+        """
+        Start the event loop with debug rendering
+        """
         self.debugActive = True
         self.run()
 
     def restartRender(self):
+        """
+        Clear the screen and start rendering a new set of layers
+        """
         self.haltRender = True
         self.display.disableRender()
         self.renderThread.join()
@@ -122,7 +149,9 @@ class Environment():
             self.startRender()
 
     def eventLoop(self):
-
+        """
+        Blocking event loop
+        """
         while not self.exited:
 
             if self.saveQueued and self.renderingDone:

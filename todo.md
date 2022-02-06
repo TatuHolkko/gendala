@@ -1,4 +1,4 @@
-refactor reference passing, no line should share points
+refactor private variable usage
 multiple feature patterns for layer
 comments
 detail allocation points

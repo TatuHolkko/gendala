@@ -102,6 +102,15 @@ class Ribbon():
             x0 = x1
 
     def taperScale(self, index: int) -> float:
+        """
+        Get taper scale for a Point at the given index.
+
+        Args:
+            index (int): Index of the Point.
+
+        Returns:
+            float: Taper scale
+        """
 
         if self.taperLengthIndex < 1 or self.closed:
             return 1
@@ -285,6 +294,10 @@ class Ribbon():
             endScale=endTaper)
 
     def unCollideWidth(self):
+        """
+        Adjust width of the Ribbon so that the pattern does not
+        ovelap in tight corners.
+        """
         collisionWidth = self.width
         for riblet in self.riblets:
             collision = riblet.collisionHeight()
@@ -297,7 +310,7 @@ class Ribbon():
 
     def render(self, display: Display) -> None:
         """
-        Render a list of lines created by this ribbon
+        Render the Ribbon
 
         Args:
             display (Display): Display to draw on
@@ -306,6 +319,12 @@ class Ribbon():
             riblet.render(display)
 
     def getPattern(self) -> Pattern:
+        """
+        Create a pattern from this Ribbon
+
+        Returns:
+            Pattern: Pattern from this Ribbon
+        """
         result = Pattern()
         for riblet in self.riblets:
             for line in riblet.getPattern().lines:

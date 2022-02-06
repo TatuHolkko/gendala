@@ -7,6 +7,9 @@ from hierarchy.ribbon import Ribbon
 
 
 class Layer:
+    """
+    Layer is a circular ribbon centered at the origin.
+    """
 
     def __init__(
             self,
@@ -14,6 +17,15 @@ class Layer:
             width: float,
             pattern: Pattern,
             repeats: int = None) -> None:
+        """
+        Initialize the layer
+
+        Args:
+            radius (float): Radius of the centerline of the layer
+            width (float): Width of the layer
+            pattern (Pattern): Pattern of the layer
+            repeats (int, optional): Number of repeated patterns in the layer. Defaults to None.
+        """
 
         if repeats is None:
             repeats = int(4 + 16 * radius)
@@ -33,5 +45,11 @@ class Layer:
             n=repeats,
             width=width)
 
-    def render(self, display):
+    def render(self, display) -> None:
+        """
+        Render the Layer
+
+        Args:
+            display (Display): Display to draw on
+        """
         return self.ribbon.render(display)

@@ -3,8 +3,16 @@ from math import pi
 
 Angle = float
 
-
 def deg(a: Angle) -> float:
+    """
+    Convert radians to degrees
+
+    Args:
+        a (Angle): Angle in radians
+
+    Returns:
+        float: Angle in degrees
+    """
     return a * 180 / pi
 
 

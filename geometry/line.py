@@ -2,6 +2,9 @@ from geometry.point import Point
 from copy import deepcopy
 
 class Line:
+    """
+    A simple object describing two points
+    """
     def __init__(self, p0: Point, p1: Point) -> None:
         self.p0 = deepcopy(p0)
         self.p1 = deepcopy(p1)

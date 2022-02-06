@@ -65,7 +65,7 @@ class Feature:
 
     def render(self, display: Display) -> None:
         """
-        Render lines created by this feature
+        Render the Feature
 
         Args:
             display (Display): Display to draw on
@@ -74,6 +74,12 @@ class Feature:
             ribbon.render(display)
 
     def getPattern(self) -> Pattern:
+        """
+        Create a pattern from this Feature
+
+        Returns:
+            Pattern: Pattern from this Feature
+        """
         result = Pattern()
         for ribbon in self.ribbons:
             for line in ribbon.getPattern().lines:
