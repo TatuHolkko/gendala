@@ -10,6 +10,8 @@ from generation.pattern import centerLine, randomPattern
 from generation.curve import randomCurve
 from common.utility import coinFlip, gradient
 
+minWidth = 0.002
+
 
 class Generator:
     """
@@ -17,20 +19,23 @@ class Generator:
     """
 
     def __init__(self) -> None:
-        pass
+        self.scale = 1
 
-    def fillScore(self, ribbon:Ribbon):
+    def setScale(self, factor: float) -> None:
+        self.scale = factor
+
+    def fillScore(self, ribbon: Ribbon):
         pattern = ribbon.getPattern()
-        midpoints:List[Point] = []
-        endpoints:List[Point] = []
+        midpoints: List[Point] = []
+        endpoints: List[Point] = []
         for line in pattern.lines:
             midpoints.append(gradient(line.p0, line.p1, 0.5))
             endpoints.append(line.p0)
             endpoints.append(line.p1)
         midpointAvg = avgPoint(midpoints)
-        avgRadius = sum([midpointAvg.distanceTo(p) for p in endpoints]) / len(endpoints)
-        return 4 / pi*avgRadius**2
-        
+        avgRadius = sum([midpointAvg.distanceTo(p)
+                        for p in endpoints]) / len(endpoints)
+        return 4 / pi * avgRadius**2
 
     def getFeature(self) -> Feature:
         """
@@ -65,7 +70,7 @@ class Generator:
         while(True):
             closed = coinFlip()
             curve = None
-            width = random.random() * 0.2
+            width = random.random() * 0.3
             while(True):
                 curve = randomCurve(closed=closed)
                 try:
@@ -84,6 +89,14 @@ class Generator:
                 width=width,
                 n=n)
             r.unCollideWidth()
+            if r.width * self.scale < minWidth:
+                r = Ribbon(
+                    curve=curve,
+                    pattern=centerLine(),
+                    closed=closed,
+                    taperLength=taperLength,
+                    width=0,
+                    n=n)
             if self.fillScore(r) > 0.5:
                 break
         return r

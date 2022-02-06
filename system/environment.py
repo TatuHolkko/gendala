@@ -66,11 +66,12 @@ class Environment():
         r0 = 0.02
         w0 = 0.08
         wp = 0
+        g = Generator()
         for i in range(layers):
             w = w0 + random.random() * 0.06 - 0.03
-            r = r0 + wp + w
-
-            pat = Generator().getFeature().getPattern()
+            width = w * ((i % 2) * 2 - 1)
+            g.setScale(w)
+            pat = g.getFeature().getPattern()
 
             if self.restartEvent.active:
                 break
@@ -78,7 +79,9 @@ class Environment():
             n = random.randint(1, 4)
             repeats = (i + 1) * 4 + n * int(i / 2)
 
-            l = Layer(r, w * ((i % 2) * 2 - 1), pat, repeats=repeats)
+
+            r = r0 + wp + w
+            l = Layer(r, width, pat, repeats=repeats)
 
             if self.restartEvent.active:
                 break
