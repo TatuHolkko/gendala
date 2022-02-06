@@ -35,7 +35,7 @@ class Generator:
         midpointAvg = avgPoint(midpoints)
         avgRadius = sum([midpointAvg.distanceTo(p)
                         for p in endpoints]) / len(endpoints)
-        return 4 / pi * avgRadius**2
+        return (4 / pi * avgRadius**2) - abs(midpointAvg.y)/3
 
     def getFeature(self) -> Feature:
         """
