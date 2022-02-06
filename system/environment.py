@@ -13,6 +13,10 @@ from generation.pattern import box, centerLine, crossedBox, horizontalLine, topA
 from generation.generator import Generator
 from system.display import Display
 
+class Event():
+    def __init__(self) -> None:
+        self.queued = False
+        self.active = False
 
 class Environment():
     """
@@ -22,19 +26,19 @@ class Environment():
         pygame.init()
         pygame.display.set_caption("Gendala")
         self.surf = pygame.display.set_mode(size=(1000, 1000))
-        self.display = Display(self.surf)
-        self.display.setAutoFlush(True)
-        self.renderThread = False
-        self.haltRender = False
-        self.renderingDone = False
-        self.saveQueued = False
+        self.display = Display(self.surf, autoFlush=True)
+        self.renderThread = None
         self.debugActive = False
         self.exited = False
+        self.renderingEvent = Event()
+        self.saveEvent = Event()
+        self.restartEvent = Event()
 
     def debugRender(self):
         """
         Drawign function for debugging
         """
+        self.display.drawDebugGrid()
         closed = False
         arcCurve = Curve(Point(-1, 0), closed=closed)
         arcCurve.extend(arcCurve.arc(Point(1, 0), amplitude=0, subDivs=1))
@@ -68,7 +72,7 @@ class Environment():
 
             pat = Generator().getFeature().getPattern()
 
-            if self.haltRender:
+            if self.restartEvent.active:
                 break
 
             n = random.randint(1, 4)
@@ -76,12 +80,12 @@ class Environment():
 
             l = Layer(r, w * ((i % 2) * 2 - 1), pat, repeats=repeats)
 
-            if self.haltRender:
+            if self.restartEvent.active:
                 break
 
             l.render(self.display)
 
-            if self.haltRender:
+            if self.restartEvent.active:
                 break
 
             r0 = r
@@ -98,9 +102,10 @@ class Environment():
             function: a function to be given for the rendering thread
         """
         def rend():
-            self.renderingDone = False
+            self.renderingEvent.active = True
+            self.display.clear()
             renderFunction()
-            self.renderingDone = True
+            self.renderingEvent.active = False
 
         return rend
 
@@ -108,10 +113,7 @@ class Environment():
         """
         Start the rendering thread
         """
-        self.display.clear()
-
         if self.debugActive:
-            self.display.drawDebugGrid()
             self.renderThread = threading.Thread(
                 target=self.generateRenderFunction(
                     self.debugRender))
@@ -139,14 +141,16 @@ class Environment():
         """
         Clear the screen and start rendering a new set of layers
         """
-        self.haltRender = True
+        self.restartEvent.queued = True
+        self.restartEvent.active = True
         self.display.disableRender()
         self.renderThread.join()
         if not self.exited:
-            self.haltRender = False
+            self.restartEvent.active = False
             self.display.enableRender()
-            self.saveQueued = False
+            self.saveEvent.queued = False
             self.startRender()
+            self.restartEvent.queued = False
 
     def eventLoop(self):
         """
@@ -154,25 +158,29 @@ class Environment():
         """
         while not self.exited:
 
-            if self.saveQueued and self.renderingDone:
+            if self.saveEvent.queued and not self.saveEvent.active and not self.renderingEvent.active:
+                self.saveEvent.active = True
                 pygame.image.save(self.surf,
                                   "../results/" + str(uuid.uuid4()) + ".png")
-                self.saveQueued = False
+                self.saveEvent.active = False
+                self.saveEvent.queued = False
 
             for event in pygame.event.get():
 
                 if event.type == pygame.QUIT:
 
                     self.exited = True
-                    self.haltRender = True
+                    self.restartEvent.active = True
                     self.display.disableRender()
                     break
 
                 if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_r:
-                        thread = threading.Thread(target=self.restartRender)
-                        thread.start()
+                        if not self.restartEvent.queued:
+                            thread = threading.Thread(target=self.restartRender)
+                            thread.start()
 
                     elif event.key == pygame.K_s:
-                        self.saveQueued = True
+                        if not self.saveEvent.queued:
+                            self.saveEvent.queued = True
