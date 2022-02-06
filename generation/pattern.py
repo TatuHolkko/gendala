@@ -64,6 +64,12 @@ def centerLine() -> Pattern:
     pattern.combine(horizontalLine(0))
     return pattern
 
+def zed() -> Pattern:
+    pattern = Pattern()
+    pattern.combine(topAndBottom())
+    pattern.combine(diagonal())
+    return pattern
+
 
 def rope() -> Pattern:
     pattern = Pattern()
