@@ -1,18 +1,24 @@
 import os                                           # nopep8
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"   # nopep8
 import pygame                                       # nopep8
+import pygame.gfxdraw                               # nopep8
+
 from copy import deepcopy
 from typing import List
 from geometry.geospace import GeoSpace, GeoSpaceStack
 from geometry.line import Line
 from geometry.point import Point
+from common.utility import gradient
+
+antiAlias = True
 
 
 class Display:
     """
     Display provides functions for rendering lines.
     """
-    def __init__(self, surf, autoFlush:bool=True) -> None:
+
+    def __init__(self, surf, autoFlush: bool = True) -> None:
         """
         Initialize the Display object.
 
@@ -27,12 +33,16 @@ class Display:
         self.scale = min(self.width, self.height) / 3
         self.lineBuffer: List[Line] = []
         self.renderDisabled = False
-        self.geoSpace = GeoSpace()
+        self.geoSpace = GeoSpace(
+            origin=Point(self.width / 2,
+                         self.height / 2),
+            yScale=-self.scale,
+            xScale=self.scale)
         self.geoSpaceStack = GeoSpaceStack()
         self.geoSpaceStack.push(self.geoSpace)
         self.color = [255, 255, 255]
 
-    def drawLine(self, line:Line) -> None:
+    def drawLine(self, line: Line) -> None:
         """
         Draw a line
 
@@ -46,7 +56,7 @@ class Display:
         if self.autoFlush:
             self.flushBuffer()
 
-    def setAutoFlush(self, value:bool) -> None:
+    def setAutoFlush(self, value: bool) -> None:
         """
         Set the auto flushing feature to True or False
 
@@ -74,17 +84,34 @@ class Display:
         for line in self.lineBuffer:
             pos0 = self.geoSpaceStack.getGlobalPos(line.p0)
             pos1 = self.geoSpaceStack.getGlobalPos(line.p1)
-            pygame.draw.line(
-                self.surf,
-                (self.color[0],
-                 self.color[1],
-                 self.color[2]),
-                (round(self.width / 2 + pos0.x * self.scale),
-                 round(self.height / 2 - pos0.y * self.scale)),
-                (round(self.width / 2 + pos1.x * self.scale),
-                 round(self.height / 2 - pos1.y * self.scale)))
+            if antiAlias:
+                self.drawAALine(pos0, pos1)
+            else:
+                pygame.draw.line(
+                    self.surf,
+                    (self.color[0],
+                     self.color[1],
+                     self.color[2]),
+                    (round(pos0.x),
+                     round(pos0.y)),
+                    (round(pos0.x),
+                     round(pos0.y)))
         self.lineBuffer = []
         pygame.display.update()
+
+    def drawAALine(self, p1: Point, p2: Point) -> None:
+        mid = gradient(p1, p2, 0.5)
+        pygame.gfxdraw.aatrigon(
+            self.surf,
+            round(p1.x),
+            round(p1.y),
+            round(mid.x),
+            round(mid.y),
+            round(p2.x),
+            round(p2.y),
+            (self.color[0],
+             self.color[1],
+             self.color[2]))
 
     def clear(self) -> None:
         """
@@ -94,7 +121,7 @@ class Display:
         self.surf.fill((0, 0, 0))
         pygame.display.update()
 
-    def setColor(self, r:int, g:int, b:int) -> None:
+    def setColor(self, r: int, g: int, b: int) -> None:
         """
         Set line color
 
@@ -123,7 +150,7 @@ class Display:
         self.drawLine(Line(Point(1, 0), Point(-1, 0)))
         self.setColor(tempcolor[0], tempcolor[1], tempcolor[2])
 
-    def pushGeoSpace(self, geoSpace:GeoSpace) -> None:
+    def pushGeoSpace(self, geoSpace: GeoSpace) -> None:
         """
         Push a geospace to the stack
 
