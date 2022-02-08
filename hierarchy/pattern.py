@@ -53,11 +53,11 @@ class Pattern:
             for line in self.lines:
                 self.updateLimits(line.p0)
                 self.updateLimits(line.p1)
-
-        self.xMax = max(self.xMax, point.x)
-        self.xMin = min(self.xMin, point.x)
-        self.yMax = max(self.yMax, point.y)
-        self.yMin = min(self.yMin, point.y)
+        else:
+            self.xMax = max(self.xMax, point.x)
+            self.xMin = min(self.xMin, point.x)
+            self.yMax = max(self.yMax, point.y)
+            self.yMin = min(self.yMin, point.y)
 
     def getWidth(self) -> float:
         """
