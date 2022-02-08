@@ -5,33 +5,20 @@ from geometry.point import Point
 from typing import List
 
 
-def getPoints() -> List[Point]:
+def getPoints(n: int = 2) -> List[Point]:
     """
     Generate a random set of points
+
+    Args:
+        n (int): Number of points
 
     Returns:
         List[Point]: A random set of points
     """
     points = []
-    continuous = coinFlip()
-    edgeY = randomCoordinate()
-
-    if continuous:
-        points.append(Point(-1, edgeY))
-
-    if coinFlip():
+    
+    for _ in range(n):
         points.append(randomPoint())
-    if coinFlip():
-        points.append(randomPoint())
-    if coinFlip():
-        points.append(randomPoint())
-
-    if not continuous and len(points) < 2:
-        points.append(randomPoint())
-        points.append(randomPoint())
-
-    if continuous:
-        points.append(Point(1, edgeY))
 
     return points
 
@@ -45,7 +32,7 @@ def extend(curve: Curve, point: Point) -> None:
         curve (Curve): Curve to extend
         point (Point): New endpoint
     """
-    subDivs = random.randint(1, 9)
+    subDivs = random.randint(3, 9)
     curveType = random.choice(["sine", "arc", "line"])
     if curveType == "sine":
         curve.extend(
@@ -66,22 +53,42 @@ def extend(curve: Curve, point: Point) -> None:
         curve.extend(curve.line(point))
 
 
-def randomCurve(closed=False) -> Curve:
+def randomCurve(closed=False, start: Point = None, end: Point = None) -> Curve:
     """
     Generate a random curve
 
+    If start or end are not given, they are random
+
     Args:
         closed (bool, optional): Wether to close the curve. Defaults to False.
+        start (Point): Start of the ribbon
+        end (Point): End of the ribbon
 
     Returns:
         Curve: A random Curve
     """
-    points = getPoints()
+    
+    points:List[Point] = []
+
+    n = random.choice([3,3,3,4])
+    
+    if start:
+        points.append(start)
+        n -= 1
+    if end:
+        n -= 1
+    
+    points.extend(getPoints(n))
+
+    if end:
+        points.append(end)
+
     curve = Curve(points[0], closed=closed)
     for point in points[1:]:
         extend(curve, point)
     curve.removeDuplicates()
     if (len(curve.points) < 2) or (len(curve.points) < 3 and closed):
         # if all random points landed on top of each other
-        return randomCurve(closed=closed)
+        print("Invalid Curve discarded.")
+        return randomCurve(closed=closed, start=start, end=end)
     return curve
