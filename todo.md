@@ -1,6 +1,6 @@
-generator process revealed in a small window for debugging
-pattern repeat increase: either multiples or with a division line
 settings file
+create both multi and single feature patterns
+generator process revealed in a small window for debugging
 refactor private variable usage
 detail allocation points
 if performance becomes issue, remove unneccessary deep copies
