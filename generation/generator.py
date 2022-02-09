@@ -70,7 +70,7 @@ class Generator:
         if coinFlip() or coinFlip():
             pat1.combine(horizontalLine(-1))
     
-        l = Layer(radius=radius, width=width, pattern=pat1, repeats=ceil(repeats / 2))
+        l = Layer(radius=radius, width=width, pattern=pat1, repeats=ceil(repeats / 4))
         return l
 
     def getFeature(self, leftConnection: float = None,
@@ -163,7 +163,7 @@ class Generator:
                     taperLength=taperLength,
                     width=0,
                     n=n)
-            if self.fillScore(r) > 0.5:
+            if self.fillScore(r) > 0.4:
                 break
             print("Invalid Ribbon discarded.")
         return r
