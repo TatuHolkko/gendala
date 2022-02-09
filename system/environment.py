@@ -75,7 +75,7 @@ class Environment():
             if self.restartEvent.active:
                 break
 
-            l = g.getLayer(radius=r, width=w, repeats=repeats)
+            l = g.getLayer(radius=r, width=w)
 
             if self.restartEvent.active:
                 break

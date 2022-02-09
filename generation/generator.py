@@ -22,7 +22,7 @@ class Generator:
     """
 
     def __init__(self) -> None:
-        self.scale = 1
+        self.lastRepeats = 2
 
     def fillScore(self, ribbon: Ribbon):
         pattern = ribbon.getPattern()
@@ -37,8 +37,36 @@ class Generator:
                         for p in endpoints]) / len(endpoints)
         return (4 / pi * avgRadius**2) - abs(midpointAvg.y) / 3
 
-    def getLayer(self, radius: float, width: float, repeats: int) -> Layer:
+    def getRepeats(self, radius: float, width: float) -> int:
+        repeats = self.lastRepeats
+        optimalRepeats = int(6.28 * (radius + 0.1) / width / 2) * 2
 
+        deviation = (self.lastRepeats - optimalRepeats) / optimalRepeats
+        if deviation < -0.6:
+            repeats = 2 * self.lastRepeats
+        elif deviation > 0.2:
+            repeats = int(self.lastRepeats / 4 + optimalRepeats / 4) * 2
+        if coinFlip():
+            repeats = int(repeats / 4) * 2
+        repeats = max(8, repeats)
+        return repeats
+
+    def getLayer(
+            self,
+            radius: float,
+            width: float,
+            repeats: int = None) -> Layer:
+
+        divider = coinFlip() and coinFlip()
+
+        if not repeats:
+            repeats = self.getRepeats(radius=radius, width=width)
+        
+        if ((repeats / self.lastRepeats) % 1 != 0) and ((self.lastRepeats / repeats) % 1 != 0):
+            divider = True
+
+        self.lastRepeats = repeats
+            
         yEdge = None
         yCenter = None
         if coinFlip():
@@ -48,13 +76,13 @@ class Generator:
 
         f1 = self.getFeature(leftConnection=yEdge, rightConnection=yCenter)
         f2 = self.getFeature(leftConnection=yCenter, rightConnection=yEdge)
-        
+
         pat1 = f1.getPattern()
-        
+
         pat2 = f2.getPattern()
-        
+
         pat2.offsetX(2)
-        
+
         pat1.combine(pat2)
         pat1.offsetX(-1)
         pat1.scaleX(0.5)
@@ -67,10 +95,15 @@ class Generator:
             pat1.combine(mirror)
             pat1.scaleX(0.5)
 
-        if coinFlip() or coinFlip():
+        if divider:
             pat1.combine(horizontalLine(-1))
-    
-        l = Layer(radius=radius, width=width, pattern=pat1, repeats=ceil(repeats / 4))
+
+        l = Layer(
+            radius=radius,
+            width=width,
+            pattern=pat1,
+            repeats=ceil(
+                repeats / 2))
         return l
 
     def getFeature(self, leftConnection: float = None,
@@ -104,7 +137,7 @@ class Generator:
 
         feature = Feature(mirrorY=mirrorY, mirrorX=mirrorX)
 
-        n = 1 # random.choice([1, 1, 2])
+        n = 1  # random.choice([1, 1, 2])
         connectedLeft = random.choice(range(n))
         connectedRight = random.choice(range(n))
         for i in range(n):
@@ -155,7 +188,7 @@ class Generator:
                 width=width,
                 n=n)
             r.unCollideWidth()
-            if r.width * self.scale < minWidth:
+            if r.width < minWidth:
                 r = Ribbon(
                     curve=curve,
                     pattern=centerLine(),
