@@ -1,3 +1,4 @@
+investigate weird glitch with vertical lines being off placed in small patterns, maybe rounding errors?
 settings file
 create both multi and single feature patterns
 generator process revealed in a small window for debugging
