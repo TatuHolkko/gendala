@@ -3,12 +3,13 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"   # nopep8
 import pygame                                       # nopep8
 import pygame.gfxdraw                               # nopep8
 
+from math import hypot
 from copy import deepcopy
 from typing import List
 from geometry.geospace import GeoSpace, GeoSpaceStack
 from geometry.line import Line
 from geometry.point import Point
-from common.utility import gradient
+from common.utility import Color, gradient
 
 antiAlias = True
 
@@ -40,7 +41,7 @@ class Display:
             xScale=self.scale)
         self.geoSpaceStack = GeoSpaceStack()
         self.geoSpaceStack.push(self.geoSpace)
-        self.color = [255, 255, 255]
+        self.lineColor = Color(255, 255, 255)
 
     def drawLine(self, line: Line) -> None:
         """
@@ -89,9 +90,7 @@ class Display:
             else:
                 pygame.draw.line(
                     self.surf,
-                    (self.color[0],
-                     self.color[1],
-                     self.color[2]),
+                    self.lineColor.get(),
                     (round(pos0.x),
                      round(pos0.y)),
                     (round(pos0.x),
@@ -109,16 +108,24 @@ class Display:
             round(mid.y),
             round(p2.x),
             round(p2.y),
-            (self.color[0],
-             self.color[1],
-             self.color[2]))
+            self.lineColor.get())
 
     def clear(self) -> None:
         """
         Clear the screen
         """
         self.lineBuffer = []
-        self.surf.fill((0, 0, 0))
+        diag = hypot(self.width, self.height)
+        maxR = int(diag / 2)
+        c0 = Color(232, 61, 19)
+        c1 = Color(0, 0, 0)
+        self.surf.fill(c1.get())
+        for i in reversed(range(maxR)):
+            c = gradient(c0, c1, i / maxR)
+            x = int(self.width/2)
+            y = int(self.height/2)
+            pygame.gfxdraw.aacircle(self.surf, x, y, i, c.get())
+            pygame.gfxdraw.filled_circle(self.surf, x, y, i, c.get())
         pygame.display.update()
 
     def setColor(self, r: int, g: int, b: int) -> None:
@@ -130,16 +137,14 @@ class Display:
             g (int): Green
             b (int): Blue
         """
-        self.color[0] = r
-        self.color[1] = g
-        self.color[2] = b
+        self.lineColor.r = r
+        self.lineColor.g = g
+        self.lineColor.b = b
 
     def drawDebugGrid(self) -> None:
         """
         Draw a red unit square with x and y axes
         """
-        tempcolor = deepcopy(self.color)
-        self.setColor(255, 0, 0)
         # unit square
         self.drawLine(Line(Point(1, 1), Point(-1, 1)))
         self.drawLine(Line(Point(-1, 1), Point(-1, -1)))
@@ -148,7 +153,6 @@ class Display:
         # x and y axis
         self.drawLine(Line(Point(0, 1), Point(0, -1)))
         self.drawLine(Line(Point(1, 0), Point(-1, 0)))
-        self.setColor(tempcolor[0], tempcolor[1], tempcolor[2])
 
     def pushGeoSpace(self, geoSpace: GeoSpace) -> None:
         """

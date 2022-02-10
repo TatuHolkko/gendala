@@ -38,7 +38,9 @@ class Environment():
         """
         Drawign function for debugging
         """
+        self.display.setColor(255,0,0)
         self.display.drawDebugGrid()
+        self.display.setColor(255,255,255)
         closed = False
         arcCurve = Curve(Point(-1, 0), closed=closed)
         arcCurve.extend(arcCurve.arc(Point(1, 0), amplitude=0, subDivs=1))
@@ -62,6 +64,7 @@ class Environment():
         """
         Generate and render a set of layers
         """
+        self.display.setColor(0,0,0)
         layers = 12
         r0 = 0.02
         w0 = 0.08

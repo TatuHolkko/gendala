@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import List, TypeVar
 import random
 
@@ -83,3 +84,34 @@ def coinFlip() -> bool:
         bool: Result
     """
     return random.choice([True, False])
+
+class Color:
+    def __init__(self, r:int, g:int, b:int) -> None:
+        self.r = int(clamp(0,255,r))
+        self.g = int(clamp(0,255,g))
+        self.b = int(clamp(0,255,b))
+    
+    def get(self) -> tuple:
+        return (self.r, self.g, self.b)
+    
+    def __add__(self, other:Color):
+        return Color(
+            r = self.r + other.r,
+            g = self.b + other.g,
+            b = self.b + other.b
+        )
+    
+    def __sub__(self, other:Color):
+        return Color(
+            r = self.r - other.r,
+            g = self.b - other.g,
+            b = self.b - other.b
+        )
+    
+    def __mul__(self, scale:float):
+        return Color(
+            r = self.r * scale,
+            g = self.b * scale,
+            b = self.b * scale
+        )
+
