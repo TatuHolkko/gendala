@@ -70,6 +70,11 @@ def zed() -> Pattern:
     pattern.combine(diagonal())
     return pattern
 
+def ladder() -> Pattern:
+    pattern = Pattern()
+    pattern.combine(topAndBottom())
+    pattern.combine(verticalLine(0))
+    return pattern
 
 def rope() -> Pattern:
     pattern = Pattern()
