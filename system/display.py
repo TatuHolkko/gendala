@@ -52,8 +52,12 @@ class Display:
         """
         if self.renderDisabled:
             return
+        
+        pos0 = self.geoSpaceStack.getGlobalPos(line.p0)
+        pos1 = self.geoSpaceStack.getGlobalPos(line.p1)
 
-        self.lineBuffer.append(deepcopy(line))
+        self.lineBuffer.append(Line(pos0, pos1))
+
         if self.autoFlush:
             self.flushBuffer()
 
@@ -83,8 +87,8 @@ class Display:
         Draw buffered lines and clear the buffer
         """
         for line in self.lineBuffer:
-            pos0 = self.geoSpaceStack.getGlobalPos(line.p0)
-            pos1 = self.geoSpaceStack.getGlobalPos(line.p1)
+            pos0 = line.p0
+            pos1 = line.p1
             if antiAlias:
                 self.drawAALine(pos0, pos1)
             else:
