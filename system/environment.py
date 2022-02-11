@@ -2,6 +2,7 @@ import os                                           # nopep8
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"   # nopep8
 import pygame                                       # nopep8
 import uuid
+from common.settings import Settings                                           # nopep8
 import random
 import threading
 from geometry.point import Point
@@ -13,19 +14,30 @@ from generation.pattern import box, centerLine, crossedBox, horizontalLine, topA
 from generation.generator import Generator
 from system.display import Display
 
+
 class Event():
     def __init__(self) -> None:
         self.queued = False
         self.active = False
 
+
 class Environment():
     """
     Environment controls the user input and rendering control
     """
-    def __init__(self) -> None:
+
+    def __init__(self, settings: Settings) -> None:
+        """
+        Initialize the environment
+
+        Args:
+            settings (Settings):  Settings object
+        """
         pygame.init()
         pygame.display.set_caption("Gendala")
-        self.surf = pygame.display.set_mode(size=(1000, 1000))
+        self.surf = pygame.display.set_mode(
+            size=settings.getList(
+                "System", "resolution", int))
         self.display = Display(self.surf, autoFlush=True)
         self.renderThread = None
         self.debugActive = False
@@ -38,9 +50,9 @@ class Environment():
         """
         Drawign function for debugging
         """
-        self.display.setColor(255,0,0)
+        self.display.setColor(255, 0, 0)
         self.display.drawDebugGrid()
-        self.display.setColor(255,255,255)
+        self.display.setColor(255, 255, 255)
         closed = False
         arcCurve = Curve(Point(-1, 0), closed=closed)
         arcCurve.extend(arcCurve.arc(Point(1, 0), amplitude=0, subDivs=1))
@@ -52,11 +64,11 @@ class Environment():
             closed=closed,
             width=0.3,
             n=4)
-        #r.unCollideWidth()
+        # r.unCollideWidth()
         r.render(self.display)
         #feature = Feature()
-        #feature.add(r)
-        #feature.render(self.display)
+        # feature.add(r)
+        # feature.render(self.display)
 
         #Layer(1, 0.5, feature.getPattern(), repeats=4).render(self.display)
 
@@ -64,7 +76,7 @@ class Environment():
         """
         Generate and render a set of layers
         """
-        self.display.setColor(0,0,0)
+        self.display.setColor(0, 0, 0)
         layers = 12
         r0 = 0.02
         w0 = 0.08
@@ -94,7 +106,7 @@ class Environment():
 
         Args:
             renderFunction (function): function that renders everything
-        
+
         Return:
             function: a function to be given for the rendering thread
         """
@@ -175,7 +187,8 @@ class Environment():
 
                     if event.key == pygame.K_r:
                         if not self.restartEvent.queued:
-                            thread = threading.Thread(target=self.restartRender)
+                            thread = threading.Thread(
+                                target=self.restartRender)
                             thread.start()
 
                     elif event.key == pygame.K_s:
