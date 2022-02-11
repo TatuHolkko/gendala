@@ -57,7 +57,7 @@ class Generator:
             width: float,
             repeats: int = None) -> Layer:
 
-        divider = coinFlip() and coinFlip()
+        divider = coinFlip()
 
         if not repeats:
             repeats = self.getRepeats(radius=radius, width=width)
@@ -137,7 +137,7 @@ class Generator:
 
         feature = Feature(mirrorY=mirrorY, mirrorX=mirrorX)
 
-        n = 1  # random.choice([1, 1, 2])
+        n = random.choice([1, 1, 1, 2])
         connectedLeft = random.choice(range(n))
         connectedRight = random.choice(range(n))
         for i in range(n):
@@ -196,7 +196,7 @@ class Generator:
                     taperLength=taperLength,
                     width=0,
                     n=n)
-            if self.fillScore(r) > 0.4:
+            if self.fillScore(r) > 0.3:
                 break
             print("Invalid Ribbon discarded.")
         return r

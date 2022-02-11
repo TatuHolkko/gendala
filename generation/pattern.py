@@ -64,17 +64,27 @@ def centerLine() -> Pattern:
     pattern.combine(horizontalLine(0))
     return pattern
 
+
+def tripleLine() -> Pattern:
+    pattern = Pattern()
+    pattern.combine(topAndBottom())
+    pattern.combine(horizontalLine(0))
+    return pattern
+
+
 def zed() -> Pattern:
     pattern = Pattern()
     pattern.combine(topAndBottom())
     pattern.combine(diagonal())
     return pattern
 
+
 def ladder() -> Pattern:
     pattern = Pattern()
     pattern.combine(topAndBottom())
     pattern.combine(verticalLine(0))
     return pattern
+
 
 def rope() -> Pattern:
     pattern = Pattern()
@@ -92,6 +102,7 @@ def rope() -> Pattern:
 
 
 def randomPattern() -> Pattern:
-    func = random.choice([topAndBottom,
+    func = random.choice([tripleLine,
+                          topAndBottom,
                           centerLine])
     return func()
