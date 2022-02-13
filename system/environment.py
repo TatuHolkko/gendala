@@ -35,10 +35,11 @@ class Environment():
         """
         pygame.init()
         pygame.display.set_caption("Gendala")
+        self.settings = settings
         self.surf = pygame.display.set_mode(
-            size=settings.getList(
-                "System", "resolution", int))
-        self.display = Display(self.surf, autoFlush=True)
+            size=settings.getList("System", "resolution", int)
+        )
+        self.display = Display(self.surf, autoFlush=settings.getBool("Graphics", "autoFlush"))
         self.renderThread = None
         self.debugActive = False
         self.exited = False
@@ -96,6 +97,8 @@ class Environment():
                 break
 
             l.render(self.display)
+
+            self.display.flushBuffer()
 
             r0 = r
             wp = w

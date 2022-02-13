@@ -16,6 +16,31 @@ class Settings:
         """
         self.config = configparser.ConfigParser()
         self.config.read(iniPath)
+    
+    def getBool(self, section:str, setting:str) -> bool:
+        """
+        Get a boolean setting.
+    
+        Will raise an exception if the boolean value is invalid
+
+        Args:
+            section (str): Section name
+            setting (str): Setting name
+
+        Raises:
+            ValueError: If the value is not one of "true", "false", "1", "0"
+
+        Returns:
+            bool: Setting value
+        """
+        s = self.getItem(section=section, setting=setting, constructor=str)
+        s = s.strip().lower()
+        if s == "false" or s == "0":
+            return False
+        elif s == "true" or s == "1":
+            return True
+        raise ValueError("Invalid boolean value: " + s)
+
 
     def getItem(self, section:str, setting:str, constructor:Callable[[str], T]) -> T:
         """
