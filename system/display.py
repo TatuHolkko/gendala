@@ -10,8 +10,7 @@ from geometry.geospace import GeoSpace, GeoSpaceStack
 from geometry.line import Line
 from geometry.point import Point
 from common.utility import Color, gradient
-
-antiAlias = True
+from common.settings import Settings                                           # nopep8
 
 
 class Display:
@@ -19,18 +18,20 @@ class Display:
     Display provides functions for rendering lines.
     """
 
-    def __init__(self, surf, autoFlush: bool = True) -> None:
+    def __init__(self, surf, settings:Settings) -> None:
         """
         Initialize the Display object.
 
         Args:
             surf (pygame Surface): Surface to render into.
-            autoFlush (bool): Whether to update the screen after each line
+            settings (Settings):  Settings object
         """
         self.surf = surf
         self.width = surf.get_width()
         self.height = surf.get_height()
-        self.autoFlush = autoFlush
+        self.settings = settings
+        self.antialiasing = settings.getBool("Graphics", "antialiasing")
+        self.autoFlush = settings.getBool("Graphics", "autoFlush")
         self.scale = min(self.width, self.height) / 3
         self.lineBuffer: List[Line] = []
         self.renderDisabled = False
@@ -89,7 +90,7 @@ class Display:
         for line in self.lineBuffer:
             pos0 = line.p0
             pos1 = line.p1
-            if antiAlias:
+            if self.antialiasing:
                 self.drawAALine(pos0, pos1)
             else:
                 pygame.draw.line(

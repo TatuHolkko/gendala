@@ -39,7 +39,7 @@ class Environment():
         self.surf = pygame.display.set_mode(
             size=settings.getList("System", "resolution", int)
         )
-        self.display = Display(self.surf, autoFlush=settings.getBool("Graphics", "autoFlush"))
+        self.display = Display(self.surf, settings=settings)
         self.renderThread = None
         self.debugActive = settings.getBool("Program", "debug")
         self.exited = False
