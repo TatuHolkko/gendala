@@ -55,16 +55,19 @@ class Environment():
         self.display.drawDebugGrid()
         self.display.setColor(255, 255, 255)
         closed = False
+
         arcCurve = Curve(Point(-1, 0), closed=closed)
-        arcCurve.extend(arcCurve.arc(Point(1, 0), amplitude=0, subDivs=1))
+        arcCurve.extend(arcCurve.arc(Point(0.99, -0.5), amplitude=0, subDivs=2000))
         #arcCurve.extend(arcCurve.arc(Point(-1, 0), amplitude=1, subDivs=1))
 
+        lineCurve = Curve(Point(-1,0),closed=False)
+        lineCurve.extend(lineCurve.line(Point(1,0), subDivs=1))
         r = Ribbon(
-            arcCurve,
-            centerLine(),
+            lineCurve,
+            arcCurve.getPattern(),
             closed=closed,
-            width=0.3,
-            n=4)
+            width=1,
+            n=1)
         # r.unCollideWidth()
         r.render(self.display)
         #feature = Feature()
