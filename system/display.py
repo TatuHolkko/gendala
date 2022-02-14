@@ -97,8 +97,8 @@ class Display:
                     self.lineColor.get(),
                     (round(pos0.x),
                      round(pos0.y)),
-                    (round(pos0.x),
-                     round(pos0.y)))
+                    (round(pos1.x),
+                     round(pos1.y)))
         self.lineBuffer = []
         pygame.display.update()
 
