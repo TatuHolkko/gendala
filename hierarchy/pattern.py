@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import List
 from geometry.point import Point
 from geometry.line import Line
 from copy import deepcopy
@@ -9,7 +10,7 @@ class Pattern:
     Pattern is a collection of lines
     """
     def __init__(self) -> None:
-        self.lines: set[Line] = set()
+        self.lines: List[Line] = []
         self.xMin = 0
         self.xMax = 0
         self.yMin = 0
@@ -22,7 +23,7 @@ class Pattern:
         Args:
             line (Line): Line to add
         """
-        self.lines.add(deepcopy(line))
+        self.lines.append(deepcopy(line))
         self.updateLimits(line.p0)
         self.updateLimits(line.p1)
 
