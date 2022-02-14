@@ -2,16 +2,13 @@ import os                                           # nopep8
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"   # nopep8
 import pygame                                       # nopep8
 import uuid
-from common.settings import Settings                                           # nopep8
+from common.settings import Settings
 import random
 import threading
 from geometry.point import Point
 from hierarchy.curve import Curve
 from hierarchy.ribbon import Ribbon
-from hierarchy.layer import Layer
-from hierarchy.feature import Feature
-from generation.pattern import box, centerLine, crossedBox, horizontalLine, topAndBottom
-from generation.generator import Generator
+from generation.layer import LayerGenerator
 from system.display import Display
 
 
@@ -57,11 +54,14 @@ class Environment():
         closed = False
 
         arcCurve = Curve(Point(-1, 0), closed=closed)
-        arcCurve.extend(arcCurve.arc(Point(0.99, -0.5), amplitude=0, subDivs=2000))
+        arcCurve.extend(
+            arcCurve.arc(
+                Point(
+                    0.99, -0.5), amplitude=0, subDivs=2000))
         #arcCurve.extend(arcCurve.arc(Point(-1, 0), amplitude=1, subDivs=1))
 
-        lineCurve = Curve(Point(-1,0),closed=False)
-        lineCurve.extend(lineCurve.line(Point(1,0), subDivs=1))
+        lineCurve = Curve(Point(-1, 0), closed=False)
+        lineCurve.extend(lineCurve.line(Point(1, 0), subDivs=1))
         r = Ribbon(
             lineCurve,
             arcCurve.getPattern(),
@@ -85,7 +85,7 @@ class Environment():
         r0 = 0.02
         w0 = 0.08
         wp = 0
-        g = Generator(self.settings)
+        g = LayerGenerator(self.settings)
         for i in range(layers):
             w = w0 + random.random() * 0.06 - 0.03
             r = r0 + wp + w

@@ -76,15 +76,6 @@ def gradient(v1:T, v2:T, s: float) -> T:
     d = v2 - v1
     return v1 + d * s
 
-def coinFlip() -> bool:
-    """
-    Return True or False, both as likely.
-
-    Returns:
-        bool: Result
-    """
-    return random.choice([True, False])
-
 class Color:
     def __init__(self, r:int, g:int, b:int) -> None:
         self.r = int(clamp(0,255,r))

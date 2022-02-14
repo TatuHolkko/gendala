@@ -3,6 +3,16 @@ from geometry.point import Point
 
 edgePadding = 0.1
 
+
+def coinFlip() -> bool:
+    """
+    Return True or False, both as likely.
+
+    Returns:
+        bool: Result
+    """
+    return random.choice([True, False])
+
 def randomCoordinate() -> float:
     """
     Return a random coordinate between -1 and 1
