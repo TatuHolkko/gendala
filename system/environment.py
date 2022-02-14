@@ -41,7 +41,7 @@ class Environment():
         )
         self.display = Display(self.surf, autoFlush=settings.getBool("Graphics", "autoFlush"))
         self.renderThread = None
-        self.debugActive = False
+        self.debugActive = settings.getBool("Program", "debug")
         self.exited = False
         self.renderingEvent = Event()
         self.saveEvent = Event()
@@ -115,7 +115,10 @@ class Environment():
         """
         def rend():
             self.renderingEvent.active = True
-            self.display.clear()
+            if self.debugActive:
+                self.display.clear()
+            else:
+                self.display.gradient()
             renderFunction()
             self.renderingEvent.active = False
 

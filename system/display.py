@@ -119,6 +119,15 @@ class Display:
         Clear the screen
         """
         self.lineBuffer = []
+        c1 = Color(0, 0, 0)
+        self.surf.fill(c1.get())
+        pygame.display.update()
+
+    def gradient(self) -> None:
+        """
+        Draw a radial gradient background
+        """
+        self.lineBuffer = []
         diag = hypot(self.width, self.height)
         maxR = int(diag / 2)
         c0 = Color(232, 61, 19)
