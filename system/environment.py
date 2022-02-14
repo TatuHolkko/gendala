@@ -85,7 +85,7 @@ class Environment():
         r0 = 0.02
         w0 = 0.08
         wp = 0
-        g = Generator()
+        g = Generator(self.settings)
         for i in range(layers):
             w = w0 + random.random() * 0.06 - 0.03
             r = r0 + wp + w

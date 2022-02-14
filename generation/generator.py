@@ -2,7 +2,7 @@ from math import ceil, pi
 import random
 from typing import List
 from generation.utility import randomCoordinate
-from hierarchy.curve import Curve, GeometryException
+from hierarchy.curve import GeometryException
 from hierarchy.pattern import Pattern
 from hierarchy.ribbon import Ribbon
 from hierarchy.feature import Feature
@@ -12,6 +12,7 @@ from geometry.utility import avgPoint
 from generation.pattern import centerLine, horizontalLine, randomPattern, verticalLine
 from generation.curve import randomCurve
 from common.utility import coinFlip, gradient
+from common.settings import Settings
 
 minWidth = 0.002
 
@@ -21,21 +22,26 @@ class Generator:
     Object for generating random hierarchy structures
     """
 
-    def __init__(self) -> None:
+    def __init__(self, settings:Settings) -> None:
+        self.settings = settings
         self.lastRepeats = 2
+        self.fillScoreAreaCoeff = settings.getItem("Generator","fillScoreAreaCoeff",float)
+        self.fillScoreCentricCoeff = settings.getItem("Generator","fillScoreCentricCoeff",float)
+        self.fillScoreThreshold = settings.getItem("Generator","fillScoreThreshold",float)
 
     def fillScore(self, ribbon: Ribbon):
         pattern = ribbon.getPattern()
-        midpoints: List[Point] = []
+        midpointsWeighted: List[(Point, float)] = []
         endpoints: List[Point] = []
         for line in pattern.lines:
-            midpoints.append(gradient(line.p0, line.p1, 0.5))
+            midpointsWeighted.append((gradient(line.p0, line.p1, 0.5), line.p0.distanceTo(line.p1)))
             endpoints.append(line.p0)
             endpoints.append(line.p1)
-        midpointAvg = avgPoint(midpoints)
-        avgRadius = sum([midpointAvg.distanceTo(p)
-                        for p in endpoints]) / len(endpoints)
-        return (4 / pi * avgRadius**2) - abs(midpointAvg.y) / 3
+        midpointAvg = avgPoint([mid for mid, _ in midpointsWeighted])
+        weightedRadiusSum = sum([midpointAvg.distanceTo(p)*w for p, w in midpointsWeighted])
+        weightsSum = sum([w for _, w in midpointsWeighted])
+        avgRadius = weightedRadiusSum / weightsSum
+        return (4 / pi * avgRadius**2) * self.fillScoreAreaCoeff - abs(midpointAvg.y) * self.fillScoreCentricCoeff
 
     def getRepeats(self, radius: float, width: float) -> int:
         repeats = self.lastRepeats
@@ -196,7 +202,7 @@ class Generator:
                     taperLength=taperLength,
                     width=0,
                     n=n)
-            if self.fillScore(r) > 0.3:
+            if self.fillScore(r) > self.fillScoreThreshold:
                 break
             print("Invalid Ribbon discarded.")
         return r
