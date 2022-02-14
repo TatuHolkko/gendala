@@ -264,7 +264,7 @@ class Curve():
         gspace = geoSpaceBetween(self.end, end)
         if curvature < 0:
             curvature = -curvature
-            gspace.scaleYBy(-1)
+            gspace.scale[1] = -1 * gspace.scale[1]
 
         pivotY = tan(2 * atan(1 / curvature) - pi / 2)
         pivot = Point(0, -pivotY)

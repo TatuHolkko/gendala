@@ -44,7 +44,7 @@ class Environment():
         self.saveEvent = Event()
         self.restartEvent = Event()
 
-    def debugRender(self):
+    def debugRender(self) -> None:
         """
         Drawign function for debugging
         """
@@ -76,7 +76,7 @@ class Environment():
 
         #Layer(1, 0.5, feature.getPattern(), repeats=4).render(self.display)
 
-    def layers(self):
+    def layers(self) -> None:
         """
         Generate and render a set of layers
         """
@@ -106,15 +106,17 @@ class Environment():
             r0 = r
             wp = w
 
-    def generateRenderFunction(self, renderFunction):
+    def generateRenderFunction(
+            self,
+            renderFunction: callable[[], None]) -> callable[[], None]:
         """
-        Generate a function for rendering thread
+        Generate a function for rendering thread.
 
         Args:
-            renderFunction (function): function that renders everything
+            renderFunction (callable[[], None]): function that renders everything
 
-        Return:
-            function: a function to be given for the rendering thread
+        Returns:
+            callable[[], None]: a function to be given for the rendering thread
         """
         def rend():
             self.renderingEvent.active = True

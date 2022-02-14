@@ -5,13 +5,24 @@ from geometry.point import Point
 from hierarchy.feature import Feature
 from generation.utility import coinFlip
 
-class FeatureGenerator:
 
-    def __init__(self, settings:Settings) -> None:
+class FeatureGenerator:
+    """
+    Generator for Feature objects
+    """
+
+    def __init__(self, settings: Settings) -> None:
+        """
+        Initialize the generator
+
+        Args:
+            settings (Settings): Settings object
+        """
         self.ribbonGenerator = RibbonGenerator(settings=settings)
-    
-    def getFeature(self, leftConnection: float = None,
-                    rightConnection: float = None) -> Feature:
+
+    def getFeature(self,
+                   leftConnection: float = None,
+                   rightConnection: float = None) -> Feature:
         """
         Generate a random Feature
 

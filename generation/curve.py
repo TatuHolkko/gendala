@@ -5,14 +5,28 @@ from hierarchy.curve import Curve
 from geometry.point import Point
 from typing import List
 
-class CurveGenerator:
 
-    def __init__(self, settings:Settings) -> None:
+class CurveGenerator:
+    """
+    Generator for Curve objects
+    """
+
+    def __init__(self, settings: Settings) -> None:
+        """
+        Initialize the generator
+
+        Args:
+            settings (Settings): Settings object
+        """
         pass
 
-    def getCurve(self, closed=False, start: Point = None, end: Point = None) -> Curve:
+    def getCurve(
+            self,
+            closed=False,
+            start: Point = None,
+            end: Point = None) -> Curve:
         """
-        Generate a random curve
+        Generate a random Curve
 
         If start or end are not given, they are random
 
@@ -24,17 +38,17 @@ class CurveGenerator:
         Returns:
             Curve: A random Curve
         """
-        
-        points:List[Point] = []
 
-        n = random.choice([3,3,3,4])
-        
+        points: List[Point] = []
+
+        n = random.choice([3, 3, 3, 4])
+
         if start:
             points.append(start)
             n -= 1
         if end:
             n -= 1
-        
+
         points.extend(self.getPoints(n))
 
         if end:
@@ -49,8 +63,8 @@ class CurveGenerator:
             print("Invalid Curve discarded.")
             return self.randomCurve(closed=closed, start=start, end=end)
         return curve
-    
-    def extend(self, curve:Curve, point: Point) -> None:
+
+    def extend(self, curve: Curve, point: Point) -> None:
         """
         Extend the given curve to the given point using a random
         curve function.
@@ -78,7 +92,7 @@ class CurveGenerator:
                     1))
         else:
             curve.extend(curve.line(point))
-    
+
     @staticmethod
     def getPoints(n: int = 2) -> List[Point]:
         """
@@ -91,11 +105,8 @@ class CurveGenerator:
             List[Point]: A random set of points
         """
         points = []
-        
+
         for _ in range(n):
             points.append(randomPoint())
 
         return points
-
-
-

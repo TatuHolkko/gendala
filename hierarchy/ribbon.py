@@ -137,11 +137,10 @@ class Ribbon():
         """
         curve = deepcopy(self.curve)
         curve.reshape(geoSpace)
-        xScale, yScale = geoSpace.getScale()
+        xScale, yScale = geoSpace.scale
         pattern = deepcopy(self.pattern)
         if xScale * yScale < 0:
-            flip = GeoSpace()
-            flip.scaleYBy(-1)
+            flip = GeoSpace(yScale=-1)
             flip.transform(pattern)
         return Ribbon(
             curve=curve,
@@ -305,7 +304,7 @@ class Ribbon():
                 collisionWidth = min(collisionWidth, abs(collision))
         if collisionWidth != self.width:
             for riblet in self.riblets:
-                riblet.geoSpace.setYScale(collisionWidth)
+                riblet.geoSpace.scale[1] = collisionWidth
             self.width = collisionWidth
 
     def render(self, display: Display) -> None:

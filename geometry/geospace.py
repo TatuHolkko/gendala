@@ -58,56 +58,6 @@ class GeoSpace:
     def __repr__(self) -> str:
         return f"{self.origin.__repr__()}, {int(self.angle/math.pi*180)}°, {self.scale}, [{int(self.startAngle/math.pi*180)}°,{int(self.endAngle/math.pi*180)}°]"
 
-    def setYScale(self, scale: float):
-        self.scale[1] = scale
-
-    def getScale(self):
-        return self.scale
-
-    def scaleBy(self, factor: float) -> None:
-        """
-        Scale both x and y by a factor
-
-        Args:
-            factor (float): Scaling factor
-        """
-        self.scale = [self.scale[0] * factor, self.scale[1] * factor]
-
-    def scaleXBy(self, factor: float) -> None:
-        """
-        Scale x by a factor
-
-        Args:
-            factor (float): Scaling factor
-        """
-        self.scale[0] = self.scale[0] * factor
-
-    def scaleYBy(self, factor: float) -> None:
-        """
-        Scale y by a factor
-
-        Args:
-            factor (float): Scaling factor
-        """
-        self.scale[1] = self.scale[1] * factor
-
-    def rotate(self, theta: Angle) -> None:
-        """
-        Rotate the coordinate system around local origin.
-
-        Args:
-            theta (Angle): Angle in radians.
-        """
-        x_mirrored = self.scale[0] < 0
-        y_mirrored = self.scale[1] < 0
-        if y_mirrored and x_mirrored:
-            theta = theta + math.pi
-        elif y_mirrored:
-            theta = -theta
-        elif x_mirrored:
-            theta = math.pi - theta
-        self.angle += theta
-
     def getExternalPos(self, pos: Point) -> Point:
         """
         Apply all transformations to a local point and return the external equivalent
@@ -238,6 +188,7 @@ class GeoSpaceStack:
         for geoSpace in reversed(self.stack):
             newPos = geoSpace.getExternalPos(newPos)
         return newPos
+
 
 def geoSpaceBetween(p0: Point, p1: Point) -> GeoSpace:
     """

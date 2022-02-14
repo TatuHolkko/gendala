@@ -3,11 +3,13 @@ from typing import Callable, List, TypeVar
 
 T = TypeVar('T')
 
+
 class Settings:
     """
     Object for reading a settings ini file
     """
-    def __init__(self, iniPath:str) -> None:
+
+    def __init__(self, iniPath: str) -> None:
         """
         Initialize the ini reader
 
@@ -16,11 +18,11 @@ class Settings:
         """
         self.config = configparser.ConfigParser()
         self.config.read(iniPath)
-    
-    def getBool(self, section:str, setting:str) -> bool:
+
+    def getBool(self, section: str, setting: str) -> bool:
         """
         Get a boolean setting.
-    
+
         Will raise an exception if the boolean value is invalid
 
         Args:
@@ -41,8 +43,8 @@ class Settings:
             return True
         raise ValueError("Invalid boolean value: " + s)
 
-
-    def getItem(self, section:str, setting:str, constructor:Callable[[str], T]) -> T:
+    def getItem(self, section: str, setting: str,
+                constructor: Callable[[str], T]) -> T:
         """
         Get a single item
 
@@ -56,7 +58,8 @@ class Settings:
         """
         return constructor(self.config[section][setting])
 
-    def getList(self, section:str, setting:str, constructor:Callable[[str], T]) -> List[T]:
+    def getList(self, section: str, setting: str,
+                constructor: Callable[[str], T]) -> List[T]:
         """
         Get a list of items
 
@@ -71,7 +74,8 @@ class Settings:
         settingstring = self.getItem(section, setting, str)
         return [constructor(value) for value in settingstring.split(';')]
 
-    def getList2d(self, section:str, setting:str, constructor:Callable[[str], T]) -> List[List[T]]:
+    def getList2d(self, section: str, setting: str,
+                  constructor: Callable[[str], T]) -> List[List[T]]:
         """
         Get a 2d list of items
 
@@ -84,4 +88,5 @@ class Settings:
             List[List[T]]: Return value
         """
         sublists = self.getList(section, setting, str)
-        return [[constructor(value) for value in sublist.split(',')] for sublist in sublists]
+        return [[constructor(value) for value in sublist.split(',')]
+                for sublist in sublists]

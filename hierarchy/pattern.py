@@ -10,6 +10,9 @@ class Pattern:
     Pattern is a collection of lines
     """
     def __init__(self) -> None:
+        """
+        Initialize the pattern
+        """
         self.lines: List[Line] = []
         self.xMin = 0
         self.xMax = 0

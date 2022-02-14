@@ -5,6 +5,15 @@ from math import pi
 Angle = float
 
 def avgPoint(points:List[Point]) -> Point:
+    """
+    Return an averaged point
+
+    Args:
+        points (List[Point]): List of points
+
+    Returns:
+        Point: Average point
+    """
     p = Point(0,0)
     for point in points:
         p = p + point

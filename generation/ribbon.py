@@ -11,29 +11,61 @@ from generation.curve import CurveGenerator
 from generation.pattern import centerLine, randomPattern
 from generation.utility import coinFlip
 
+
 class RibbonGenerator:
 
-    def __init__(self, settings:Settings) -> None:
+    def __init__(self, settings: Settings) -> None:
         self.curveGenerator = CurveGenerator(settings=settings)
-        self.fillScoreAreaCoeff = settings.getItem("Generator","fillScoreAreaCoeff",float)
-        self.fillScoreCentricCoeff = settings.getItem("Generator","fillScoreCentricCoeff",float)
-        self.fillScoreThreshold = settings.getItem("Generator","fillScoreThreshold",float)
 
-    def fillScore(self, ribbon: Ribbon):
+        self.fillScoreAreaCoeff = settings.getItem(
+            "Generator",
+            "fillScoreAreaCoeff",
+            float)
+
+        self.fillScoreCentricCoeff = settings.getItem(
+            "Generator",
+            "fillScoreCentricCoeff",
+            float)
+
+        self.fillScoreThreshold = settings.getItem(
+            "Generator",
+            "fillScoreThreshold",
+            float)
+
+    def fillScore(self, ribbon: Ribbon) -> float:
+        """
+        Return a score describing how well a ribbon fills area
+        and how centric is it's position.
+
+        Args:
+            ribbon (Ribbon): Ribbon to evaluate
+
+        Returns:
+            float: Fill score
+        """
         pattern = ribbon.getPattern()
         midpointsWeighted: List[(Point, float)] = []
         endpoints: List[Point] = []
         for line in pattern.lines:
-            midpointsWeighted.append((gradient(line.p0, line.p1, 0.5), line.p0.distanceTo(line.p1)))
+            midpointsWeighted.append(
+                (gradient(
+                    line.p0, line.p1, 0.5), line.p0.distanceTo(
+                    line.p1)))
             endpoints.append(line.p0)
             endpoints.append(line.p1)
         midpointAvg = avgPoint([mid for mid, _ in midpointsWeighted])
-        weightedRadiusSum = sum([midpointAvg.distanceTo(p)*w for p, w in midpointsWeighted])
+        weightedRadiusSum = sum(
+            [midpointAvg.distanceTo(p) * w for p, w in midpointsWeighted])
         weightsSum = sum([w for _, w in midpointsWeighted])
         avgRadius = weightedRadiusSum / weightsSum
-        return (4 / pi * avgRadius**2) * self.fillScoreAreaCoeff - abs(midpointAvg.y) * self.fillScoreCentricCoeff
+        return (4 / pi * avgRadius**2) * self.fillScoreAreaCoeff - \
+            abs(midpointAvg.y) * self.fillScoreCentricCoeff
 
-    def getRibbon(self, start: Point = None, end: Point = None, minWidth:float = 0.1) -> Ribbon:
+    def getRibbon(
+            self,
+            start: Point = None,
+            end: Point = None,
+            minWidth: float = 0.1) -> Ribbon:
         """
         Generate a random Ribbon
 
@@ -53,11 +85,11 @@ class RibbonGenerator:
             curve = None
             width = random.random() * 0.2
             while(True):
-                curve = self.curveGenerator.getCurve(closed=closed, start=start, end=end)
+                curve = self.curveGenerator.getCurve(
+                    closed=closed, start=start, end=end)
                 try:
                     curve.round()
                 except GeometryException:
-                    print("Invalid Curve discarded.")
                     continue
                 break
             pattern = randomPattern()
@@ -81,5 +113,4 @@ class RibbonGenerator:
                     n=n)
             if self.fillScore(r) > self.fillScoreThreshold:
                 break
-            print("Invalid Ribbon discarded.")
         return r
