@@ -65,7 +65,7 @@ class RibbonGenerator:
             self,
             start: Point = None,
             end: Point = None,
-            minWidth: float = 0.1) -> Ribbon:
+            minWidth: float = 0.05) -> Ribbon:
         """
         Generate a random Ribbon
 
