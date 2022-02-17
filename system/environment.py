@@ -1,4 +1,5 @@
-import os                                           # nopep8
+import os
+from typing import Callable                                           # nopep8
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"   # nopep8
 import pygame                                       # nopep8
 import uuid
@@ -108,15 +109,15 @@ class Environment():
 
     def generateRenderFunction(
             self,
-            renderFunction: callable[[], None]) -> callable[[], None]:
+            renderFunction: Callable[[], None]) -> Callable[[], None]:
         """
         Generate a function for rendering thread.
 
         Args:
-            renderFunction (callable[[], None]): function that renders everything
+            renderFunction (Callable[[], None]): function that renders everything
 
         Returns:
-            callable[[], None]: a function to be given for the rendering thread
+            Callable[[], None]: a function to be given for the rendering thread
         """
         def rend():
             self.renderingEvent.active = True
