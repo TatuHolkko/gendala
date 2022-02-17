@@ -4,6 +4,18 @@ import random
 
 T = TypeVar('T')
 
+def multiplePair(val1:int, val2:int) -> bool:
+    """
+    Return true if val1 is a multiple of val2 or vice versa
+
+    Args:
+        val1 (int): Value 1
+        val2 (int): Value 2
+
+    Returns:
+        bool: True if val1 is a multiple of val2 or vice versa
+    """
+    return ((float(val1)/val2) % 1 == 0) or ((float(val2)/val1) % 1 == 0)
 
 def clamp(value: float, minLim: float, maxLim: float) -> float:
     """

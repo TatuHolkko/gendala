@@ -1,4 +1,8 @@
-from math import ceil
+from copy import deepcopy
+from math import ceil, floor
+import random
+from common.utility import multiplePair
+from geometry.point import Point
 from generation.feature import FeatureGenerator
 from generation.utility import coinFlip, randomCoordinate
 from generation.pattern import horizontalLine
@@ -6,12 +10,13 @@ from common.settings import Settings
 from hierarchy.layer import Layer
 from hierarchy.pattern import Pattern
 
+
 class LayerGenerator:
     """
     Generator for Layer objects
     """
 
-    def __init__(self, settings:Settings) -> None:
+    def __init__(self, settings: Settings) -> None:
         """
         Initialize the generator
 
@@ -20,7 +25,8 @@ class LayerGenerator:
         """
         self.lastRepeats = 2
         self.featureGenerator = FeatureGenerator(settings=settings)
-        self.repeatCoeff = settings.getItem("Generator", "featureWidthCoeff", float)
+        self.repeatCoeff = settings.getItem(
+            "Generator", "featureWidthCoeff", float)
 
     def getRepeats(self, radius: float, width: float) -> int:
         """
@@ -34,24 +40,21 @@ class LayerGenerator:
             int: Number of repeats
         """
         repeats = self.lastRepeats
-        optimalRepeats = int(6.28 * (radius + 0.1) / width / 2) * 2
+        optimalRepeats = int(6.28 * (radius) / width / 2) * 2
         optimalRepeats = optimalRepeats / self.repeatCoeff
 
         deviation = (self.lastRepeats - optimalRepeats) / optimalRepeats
-        if deviation < -0.6:
+        if deviation < 0:
             repeats = 2 * self.lastRepeats
         elif deviation > 0.2:
             repeats = int(self.lastRepeats / 4 + optimalRepeats / 4) * 2
-        if coinFlip():
-            repeats = int(repeats / 4) * 2
         repeats = max(8, repeats)
         return repeats
 
     def getLayer(
-                self,
-                radius: float,
-                width: float,
-                repeats: int = None) -> Layer:
+            self,
+            radius: float,
+            width: float) -> Layer:
         """
         Generate a random Layer
 
@@ -60,57 +63,118 @@ class LayerGenerator:
         Args:
             radius (float): Radius of the layer
             width (float): Width of the layer
-            repeats (int, optional): Number of pattern repeats. Defaults to None.
 
         Returns:
             Layer: A random Layer
         """
 
+        complexity = random.randint(2, 8)
+        superMirrored = coinFlip()
         divider = coinFlip()
+        interContinuous = coinFlip()
 
-        if not repeats:
-            repeats = self.getRepeats(radius=radius, width=width)
-        
-        if ((repeats / self.lastRepeats) % 1 != 0) and ((self.lastRepeats / repeats) % 1 != 0):
+        repeats = self.getRepeats(radius=radius, width=width)
+        if repeats < complexity * 2:
+            repeats = complexity * 2
+        repeats = ceil(repeats / complexity) * complexity
+        if not multiplePair(repeats, self.lastRepeats):
             divider = True
-
+            width *= 0.9
         self.lastRepeats = repeats
-            
+        repeats = ceil(max(4, int(repeats / complexity)) / 2) * 2
+
         yEdge = None
-        yCenter = None
-        if coinFlip():
+        if interContinuous:
             yEdge = randomCoordinate()
-        if coinFlip():
-            yCenter = randomCoordinate()
+        yInside = [
+            randomCoordinate() if coinFlip() else None for _ in range(
+                complexity - 1)]
+        connections = [yEdge]
+        connections.extend(yInside)
+        connections.append(yEdge)
 
-        f1 = self.featureGenerator.getFeature(leftConnection=yEdge, rightConnection=yCenter)
-        f2 = self.featureGenerator.getFeature(leftConnection=yCenter, rightConnection=yEdge)
+        resultPattern = Pattern()
 
-        pat1 = f1.getPattern()
+        centerIndex = floor((complexity - 1) / 2)
+        center = self.featureGenerator.getFeature(
+            connections[centerIndex],
+            connections[centerIndex],
+            forceXMirror=True
+        ).getPattern()
 
-        pat2 = f2.getPattern()
+        patternWidth = 0
+        if complexity % 2 != 0:
+            patternWidth = 2
+        else:
+            patternWidth = 4
+            mirror(center)
 
-        pat2.offsetX(2)
+        resultPattern.combine(center)
 
-        pat1.combine(pat2)
-        pat1.offsetX(-1)
-        pat1.scaleX(0.5)
+        i = centerIndex
+        while i > 0:
+            feature = self.featureGenerator.getFeature(
+                leftConnection=connections[i],
+                rightConnection=connections[i - 1]
+            )
 
-        if True:
-            pat1.offsetX(-1)
-            mirror = Pattern()
-            mirror.combine(pat1)
-            mirror.scaleX(-1)
-            pat1.combine(mirror)
-            pat1.scaleX(0.5)
+            surround(resultPattern, patternWidth, feature.getPattern())
+            patternWidth += 4
+            i -= 1
+
+        resultPattern.offsetX(-complexity)
+        resultPattern.scaleX(1 / complexity)
 
         if divider:
-            pat1.combine(horizontalLine(-1))
+            resultPattern.combine(horizontalLine(-1))
+            if coinFlip():
+                resultPattern.combine(horizontalLine(-0.95))
+
 
         l = Layer(
             radius=radius,
             width=width,
-            pattern=pat1,
-            repeats=ceil(
-                repeats / 2))
+            pattern=resultPattern,
+            repeats=repeats)
         return l
+
+
+def mirror(pattern: Pattern) -> None:
+    """
+    Combine an unscaled mirror pattern into the given pattern.
+
+    Args:
+        pattern (Pattern): Pattern to mirror
+    """
+
+    mirroredPattern=deepcopy(pattern)
+    mirroredPattern.scaleX(-1)
+    mirroredPattern.offsetX(1)
+
+    pattern.offsetX(-1)
+
+    pattern.combine(mirroredPattern)
+
+
+def surround(center: Pattern, centerWidth: float, edges: Pattern) -> None:
+    """
+    Combine the edge Pattern (one side mirrored) on both sides of center Pattern
+
+    Args:
+        center (Pattern): Center Pattern
+        centerWidth (float): Width of center Pattern
+        edges (Pattern): Edge Pattern
+    """
+
+    rightMirror=deepcopy(edges)
+    rightMirror.scaleX(-1)
+
+    leftMirror=deepcopy(edges)
+
+    offset=centerWidth / 2 + 1
+
+    leftMirror.offsetX(-offset)
+    rightMirror.offsetX(offset)
+
+    center.combine(leftMirror)
+    center.combine(rightMirror)

@@ -61,7 +61,7 @@ class CurveGenerator:
         if (len(curve.points) < 2) or (len(curve.points) < 3 and closed):
             # if all random points landed on top of each other
             print("Invalid Curve discarded.")
-            return self.randomCurve(closed=closed, start=start, end=end)
+            return self.getCurve(closed=closed, start=start, end=end)
         return curve
 
     def extend(self, curve: Curve, point: Point) -> None:

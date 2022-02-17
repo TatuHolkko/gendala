@@ -5,6 +5,7 @@ from geometry.point import Point
 from hierarchy.feature import Feature
 from generation.utility import coinFlip
 
+overrideConnection = True
 
 class FeatureGenerator:
     """
@@ -22,27 +23,33 @@ class FeatureGenerator:
 
     def getFeature(self,
                    leftConnection: float = None,
-                   rightConnection: float = None) -> Feature:
+                   rightConnection: float = None,
+                   forceXMirror:bool = False) -> Feature:
         """
         Generate a random Feature
 
         Args:
             leftConnection (float): If given, y coordinate of left connection
             rightConnection (float): If given, y coordinate of right connection
+            forceXMirror (bool): if true, X will always be mirrored
 
         Returns:
             Feature: A random Feature
         """
-        mirrorX = coinFlip()
+        mirrorX = coinFlip() or forceXMirror
+        mirrorY = coinFlip()
 
         if leftConnection and (not rightConnection) and mirrorX:
             rightConnection = leftConnection
         elif rightConnection and (not leftConnection) and mirrorX:
             leftConnection = rightConnection
         elif rightConnection and leftConnection and (not leftConnection == rightConnection):
-            mirrorX = False
+            if overrideConnection:
+                leftConnection = rightConnection
+            else:
+                mirrorX = False
 
-        mirrorY = coinFlip()
+
 
         if mirrorY:
             if leftConnection:
