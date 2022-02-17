@@ -7,6 +7,7 @@
            "request": "launch",
            "program": "${workspaceRoot}\\common\\main.py",
            "console": "integratedTerminal",
+           "cwd": "${workspaceRoot}/${relativeFileDirname}",
            "env": { "PYTHONPATH": "${workspaceRoot}"}
         }
     ]
