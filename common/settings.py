@@ -56,7 +56,10 @@ class Settings:
         Returns:
             T: Return value
         """
-        return constructor(self.config[section][setting])
+        if constructor == bool:
+            return self.getBool(section=section, setting=setting)
+        else:
+            return constructor(self.config[section][setting])
 
     def getList(self, section: str, setting: str,
                 constructor: Callable[[str], T]) -> List[T]:

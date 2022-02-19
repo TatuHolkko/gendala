@@ -4,7 +4,7 @@ import random
 from common.utility import multiplePair
 from geometry.point import Point
 from generation.feature import FeatureGenerator
-from generation.utility import coinFlip, randomCoordinate
+from generation.utility import check, coinFlip, randomCoordinate
 from generation.pattern import horizontalLine
 from common.settings import Settings
 from hierarchy.layer import Layer
@@ -31,6 +31,10 @@ class LayerGenerator:
             "Layers", "minComplexity", int)
         self.maxComplexity = settings.getItem(
             "Layers", "maxComplexity", int)
+        self.pDivider = settings.getItem(
+            "Layers", "P_divider", float)
+        self.forceDivider = settings.getItem(
+            "Layers", "fractionBoundaryForceDivider", bool)
 
     def getRepeats(self, radius: float, width: float) -> int:
         """
@@ -75,16 +79,15 @@ class LayerGenerator:
         complexity = random.randint(
             2 * self.minComplexity,
             2 * self.maxComplexity)
-        divider = coinFlip()
+        divider = check(self.pDivider)
         interContinuous = coinFlip()
 
         repeats = self.getRepeats(radius=radius, width=width)
         if repeats < complexity * 2:
             repeats = complexity * 2
         repeats = ceil(repeats / complexity) * complexity
-        if not multiplePair(repeats, self.lastRepeats):
+        if self.forceDivider and not multiplePair(repeats, self.lastRepeats):
             divider = True
-            width *= 0.9
         self.lastRepeats = repeats
         repeats = ceil(max(4, int(repeats / complexity)) / 2) * 2
 
@@ -131,6 +134,7 @@ class LayerGenerator:
         resultPattern.scaleX(1 / complexity)
 
         if divider:
+            width *= 0.9
             resultPattern.combine(horizontalLine(-1))
             if coinFlip():
                 resultPattern.combine(horizontalLine(-0.95))
