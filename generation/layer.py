@@ -4,8 +4,8 @@ import random
 from common.utility import multiplePair
 from geometry.point import Point
 from generation.feature import FeatureGenerator
-from generation.utility import check, coinFlip, randomCoordinate
-from generation.pattern import horizontalLine, randomComplexPattern
+from generation.utility import check, checkDistribution, randomCoordinate
+from generation.pattern import randomComplexPattern
 from common.settings import Settings
 from hierarchy.curve import Curve
 from hierarchy.layer import Layer
@@ -37,10 +37,8 @@ class LayerGenerator:
             "Layers", "dividerWidth", float)
         self.dividerPadding = settings.getItem(
             "Layers", "dividerPadding", float)
-        self.minComplexity = settings.getItem(
-            "ComplexFeatures", "minComplexity", int)
-        self.maxComplexity = settings.getItem(
-            "ComplexFeatures", "maxComplexity", int)
+        self.pdComplexity = settings.getList(
+            "ComplexFeatures", "PD_complexity", float)
         self.pInterCont = settings.getItem(
             "ComplexFeatures", "P_interContinuous", float)
         self.pIntraCont = settings.getItem(
@@ -86,9 +84,7 @@ class LayerGenerator:
             Layer: A random Layer
         """
 
-        complexity = random.randint(
-            2 * self.minComplexity,
-            2 * self.maxComplexity)
+        complexity = 2 * checkDistribution(self.pdComplexity)
 
         divider = check(self.pDivider)
 
