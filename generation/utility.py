@@ -1,4 +1,5 @@
 import random
+from typing import List
 from geometry.point import Point
 
 edgePadding = 0.1
@@ -24,6 +25,19 @@ def check(p:float) -> bool:
         bool: true with probability p
     """
     return random.random() < p
+
+def checkDistribution(distribution:List[float]) -> int:
+    """
+    Return random result from a distribution
+
+    Args:
+        distribution (List[float]): Discrete distribution weights
+
+    Returns:
+        int: Result from distribution
+    """
+    choices = range(1, len(distribution) + 1)
+    return random.choices(population=choices, weights=distribution, k=1)[0]
 
 def randomCoordinate() -> float:
     """

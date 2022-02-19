@@ -75,21 +75,4 @@ class Settings:
             List[T]: Return value
         """
         settingstring = self.getItem(section, setting, str)
-        return [constructor(value) for value in settingstring.split(';')]
-
-    def getList2d(self, section: str, setting: str,
-                  constructor: Callable[[str], T]) -> List[List[T]]:
-        """
-        Get a 2d list of items
-
-        Args:
-            section (str): Section name
-            setting (str): Setting name
-            constructor (Callable[[str], T]): Constructor that constructs each element
-
-        Returns:
-            List[List[T]]: Return value
-        """
-        sublists = self.getList(section, setting, str)
-        return [[constructor(value) for value in sublist.split(',')]
-                for sublist in sublists]
+        return [constructor(value) for value in settingstring.split(',')]
