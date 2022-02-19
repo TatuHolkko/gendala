@@ -29,10 +29,6 @@ class LayerGenerator:
         self.featureGenerator = FeatureGenerator(settings=settings)
         self.repeatCoeff = settings.getItem(
             "Layers", "featureWidthCoeff", float)
-        self.minComplexity = settings.getItem(
-            "Layers", "minComplexity", int)
-        self.maxComplexity = settings.getItem(
-            "Layers", "maxComplexity", int)
         self.pDivider = settings.getItem(
             "Layers", "P_divider", float)
         self.forceDivider = settings.getItem(
@@ -41,10 +37,14 @@ class LayerGenerator:
             "Layers", "dividerWidth", float)
         self.dividerPadding = settings.getItem(
             "Layers", "dividerPadding", float)
+        self.minComplexity = settings.getItem(
+            "ComplexFeatures", "minComplexity", int)
+        self.maxComplexity = settings.getItem(
+            "ComplexFeatures", "maxComplexity", int)
         self.pInterCont = settings.getItem(
-            "Layers", "P_interContinuous", float)
+            "ComplexFeatures", "P_interContinuous", float)
         self.pIntraCont = settings.getItem(
-            "Layers", "P_intraContinuous", float)
+            "ComplexFeatures", "P_intraContinuous", float)
 
     def getRepeats(self, radius: float, width: float) -> int:
         """
