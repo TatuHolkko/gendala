@@ -2,14 +2,14 @@ import random
 from math import pi
 from typing import List
 from common.settings import Settings
-from common.utility import gradient
+from common.utility import clamp, gradient
 from geometry.point import Point
 from geometry.utility import avgPoint
 from hierarchy.curve import GeometryException
 from hierarchy.ribbon import Ribbon
 from generation.curve import CurveGenerator
 from generation.pattern import centerLine, randomPattern
-from generation.utility import coinFlip
+from generation.utility import check
 
 
 class RibbonGenerator:
@@ -30,6 +30,31 @@ class RibbonGenerator:
         self.fillScoreThreshold = settings.getItem(
             "Ribbons",
             "fillScoreThreshold",
+            float)
+
+        self.maxWidth = settings.getItem(
+            "Ribbons",
+            "maxWidth",
+            float)
+        
+        self.collapseWidth = settings.getItem(
+            "Ribbons",
+            "collapseWidth",
+            float)
+
+        self.maxTaperLength = settings.getItem(
+            "Ribbons",
+            "maxTaperLength",
+            float)
+        
+        self.minTaperLength = settings.getItem(
+            "Ribbons",
+            "minTaperLength",
+            float)
+        
+        self.pClosed = settings.getItem(
+            "Ribbons",
+            "P_closed",
             float)
 
     def fillScore(self, ribbon: Ribbon) -> float:
@@ -64,8 +89,7 @@ class RibbonGenerator:
     def getRibbon(
             self,
             start: Point = None,
-            end: Point = None,
-            minWidth: float = 0.05) -> Ribbon:
+            end: Point = None) -> Ribbon:
         """
         Generate a random Ribbon
 
@@ -74,16 +98,15 @@ class RibbonGenerator:
         Args:
             start (Point): Start of the ribbon
             end (Point): End of the ribbon
-            minWidth (float): Minimum width below which pattern collapses to a line
 
         Returns:
             Ribbon: A random Ribbon
         """
         r = None
         while(True):
-            closed = coinFlip() and not (start or end)
+            closed = check(self.pClosed) and not (start or end)
             curve = None
-            width = random.random() * 0.2
+            width = random.random() * self.maxWidth
             while(True):
                 curve = self.curveGenerator.getCurve(
                     closed=closed, start=start, end=end)
@@ -94,7 +117,7 @@ class RibbonGenerator:
                 break
             pattern = randomPattern()
             n = random.randint(1, 10)
-            taperLength = max(0.5, random.random() - 0.5)
+            taperLength = clamp(random.uniform(self.minTaperLength, self.maxTaperLength), 0, 0.5)
             r = Ribbon(
                 curve=curve,
                 pattern=pattern,
@@ -103,7 +126,7 @@ class RibbonGenerator:
                 width=width,
                 n=n)
             r.unCollideWidth()
-            if r.width < minWidth:
+            if r.width < self.collapseWidth:
                 r = Ribbon(
                     curve=curve,
                     pattern=centerLine(),
