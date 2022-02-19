@@ -35,6 +35,11 @@ class LayerGenerator:
             "Layers", "P_divider", float)
         self.forceDivider = settings.getItem(
             "Layers", "fractionBoundaryForceDivider", bool)
+        self.pInterCont = settings.getItem(
+            "Layers", "P_interContinuous", float)
+        self.pIntraCont = settings.getItem(
+            "Layers", "P_intraContinuous", float)
+
 
     def getRepeats(self, radius: float, width: float) -> int:
         """
@@ -79,8 +84,8 @@ class LayerGenerator:
         complexity = random.randint(
             2 * self.minComplexity,
             2 * self.maxComplexity)
+
         divider = check(self.pDivider)
-        interContinuous = coinFlip()
 
         repeats = self.getRepeats(radius=radius, width=width)
         if repeats < complexity * 2:
@@ -92,10 +97,10 @@ class LayerGenerator:
         repeats = ceil(max(4, int(repeats / complexity)) / 2) * 2
 
         yEdge = None
-        if interContinuous:
+        if check(self.pInterCont):
             yEdge = randomCoordinate()
         yInside = [
-            randomCoordinate() if coinFlip() else None for _ in range(
+            randomCoordinate() if check(self.pIntraCont) else None for _ in range(
                 complexity - 1)]
         connections = [yEdge]
         connections.extend(yInside)
