@@ -68,7 +68,7 @@ class Pattern:
         Return the width of the pattern along the x axis.
 
         Returns:
-            float: [description]
+            float: Width of the pattern
         """
         self.updateLimits()
         return self.xMax - self.xMin
@@ -82,6 +82,15 @@ class Pattern:
         scale = 2 / width
         self.offsetX(-middle)
         self.scaleX(scale)
+    
+    def scaleYToLimits(self) -> None:
+        """
+        Scale y so that the pattern fits the unit square
+        """
+        self.updateLimits()
+        maxY = max(1, max(abs(self.yMin), abs(self.yMax)))
+        if maxY > 1:
+            self.scaleY(1 / maxY)
 
     def offsetX(self, deltaX: float) -> None:
         """
@@ -94,6 +103,17 @@ class Pattern:
             l.p0.x += deltaX
             l.p1.x += deltaX
 
+    def offsetY(self, deltaY: float) -> None:
+        """
+        Offset the y coordinate of all lines by an amount.
+
+        Args:
+            deltaX (float): Amount to offset
+        """
+        for l in self.lines:
+            l.p0.y += deltaY
+            l.p1.y += deltaY
+
     def scaleX(self, scaleX: float) -> None:
         """
         Scale the x coordinate of all lines by an amount.
@@ -104,6 +124,18 @@ class Pattern:
         for l in self.lines:
             l.p0.x *= scaleX
             l.p1.x *= scaleX
+    
+    def scaleY(self, scaleY: float) -> None:
+        """
+        Scale the y coordinate of all lines by an amount.
+
+        Args:
+            scaleX (float): Amount to scale
+        """
+        for l in self.lines:
+            l.p0.y *= scaleY
+            l.p1.y *= scaleY
+
 
     def repeat(self, n: int) -> None:
         """

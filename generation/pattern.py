@@ -100,6 +100,42 @@ def rope() -> Pattern:
     pattern.combine(line.getPattern())
     return pattern
 
+def arrows() -> Pattern:
+    pattern = Pattern()
+    pattern.combine(topAndBottom())
+    line = Curve(Point(1, 1))
+    line.extend(line.line(Point(0, 0)))
+    pattern.combine(line.getPattern())
+    line = Curve(Point(1, -1))
+    line.extend(line.line(Point(0, 0)))
+    pattern.combine(line.getPattern())
+    return pattern
+
+def spikes() -> Pattern:
+    pattern = Pattern()
+    pattern.combine(horizontalLine(y=-1))
+    line = Curve(Point(0, 1))
+    line.extend(line.line(Point(-1, -1)))
+    pattern.combine(line.getPattern())
+    line = Curve(Point(0, 1))
+    line.extend(line.line(Point(1, -1)))
+    pattern.combine(line.getPattern())
+    return pattern
+
+def crissCross() -> Pattern:
+    pattern = Pattern()
+    pattern.combine(topAndBottom())
+    pattern.combine(diagonal(flipped=False))
+    pattern.combine(diagonal(flipped=True))
+    return pattern
+
+def randomComplexPattern() -> Pattern:
+    func = random.choice([topAndBottom,
+                          crissCross,
+                          spikes,
+                          arrows,
+                          ladder])
+    return func()
 
 def randomPattern() -> Pattern:
     func = random.choice([tripleLine,

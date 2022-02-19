@@ -5,10 +5,12 @@ from common.utility import multiplePair
 from geometry.point import Point
 from generation.feature import FeatureGenerator
 from generation.utility import check, coinFlip, randomCoordinate
-from generation.pattern import horizontalLine
+from generation.pattern import horizontalLine, randomComplexPattern
 from common.settings import Settings
+from hierarchy.curve import Curve
 from hierarchy.layer import Layer
 from hierarchy.pattern import Pattern
+from hierarchy.ribbon import Ribbon
 
 
 class LayerGenerator:
@@ -35,11 +37,14 @@ class LayerGenerator:
             "Layers", "P_divider", float)
         self.forceDivider = settings.getItem(
             "Layers", "fractionBoundaryForceDivider", bool)
+        self.dividerWidth = settings.getItem(
+            "Layers", "dividerWidth", float)
+        self.dividerPadding = settings.getItem(
+            "Layers", "dividerPadding", float)
         self.pInterCont = settings.getItem(
             "Layers", "P_interContinuous", float)
         self.pIntraCont = settings.getItem(
             "Layers", "P_intraContinuous", float)
-
 
     def getRepeats(self, radius: float, width: float) -> int:
         """
@@ -100,7 +105,8 @@ class LayerGenerator:
         if check(self.pInterCont):
             yEdge = randomCoordinate()
         yInside = [
-            randomCoordinate() if check(self.pIntraCont) else None for _ in range(
+            randomCoordinate() if check(
+                self.pIntraCont) else None for _ in range(
                 complexity - 1)]
         connections = [yEdge]
         connections.extend(yInside)
@@ -137,18 +143,29 @@ class LayerGenerator:
 
         resultPattern.offsetX(-complexity)
         resultPattern.scaleX(1 / complexity)
+        resultPattern.scaleYToLimits()
 
         if divider:
-            width *= 0.9
-            resultPattern.combine(horizontalLine(-1))
-            if coinFlip():
-                resultPattern.combine(horizontalLine(-0.95))
+            dividerSpace = self.dividerWidth + self.dividerPadding * 2
+            dividerY = 1 - dividerSpace / 2
+            dividerCurve = Curve(Point(-1, -dividerY))
+            dividerCurve.extend(dividerCurve.line(Point(1, -dividerY)))
+            dividerPattern = randomComplexPattern()
+            dividerRibbon = Ribbon(
+                dividerCurve,
+                dividerPattern,
+                closed=False,
+                width=self.dividerWidth / 2,
+                n=complexity * 3)
+            resultPattern.scaleY(1 - dividerSpace / 2)
+            resultPattern.offsetY(dividerSpace / 2)
+            resultPattern.combine(dividerRibbon.getPattern())
 
-        l = Layer(
-            radius=radius,
-            width=width,
-            pattern=resultPattern,
-            repeats=repeats)
+        l=Layer(
+            radius = radius,
+            width = width,
+            pattern = resultPattern,
+            repeats = repeats)
         return l
 
 
@@ -160,7 +177,7 @@ def mirror(pattern: Pattern) -> None:
         pattern (Pattern): Pattern to mirror
     """
 
-    mirroredPattern = deepcopy(pattern)
+    mirroredPattern=deepcopy(pattern)
     mirroredPattern.scaleX(-1)
     mirroredPattern.offsetX(1)
 
@@ -179,12 +196,12 @@ def surround(center: Pattern, centerWidth: float, edges: Pattern) -> None:
         edges (Pattern): Edge Pattern
     """
 
-    rightMirror = deepcopy(edges)
+    rightMirror=deepcopy(edges)
     rightMirror.scaleX(-1)
 
-    leftMirror = deepcopy(edges)
+    leftMirror=deepcopy(edges)
 
-    offset = centerWidth / 2 + 1
+    offset=centerWidth / 2 + 1
 
     leftMirror.offsetX(-offset)
     rightMirror.offsetX(offset)
