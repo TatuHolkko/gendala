@@ -1,6 +1,5 @@
 from copy import deepcopy
 from math import ceil, floor
-import random
 from common.utility import multiplePair
 from geometry.point import Point
 from generation.feature import FeatureGenerator

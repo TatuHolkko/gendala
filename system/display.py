@@ -4,7 +4,6 @@ import pygame                                       # nopep8
 import pygame.gfxdraw                               # nopep8
 
 from math import hypot
-from copy import deepcopy
 from typing import List
 from geometry.geospace import GeoSpace, GeoSpaceStack
 from geometry.line import Line

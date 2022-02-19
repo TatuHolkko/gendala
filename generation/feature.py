@@ -3,7 +3,7 @@ from common.settings import Settings
 from generation.ribbon import RibbonGenerator
 from geometry.point import Point
 from hierarchy.feature import Feature
-from generation.utility import check, checkDistribution, coinFlip
+from generation.utility import check, checkDistribution
 
 
 class FeatureGenerator:

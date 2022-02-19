@@ -1,4 +1,3 @@
-
 from copy import deepcopy
 from math import atan, pi, sin, tan
 from typing import List, Tuple
