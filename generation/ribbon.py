@@ -18,17 +18,17 @@ class RibbonGenerator:
         self.curveGenerator = CurveGenerator(settings=settings)
 
         self.fillScoreAreaCoeff = settings.getItem(
-            "Generator",
+            "Ribbons",
             "fillScoreAreaCoeff",
             float)
 
         self.fillScoreCentricCoeff = settings.getItem(
-            "Generator",
+            "Ribbons",
             "fillScoreCentricCoeff",
             float)
 
         self.fillScoreThreshold = settings.getItem(
-            "Generator",
+            "Ribbons",
             "fillScoreThreshold",
             float)
 

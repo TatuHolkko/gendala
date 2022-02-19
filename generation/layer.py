@@ -26,7 +26,11 @@ class LayerGenerator:
         self.lastRepeats = 2
         self.featureGenerator = FeatureGenerator(settings=settings)
         self.repeatCoeff = settings.getItem(
-            "Generator", "featureWidthCoeff", float)
+            "Layers", "featureWidthCoeff", float)
+        self.minComplexity = settings.getItem(
+            "Layers", "minComplexity", int)
+        self.maxComplexity = settings.getItem(
+            "Layers", "maxComplexity", int)
 
     def getRepeats(self, radius: float, width: float) -> int:
         """
@@ -40,7 +44,7 @@ class LayerGenerator:
             int: Number of repeats
         """
         repeats = self.lastRepeats
-        optimalRepeats = int(6.28 * (radius) / width / 2) * 2
+        optimalRepeats = int(6.28 * (radius) / width / 4) * 2
         optimalRepeats = optimalRepeats / self.repeatCoeff
 
         deviation = (self.lastRepeats - optimalRepeats) / optimalRepeats
@@ -48,7 +52,7 @@ class LayerGenerator:
             repeats = 2 * self.lastRepeats
         elif deviation > 0.2:
             repeats = int(self.lastRepeats / 4 + optimalRepeats / 4) * 2
-        repeats = max(8, repeats)
+        repeats = max(4, repeats)
         return repeats
 
     def getLayer(
@@ -68,8 +72,9 @@ class LayerGenerator:
             Layer: A random Layer
         """
 
-        complexity = random.randint(2, 8)
-        superMirrored = coinFlip()
+        complexity = random.randint(
+            2 * self.minComplexity,
+            2 * self.maxComplexity)
         divider = coinFlip()
         interContinuous = coinFlip()
 
@@ -130,7 +135,6 @@ class LayerGenerator:
             if coinFlip():
                 resultPattern.combine(horizontalLine(-0.95))
 
-
         l = Layer(
             radius=radius,
             width=width,
@@ -147,7 +151,7 @@ def mirror(pattern: Pattern) -> None:
         pattern (Pattern): Pattern to mirror
     """
 
-    mirroredPattern=deepcopy(pattern)
+    mirroredPattern = deepcopy(pattern)
     mirroredPattern.scaleX(-1)
     mirroredPattern.offsetX(1)
 
@@ -166,12 +170,12 @@ def surround(center: Pattern, centerWidth: float, edges: Pattern) -> None:
         edges (Pattern): Edge Pattern
     """
 
-    rightMirror=deepcopy(edges)
+    rightMirror = deepcopy(edges)
     rightMirror.scaleX(-1)
 
-    leftMirror=deepcopy(edges)
+    leftMirror = deepcopy(edges)
 
-    offset=centerWidth / 2 + 1
+    offset = centerWidth / 2 + 1
 
     leftMirror.offsetX(-offset)
     rightMirror.offsetX(offset)
