@@ -3,7 +3,7 @@ from math import ceil, floor
 from common.utility import multiplePair
 from geometry.point import Point
 from generation.feature import FeatureGenerator
-from generation.utility import check, checkDistribution, randomCoordinate
+from generation.utility import check, sampleFromDistribution, randomCoordinate
 from generation.pattern import randomComplexPattern
 from common.settings import Settings
 from hierarchy.curve import Curve
@@ -83,7 +83,7 @@ class LayerGenerator:
             Layer: A random Layer
         """
 
-        complexity = 2 * checkDistribution(self.pdComplexity)
+        complexity = 2 * sampleFromDistribution(self.pdComplexity)
 
         divider = check(self.pDivider)
 

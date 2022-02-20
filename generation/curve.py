@@ -1,6 +1,6 @@
 import random
 from common.settings import Settings
-from generation.utility import randomPoint
+from generation.utility import sampleFromDistribution, randomPoint
 from hierarchy.curve import Curve
 from geometry.point import Point
 from typing import List
@@ -18,7 +18,31 @@ class CurveGenerator:
         Args:
             settings (Settings): Settings object
         """
-        pass
+        self.pdNPoints = settings.getList(
+            section="Curves",
+            setting="PD_complexity",
+            constructor=float
+        )
+        self.pdSubDivs = settings.getList(
+            section="Curves",
+            setting="PD_subDivisions",
+            constructor=float
+        )
+        self.pdExtensionType = settings.getList(
+            section="Curves",
+            setting="PD_connectionType",
+            constructor=float
+        )
+        self.maxAmpSine = settings.getItem(
+            section="Curves",
+            setting="maxSineAmplitude",
+            constructor=float
+        )
+        self.maxAmpArc = settings.getItem(
+            section="Curves",
+            setting="maxArcAmplitude",
+            constructor=float
+        )
 
     def getCurve(
             self,
@@ -41,7 +65,7 @@ class CurveGenerator:
 
         points: List[Point] = []
 
-        n = random.choice([3, 3, 3, 4])
+        n = 2 + sampleFromDistribution(self.pdNPoints)
 
         if start:
             points.append(start)
@@ -59,8 +83,6 @@ class CurveGenerator:
             self.extend(curve, point)
         curve.removeDuplicates()
         if (len(curve.points) < 2) or (len(curve.points) < 3 and closed):
-            # if all random points landed on top of each other
-            print("Invalid Curve discarded.")
             return self.getCurve(closed=closed, start=start, end=end)
         return curve
 
@@ -73,25 +95,24 @@ class CurveGenerator:
             curve (Curve): Curve to extend
             point (Point): New endpoint
         """
-        subDivs = random.randint(3, 9)
-        curveType = random.choice(["sine", "arc", "line"])
-        if curveType == "sine":
+        subDivs = sampleFromDistribution(self.pdSubDivs)
+        curveType = sampleFromDistribution(self.pdExtensionType)
+        if curveType == 3:
             curve.extend(
                 curve.sine(
                     point,
                     subDivs=subDivs,
-                    amplitude=random.random() -
-                    0.5))
-        elif curveType == "arc":
+                    amplitude=random.random() * self.maxAmpSine))
+        elif curveType == 2:
             curve.extend(
                 curve.arc(
                     point,
                     subDivs=subDivs,
-                    amplitude=random.random() *
-                    2 -
-                    1))
-        else:
+                    amplitude=random.random() * self.maxAmpArc))
+        elif curveType == 1:
             curve.extend(curve.line(point))
+        else:
+            raise ValueError("Invalid curve type id")
 
     @staticmethod
     def getPoints(n: int = 2) -> List[Point]:

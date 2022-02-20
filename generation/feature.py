@@ -3,7 +3,7 @@ from common.settings import Settings
 from generation.ribbon import RibbonGenerator
 from geometry.point import Point
 from hierarchy.feature import Feature
-from generation.utility import check, checkDistribution
+from generation.utility import check, sampleFromDistribution
 
 
 class FeatureGenerator:
@@ -26,7 +26,7 @@ class FeatureGenerator:
         self.connectionOverride = settings.getItem(
             "SimpleFeatures", "connectionOverridesMirror", bool)
         self.pdNRibbons = settings.getList(
-            "SimpleFeatures", "PD_numberOfRibbons", float)
+            "SimpleFeatures", "PD_complexity", float)
 
 
     def getFeature(self,
@@ -66,7 +66,7 @@ class FeatureGenerator:
 
         feature = Feature(mirrorY=mirrorY, mirrorX=mirrorX)
 
-        n = checkDistribution(self.pdNRibbons)
+        n = sampleFromDistribution(self.pdNRibbons)
         connectedLeft = random.choice(range(n))
         connectedRight = random.choice(range(n))
         for i in range(n):

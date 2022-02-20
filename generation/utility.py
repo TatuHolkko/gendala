@@ -26,7 +26,7 @@ def check(p:float) -> bool:
     """
     return random.random() < p
 
-def checkDistribution(distribution:List[float]) -> int:
+def sampleFromDistribution(distribution:List[float]) -> int:
     """
     Return random result from a distribution
 
