@@ -9,7 +9,7 @@ from geometry.geospace import GeoSpace, GeoSpaceStack
 from geometry.line import Line
 from geometry.point import Point
 from common.utility import Color, gradient
-from common.settings import Settings                                           # nopep8
+from common.settings import Settings
 
 
 class Display:
@@ -17,7 +17,7 @@ class Display:
     Display provides functions for rendering lines.
     """
 
-    def __init__(self, surf, settings:Settings) -> None:
+    def __init__(self, surf, settings: Settings) -> None:
         """
         Initialize the Display object.
 
@@ -31,6 +31,15 @@ class Display:
         self.settings = settings
         self.antialiasing = settings.getBool("Graphics", "antialiasing")
         self.autoFlush = settings.getBool("Graphics", "autoFlush")
+        c = settings.getList("Graphics", "bgGradient1", int)
+        self.bgC0 = Color(c[0], c[1], c[2])
+        c = settings.getList("Graphics", "bgGradient2", int)
+        self.bgC1 = Color(c[0], c[1], c[2])
+        c = settings.getList("Graphics", "fgGradient1", int)
+        self.fgC0 = Color(c[0], c[1], c[2])
+        c = settings.getList("Graphics", "fgGradient2", int)
+        self.fgC1 = Color(c[0], c[1], c[2])
+        self.autoColor = True
         self.scale = min(self.width, self.height) / 3
         self.lineBuffer: List[Line] = []
         self.renderDisabled = False
@@ -52,7 +61,7 @@ class Display:
         """
         if self.renderDisabled:
             return
-        
+
         pos0 = self.geoSpaceStack.getGlobalPos(line.p0)
         pos1 = self.geoSpaceStack.getGlobalPos(line.p1)
 
@@ -94,7 +103,7 @@ class Display:
             else:
                 pygame.draw.line(
                     self.surf,
-                    self.lineColor.get(),
+                    self.getFgColor(gradient(pos0, pos1, 0.5)).get(),
                     (round(pos0.x),
                      round(pos0.y)),
                     (round(pos1.x),
@@ -104,6 +113,7 @@ class Display:
 
     def drawAALine(self, p1: Point, p2: Point) -> None:
         mid = gradient(p1, p2, 0.5)
+        c = self.getFgColor(mid)
         pygame.gfxdraw.aatrigon(
             self.surf,
             round(p1.x),
@@ -112,7 +122,16 @@ class Display:
             round(mid.y),
             round(p2.x),
             round(p2.y),
-            self.lineColor.get())
+            c.get())
+
+    def getFgColor(self, p: Point):
+        if self.autoColor:
+            center = Point(self.width / 2, self.height / 2)
+            d = center.distanceTo(p)
+            maxD = hypot(self.width, self.height) / 2
+            return gradient(self.fgC0, self.fgC1, d / maxD)
+        else:
+            return self.lineColor
 
     def clear(self) -> None:
         """
@@ -130,13 +149,13 @@ class Display:
         self.lineBuffer = []
         diag = hypot(self.width, self.height)
         maxR = int(diag / 2)
-        c0 = Color(232, 61, 19)
-        c1 = Color(0, 0, 0)
+        c0 = self.bgC0
+        c1 = self.bgC1
         self.surf.fill(c1.get())
         for i in reversed(range(maxR)):
             c = gradient(c0, c1, i / maxR)
-            x = int(self.width/2)
-            y = int(self.height/2)
+            x = int(self.width / 2)
+            y = int(self.height / 2)
             pygame.gfxdraw.aacircle(self.surf, x, y, i, c.get())
             pygame.gfxdraw.filled_circle(self.surf, x, y, i, c.get())
         pygame.display.update()
@@ -150,9 +169,13 @@ class Display:
             g (int): Green
             b (int): Blue
         """
+        self.autoColor = False
         self.lineColor.r = r
         self.lineColor.g = g
         self.lineColor.b = b
+
+    def setAutoColor(self) -> None:
+        self.autoColor = True
 
     def drawDebugGrid(self) -> None:
         """

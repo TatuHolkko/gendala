@@ -125,20 +125,20 @@ class Color:
     def __add__(self, other: Color):
         return Color(
             r=self.r + other.r,
-            g=self.b + other.g,
+            g=self.g + other.g,
             b=self.b + other.b
         )
 
     def __sub__(self, other: Color):
         return Color(
             r=self.r - other.r,
-            g=self.b - other.g,
+            g=self.g - other.g,
             b=self.b - other.b
         )
 
     def __mul__(self, scale: float):
         return Color(
             r=self.r * scale,
-            g=self.b * scale,
+            g=self.g * scale,
             b=self.b * scale
         )
