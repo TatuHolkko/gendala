@@ -8,7 +8,7 @@ from geometry.utility import avgPoint
 from hierarchy.curve import GeometryException
 from hierarchy.ribbon import Ribbon
 from generation.curve import CurveGenerator
-from generation.pattern import centerLine, randomPattern
+from generation.pattern import centerLine, randomLinePattern
 from generation.utility import check
 
 
@@ -115,8 +115,8 @@ class RibbonGenerator:
                 except GeometryException:
                     continue
                 break
-            pattern = randomPattern()
-            n = random.randint(1, 10)
+            pattern = randomLinePattern()
+            n = 1
             taperLength = clamp(random.uniform(self.minTaperLength, self.maxTaperLength), 0, 0.5)
             r = Ribbon(
                 curve=curve,

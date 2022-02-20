@@ -137,7 +137,7 @@ def randomComplexPattern() -> Pattern:
                           ladder])
     return func()
 
-def randomPattern() -> Pattern:
+def randomLinePattern() -> Pattern:
     func = random.choice([tripleLine,
                           topAndBottom,
                           centerLine])
