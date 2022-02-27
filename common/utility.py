@@ -1,4 +1,5 @@
 from __future__ import annotations
+import colorsys
 from typing import List, TypeVar
 
 T = TypeVar('T')
@@ -112,10 +113,19 @@ class Color:
         self.r = int(clamp(0, 255, r))
         self.g = int(clamp(0, 255, g))
         self.b = int(clamp(0, 255, b))
-
-    def get(self) -> tuple[float, float, float]:
+    
+    def hsv(self) -> tuple[float, float, float]:
         """
-        Get a tuple of the three channels
+        Get a tuple of the three hsv channels
+
+        Returns:
+            tuple[float, float, float]: (r,g,b)
+        """
+        return colorsys.rgb_to_hsv(self.r, self.g, self.b)
+
+    def rgb(self) -> tuple[float, float, float]:
+        """
+        Get a tuple of the three rgb channels
 
         Returns:
             tuple[float, float, float]: (r,g,b)

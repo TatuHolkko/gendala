@@ -1,4 +1,6 @@
-import os                                           # nopep8
+import os
+
+from generation.color import ColorGenerator                                           # nopep8
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"   # nopep8
 import pygame                                       # nopep8
 import pygame.gfxdraw                               # nopep8
@@ -31,14 +33,6 @@ class Display:
         self.settings = settings
         self.antialiasing = settings.getBool("Graphics", "antialiasing")
         self.autoFlush = settings.getBool("Graphics", "autoFlush")
-        c = settings.getList("Graphics", "bgGradient1", int)
-        self.bgC0 = Color(c[0], c[1], c[2])
-        c = settings.getList("Graphics", "bgGradient2", int)
-        self.bgC1 = Color(c[0], c[1], c[2])
-        c = settings.getList("Graphics", "fgGradient1", int)
-        self.fgC0 = Color(c[0], c[1], c[2])
-        c = settings.getList("Graphics", "fgGradient2", int)
-        self.fgC1 = Color(c[0], c[1], c[2])
         self.autoColor = True
         self.scale = min(self.width, self.height) / 3
         self.lineBuffer: List[Line] = []
@@ -50,6 +44,11 @@ class Display:
             xScale=self.scale)
         self.geoSpaceStack = GeoSpaceStack()
         self.geoSpaceStack.push(self.geoSpace)
+        self.bgC0 = None
+        self.bgC1 = None
+        self.fgC0 = None
+        self.fgC1 = None
+        self.generateColors()
         self.lineColor = Color(255, 255, 255)
 
     def drawLine(self, line: Line) -> None:
@@ -103,7 +102,7 @@ class Display:
             else:
                 pygame.draw.line(
                     self.surf,
-                    self.getFgColor(gradient(pos0, pos1, 0.5)).get(),
+                    self.getFgColor(gradient(pos0, pos1, 0.5)).rgb(),
                     (round(pos0.x),
                      round(pos0.y)),
                     (round(pos1.x),
@@ -122,7 +121,7 @@ class Display:
             round(mid.y),
             round(p2.x),
             round(p2.y),
-            c.get())
+            c.rgb())
 
     def getFgColor(self, p: Point):
         if self.autoColor:
@@ -139,7 +138,7 @@ class Display:
         """
         self.lineBuffer = []
         c1 = Color(0, 0, 0)
-        self.surf.fill(c1.get())
+        self.surf.fill(c1.rgb())
         pygame.display.update()
 
     def gradient(self) -> None:
@@ -151,14 +150,19 @@ class Display:
         maxR = int(diag / 2)
         c0 = self.bgC0
         c1 = self.bgC1
-        self.surf.fill(c1.get())
+        self.surf.fill(c1.rgb())
         for i in reversed(range(maxR)):
             c = gradient(c0, c1, i / maxR)
             x = int(self.width / 2)
             y = int(self.height / 2)
-            pygame.gfxdraw.aacircle(self.surf, x, y, i, c.get())
-            pygame.gfxdraw.filled_circle(self.surf, x, y, i, c.get())
+            pygame.gfxdraw.aacircle(self.surf, x, y, i, c.rgb())
+            pygame.gfxdraw.filled_circle(self.surf, x, y, i, c.rgb())
         pygame.display.update()
+
+    def generateColors(self) -> None:
+        colorGen = ColorGenerator(settings=self.settings)
+        self.bgC0, self.bgC1 = colorGen.getBackgroundColors()
+        self.fgC0, self.fgC1 = colorGen.getLineColors()
 
     def setColor(self, r: int, g: int, b: int) -> None:
         """

@@ -123,6 +123,7 @@ class Environment():
             if self.debugActive:
                 self.display.clear()
             else:
+                self.display.generateColors()
                 self.display.gradient()
             renderFunction()
             self.renderingEvent.active = False
