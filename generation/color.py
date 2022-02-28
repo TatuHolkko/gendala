@@ -26,8 +26,9 @@ class ColorGenerator:
         self.hueDiffCoeff = settings.getItem("Colors", "hueDiffCoeff", float)
         self.satDiffCoeff = settings.getItem("Colors", "satDiffCoeff", float)
         self.valDiffCoeff = settings.getItem("Colors", "valDiffCoeff", float)
-        self.visualDiffThreshold = settings.getItem("Colors", "visualDiffThreshold", float)
-        diff = self.visualDiffThreshold
+        self.visualDiffThreshold = settings.getItem(
+            "Colors", "visualDiffThreshold", float)
+        self.purityThreshold = 10
 
         while True:
             self.bg1 = self.randomColor(
@@ -48,13 +49,15 @@ class ColorGenerator:
             self.fg1 = self.fgFromBg(self.bg1)
             self.fg2 = self.fgFromBg(self.bg2)
 
-            if self.visualDistance(self.bg1, self.fg1) < self.visualDiffThreshold:
+            if self.visualDistance(self.bg1,
+                                   self.fg1) < self.visualDiffThreshold:
                 continue
-            if self.visualDistance(self.bg2, self.fg2) < self.visualDiffThreshold:
+            if self.visualDistance(self.bg2,
+                                   self.fg2) < self.visualDiffThreshold:
                 continue
             break
 
-    def visualDistance(self, c1:Color, c2:Color) -> float:
+    def visualDistance(self, c1: Color, c2: Color) -> float:
         h1, s1, v1 = c1.hsv()
         h2, s2, v2 = c2.hsv()
         hd = min(abs(h1 - h2), 1 - abs(h1 - h2))
@@ -75,11 +78,35 @@ class ColorGenerator:
             (val, val))
 
     def randomColor(self, hueRange, satRange, valRange) -> Color:
-        hue = (random.uniform(hueRange[0], hueRange[1]) / 360) % 1
+        hue = random.uniform(hueRange[0], hueRange[1]) % 360
+        hue = self.fixHue(hue=hue) / 360.0
         sat = clamp(random.uniform(satRange[0], satRange[1]), 0, 1)
         val = clamp(random.uniform(valRange[0], valRange[1]), 0, 1)
         rgb = colorsys.hsv_to_rgb(hue, sat, val)
         return Color(rgb[0] * 255, rgb[1] * 255, rgb[2] * 255)
+
+    def fixHue(self, hue):
+        sign = self.impurityDirection(hue=hue)
+        if self.isPureHue(hue):
+            print("I:"+str(hue))
+            hue = (hue + sign * self.purityThreshold) % 360
+            print("F:"+str(hue))
+        return hue
+    
+    def impurityDirection(self, hue):
+        hueMod = hue % 120
+        if hueMod < self.purityThreshold:
+            return 1
+        else:
+            return -1
+
+    def isPureHue(self, hue):
+        dRed = min(hue, 360 - hue)
+        dGreen = min(abs(hue - 120), 360 - abs(hue - 120))
+        dBlue = min(abs(hue - 240), 360 - abs(hue - 240))
+        return (dRed < self.purityThreshold or
+                dGreen < self.purityThreshold or
+                dBlue < self.purityThreshold)
 
     def getBackgroundColors(self):
         return (self.bg1, self.bg2)
