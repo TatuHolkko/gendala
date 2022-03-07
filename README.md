@@ -33,17 +33,17 @@ In order to understand the settings, it is good to understand the basic structur
 
 Hierarchy level | Name | Description | Image
 ----------------|------|-------------|-------
-1 | Mandala | Top level, contains several layers | <img src="doc/hierarchy.png" alt="drawing" width="150px"/>
-2 | Layer | Circular set of features | <img src="doc/layer.png" alt="drawing" width="150px"/>
-3 | Feature | A set of ribbons | <img src="doc/feature.png" alt="drawing" width="150px"/>
-4 | Ribbon | A pattern drawn along a curve | <img src="doc/ribbon.png" alt="drawing" width="150px"/>
-5 | Curve | A set of points | <img src="doc/curve.png" alt="drawing" width="150px"/>
+1 | Mandala | Top level, contains several layers | <img src="doc/hierarchy.jpeg" alt="hierarchy" width="150px"/>
+2 | Layer | Circular set of features | <img src="doc/layer.jpeg" alt="layer" width="150px"/>
+3 | Feature | A set of ribbons | <img src="doc/feature.jpeg" alt="feature" width="150px"/>
+4 | Ribbon | A pattern drawn along a curve | <img src="doc/ribbon.jpeg" alt="ribbon" width="150px"/>
+5 | Curve | A set of points | <img src="doc/curve.jpeg" alt="curve" width="150px"/>
 
 ### Simple and complex features
 
 The settings file distinguishes between simple and complex features using basically complex feature as a parent of several simple features. In the image below, the entire red area is the complex feature, and the red lines divide the complex feature into four simple features. Taking mirroring into account it consists of two different simple features, so it's `complexity` is 2. It also has `intercontinuity` (continuity between adjacent complex features, highlighted with orange dots) as well as `intracontinuity` (continuity between adjacent simple features, highlighted with green dots).
 
-<img src="doc/complexity.png" alt="drawing" width="150px"/>
+<img src="doc/complexity.jpeg" alt="complexity" width="150px"/>
 
 ### What settings to focus on
 
