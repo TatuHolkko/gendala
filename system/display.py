@@ -53,7 +53,7 @@ class Display:
 
     def drawLine(self, line: Line) -> None:
         """
-        Draw a line
+        Draw a line.
 
         Args:
             line (Line):  Line to draw
@@ -68,7 +68,7 @@ class Display:
 
         if self.autoFlush:
             self.flushBuffer()
-        
+
     def maxRadius(self) -> float:
         """
         Return the distance from center of screen
@@ -82,7 +82,7 @@ class Display:
 
     def setAutoFlush(self, value: bool) -> None:
         """
-        Set the auto flushing feature to True or False
+        Set the auto flushing feature to True or False.
 
         Args:
             value (bool): Value
@@ -91,19 +91,19 @@ class Display:
 
     def disableRender(self) -> None:
         """
-        Disable rendering
+        Disable rendering.
         """
         self.renderDisabled = True
 
     def enableRender(self) -> None:
         """
-        Enable rendering
+        Enable rendering.
         """
         self.renderDisabled = False
 
     def flushBuffer(self) -> None:
         """
-        Draw buffered lines and clear the buffer
+        Draw buffered lines and clear the buffer.
         """
         for line in self.lineBuffer:
             pos0 = line.p0
@@ -122,6 +122,13 @@ class Display:
         pygame.display.update()
 
     def drawAALine(self, p1: Point, p2: Point) -> None:
+        """
+        Draw antialiased line from p1 to p2.
+
+        Args:
+            p1 (Point): Point 1
+            p2 (Point): Point 2
+        """
         mid = gradient(p1, p2, 0.5)
         c = self.getFgColor(mid)
         pygame.gfxdraw.aatrigon(
@@ -134,7 +141,16 @@ class Display:
             round(p2.y),
             c.rgb())
 
-    def getFgColor(self, p: Point):
+    def getFgColor(self, p: Point) -> Color:
+        """
+        Get the foreground color at point p.
+
+        Args:
+            p (Point): Foreground point
+
+        Returns:
+            Color: Foreground color
+        """
         if self.autoColor:
             center = Point(self.width / 2, self.height / 2)
             d = center.distanceTo(p)
@@ -145,7 +161,7 @@ class Display:
 
     def clear(self) -> None:
         """
-        Clear the screen
+        Fill the screen with black color.
         """
         self.lineBuffer = []
         c1 = Color(0, 0, 0)
@@ -154,7 +170,7 @@ class Display:
 
     def gradient(self) -> None:
         """
-        Draw a radial gradient background
+        Draw a radial gradient background.
         """
         self.lineBuffer = []
         diag = hypot(self.width, self.height)
@@ -171,6 +187,9 @@ class Display:
         pygame.display.update()
 
     def generateColors(self) -> None:
+        """
+        Generate and update background and foreground color pairs.
+        """
         print("Generating colors...")
         colorGen = ColorGenerator(settings=self.settings)
         print("Done.")
@@ -179,7 +198,7 @@ class Display:
 
     def setColor(self, r: int, g: int, b: int) -> None:
         """
-        Set line color
+        Set foreground color.
 
         Args:
             r (int): Red
@@ -192,11 +211,16 @@ class Display:
         self.lineColor.b = b
 
     def setAutoColor(self) -> None:
+        """
+        Set autocoloring to true of false.
+
+        If autocoloring is on, colors are randomly generated.
+        """
         self.autoColor = True
 
     def drawDebugGrid(self) -> None:
         """
-        Draw a red unit square with x and y axes
+        Draw a red unit square with x and y axes.
         """
         # unit square
         self.drawLine(Line(Point(1, 1), Point(-1, 1)))
@@ -209,7 +233,7 @@ class Display:
 
     def pushGeoSpace(self, geoSpace: GeoSpace) -> None:
         """
-        Push a geospace to the stack
+        Push a geospace to the stack.
 
         Args:
             geoSpace (GeoSpace): GeoSpace to push

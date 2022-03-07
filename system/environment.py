@@ -68,8 +68,8 @@ class Environment():
         self.display = Display(
             self.surf,
             settings=settings
-            )
-        
+        )
+
         print(settings)
 
     def debugRender(self) -> None:
@@ -108,7 +108,7 @@ class Environment():
         """
         Generate and render a set of layers
         """
-        layers:List[Tuple[float, float]] = []
+        layers: List[Tuple[float, float]] = []
         r0 = 0.02
         w0 = 0.08
         wp = 0
@@ -129,7 +129,7 @@ class Environment():
             if self.restartEvent.active:
                 break
 
-            print(f"Generating Layer {n}/{len(layers)}..." )
+            print(f"Generating Layer {n}/{len(layers)}...")
 
             l = g.getLayer(radius=r, width=w)
 
@@ -137,7 +137,7 @@ class Environment():
 
             if self.restartEvent.active:
                 break
-            
+
             print("Rendering Layer...")
 
             l.render(self.display)
@@ -147,8 +147,6 @@ class Environment():
             self.display.flushBuffer()
 
             n += 1
-
-            
 
     def generateRenderFunction(
             self,

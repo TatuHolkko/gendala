@@ -3,6 +3,9 @@ from geometry.point import Point
 from hierarchy.curve import Curve
 from hierarchy.pattern import Pattern
 
+"""
+Collection of patterns
+"""
 
 def verticalLine(x=0) -> Pattern:
     pattern = Pattern()

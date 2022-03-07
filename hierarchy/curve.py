@@ -289,7 +289,6 @@ class Curve():
         for point in self.points:
             geoSpace.transform(point)
 
-
     def length(self) -> float:
         """
         Get the lenght of this curve

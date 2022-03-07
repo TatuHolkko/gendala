@@ -6,10 +6,12 @@ Angle = float
 # Smallest distance allowed when detecting point location equality
 collisionThreshold = 0.01
 
+
 class Point:
     """
     A simple object describing two coordinate in a cartesian coordinate system
     """
+
     def __init__(self, x: float, y: float) -> None:
         self.x = x
         self.y = y

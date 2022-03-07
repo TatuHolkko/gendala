@@ -28,7 +28,6 @@ class FeatureGenerator:
         self.pdNRibbons = settings.getList(
             "SimpleFeatures", "PD_complexity", float)
 
-
     def getFeature(self,
                    leftConnection: float = None,
                    rightConnection: float = None,

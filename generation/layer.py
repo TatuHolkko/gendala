@@ -163,11 +163,11 @@ class LayerGenerator:
             resultPattern.combine(dividerRibbon.getPattern())
             print("\tDone.")
         print("\tCreatig Layer object...")
-        l=Layer(
-            radius = radius,
-            width = width,
-            pattern = resultPattern,
-            repeats = repeats)
+        l = Layer(
+            radius=radius,
+            width=width,
+            pattern=resultPattern,
+            repeats=repeats)
         print("\tDone.")
         return l
 
@@ -180,7 +180,7 @@ def mirror(pattern: Pattern) -> None:
         pattern (Pattern): Pattern to mirror
     """
 
-    mirroredPattern=deepcopy(pattern)
+    mirroredPattern = deepcopy(pattern)
     mirroredPattern.scaleX(-1)
     mirroredPattern.offsetX(1)
 
@@ -199,12 +199,12 @@ def surround(center: Pattern, centerWidth: float, edges: Pattern) -> None:
         edges (Pattern): Edge Pattern
     """
 
-    rightMirror=deepcopy(edges)
+    rightMirror = deepcopy(edges)
     rightMirror.scaleX(-1)
 
-    leftMirror=deepcopy(edges)
+    leftMirror = deepcopy(edges)
 
-    offset=centerWidth / 2 + 1
+    offset = centerWidth / 2 + 1
 
     leftMirror.offsetX(-offset)
     rightMirror.offsetX(offset)

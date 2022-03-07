@@ -4,6 +4,10 @@ from typing import List, TypeVar
 
 T = TypeVar('T')
 
+"""
+Generally useful functions
+"""
+
 def multiplePair(val1:int, val2:int) -> bool:
     """
     Return true if val1 is a multiple of val2 or vice versa
@@ -34,7 +38,7 @@ def clamp(value: float, minLim: float, maxLim: float) -> float:
 
 def sign(value: float) -> int:
     """
-    Return sign of given value as an integers
+    Return sign of given value as an integer
 
     Args:
         value (float): value
@@ -47,7 +51,10 @@ def sign(value: float) -> int:
 
 def tuplify(lst: List) -> tuple:
     """
-    Convert list and its elements recursively to tuple
+    Convert list and its elements recursively to tuple.
+
+    If the given list is a list of lists, all sub lists will be tuplified
+    too.
 
     Args:
         lst (List): List to convert
@@ -60,7 +67,10 @@ def tuplify(lst: List) -> tuple:
 
 def listify(tpl: tuple) -> List:
     """
-    Convert tuple and its elements recursively to List
+    Convert tuple and its elements recursively to List.
+
+    If the given tuple is a tuple of tuples, all sub tuples will be listified
+    too.
 
     Args:
         lst (tuple): tuple to convert

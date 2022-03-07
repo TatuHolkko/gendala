@@ -9,6 +9,7 @@ class Pattern:
     """
     Pattern is a collection of lines
     """
+
     def __init__(self) -> None:
         """
         Initialize the pattern
@@ -35,7 +36,7 @@ class Pattern:
         Copy all lines from another pattern to this one
 
         Args:
-            other (Pattern): [description]
+            other (Pattern): Other pattern to combine into this
         """
         for line in other.lines:
             self.add(deepcopy(line))
@@ -82,10 +83,13 @@ class Pattern:
         scale = 2 / width
         self.offsetX(-middle)
         self.scaleX(scale)
-    
+
     def scaleYToLimits(self) -> None:
         """
-        Scale y so that the pattern fits the unit square
+        Scale y so that the pattern fits the unit square.
+
+        If the pattern y limits fit the unit square, no scaling
+        is applied.
         """
         self.updateLimits()
         maxY = max(1, max(abs(self.yMin), abs(self.yMax)))
@@ -124,7 +128,7 @@ class Pattern:
         for l in self.lines:
             l.p0.x *= scaleX
             l.p1.x *= scaleX
-    
+
     def scaleY(self, scaleY: float) -> None:
         """
         Scale the y coordinate of all lines by an amount.
@@ -135,7 +139,6 @@ class Pattern:
         for l in self.lines:
             l.p0.y *= scaleY
             l.p1.y *= scaleY
-
 
     def repeat(self, n: int) -> None:
         """

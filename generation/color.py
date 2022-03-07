@@ -1,11 +1,15 @@
 import colorsys
 import random
+from typing import Tuple
 from common.settings import Settings
 from common.utility import Color, clamp
 from generation.utility import coinFlip
 
 
 class ColorGenerator:
+    """
+    Generator for background and foreground color pairs.
+    """
 
     def __init__(self, settings: Settings) -> None:
         """
@@ -28,7 +32,8 @@ class ColorGenerator:
         self.valDiffCoeff = settings.getItem("Colors", "valDiffCoeff", float)
         self.visualDiffThreshold = settings.getItem(
             "Colors", "visualDiffThreshold", float)
-        self.purityThreshold =  settings.getItem("Colors", "purityThreshold", float)
+        self.purityThreshold = settings.getItem(
+            "Colors", "purityThreshold", float)
 
         while True:
             self.bg1 = self.randomColor(
@@ -60,6 +65,17 @@ class ColorGenerator:
             break
 
     def visualDistance(self, c1: Color, c2: Color) -> float:
+        """
+        Return a float representing the visual difference between
+        the given colors.
+
+        Args:
+            c1 (Color): Color 1
+            c2 (Color): Color 2
+
+        Returns:
+            float: Number representing the difference
+        """
         h1, s1, v1 = c1.hsv()
         h2, s2, v2 = c2.hsv()
         hd = min(abs(h1 - h2), 1 - abs(h1 - h2))
@@ -67,7 +83,19 @@ class ColorGenerator:
         vd = abs(v1 - v2)
         return hd * self.hueDiffCoeff + sd * self.satDiffCoeff + vd * self.valDiffCoeff
 
-    def fgFromBg(self, bg) -> Color:
+    def fgFromBg(self, bg: Color) -> Color:
+        """
+        Generate foreground color for a given background color.
+
+        The hue of the returned color is selected away from the hue
+        of the background.
+
+        Args:
+            bg (Color): Background color
+
+        Returns:
+            Color: Color that has different hue than background
+        """
         bgHue, _, _ = bg.hsv()
         sign = 1 if coinFlip() else -1
         offset = (bgHue * 360 + sign * self.fgHueOffset)
@@ -79,7 +107,26 @@ class ColorGenerator:
             (0.5, 0.7),
             (val, val))
 
-    def randomColor(self, hueRange, satRange, valRange) -> Color:
+    def randomColor(self,
+                    hueRange: Tuple[float,
+                                    float],
+                    satRange: Tuple[float,
+                                    float],
+                    valRange: Tuple[float,
+                                    float]) -> Color:
+        """
+        Generate a random color using ranges for the hsv values.
+
+        The hue is shifted if it happens to be too pure red green or blue.
+
+        Args:
+            hueRange (Tuple[float,float]): Hue range (degrees)
+            satRange (Tuple[float,float]): Saturation range (0 - 1)
+            valRange (Tuple[float,float]): Value range (0 - 1)
+
+        Returns:
+            Color: Generated color
+        """
         hue = random.uniform(hueRange[0], hueRange[1]) % 360
         hue = self.fixHue(hue=hue) / 360.0
         sat = clamp(random.uniform(satRange[0], satRange[1]), 0, 1)
@@ -87,20 +134,48 @@ class ColorGenerator:
         rgb = colorsys.hsv_to_rgb(hue, sat, val)
         return Color(rgb[0] * 255, rgb[1] * 255, rgb[2] * 255)
 
-    def fixHue(self, hue):
+    def fixHue(self, hue: float) -> float:
+        """
+        If the given hue is too pure red, green or blue,
+        it is shifted into a random direction.
+
+        Args:
+            hue (float): Hue (degrees)
+
+        Returns:
+            float: Hue that is guaranteed to not be pure red green or blue
+        """
         sign = self.impurityDirection(hue=hue)
         if self.isPureHue(hue):
             hue = (hue + sign * self.purityThreshold) % 360
         return hue
-    
-    def impurityDirection(self, hue):
+
+    def impurityDirection(self, hue: float) -> int:
+        """
+        Calculate the shorter direction away from pure red green and blue.
+
+        Args:
+            hue (float): Hue (degrees)
+
+        Returns:
+            int: -1 or 1, representing the direction
+        """
         hueMod = hue % 120
         if hueMod < self.purityThreshold:
             return 1
         else:
             return -1
 
-    def isPureHue(self, hue):
+    def isPureHue(self, hue: float) -> bool:
+        """
+        Return true if the hue is too pure.
+
+        Args:
+            hue (float): Hue (degrees)
+
+        Returns:
+            bool: True if the hue is too pure
+        """
         dRed = min(hue, 360 - hue)
         dGreen = min(abs(hue - 120), 360 - abs(hue - 120))
         dBlue = min(abs(hue - 240), 360 - abs(hue - 240))
@@ -108,8 +183,20 @@ class ColorGenerator:
                 dGreen < self.purityThreshold or
                 dBlue < self.purityThreshold)
 
-    def getBackgroundColors(self):
+    def getBackgroundColors(self) -> Tuple[Color, Color]:
+        """
+        Get the generated background colors.
+
+        Returns:
+            Tuple[Color, Color]: Background colors
+        """
         return (self.bg1, self.bg2)
 
-    def getLineColors(self):
+    def getLineColors(self) -> Tuple[Color, Color]:
+        """
+        Get the generated foreground colors.
+
+        Returns:
+            Tuple[Color, Color]: Foreground colors
+        """
         return (self.fg1, self.fg2)

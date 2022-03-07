@@ -52,12 +52,12 @@ class CurveGenerator:
         """
         Generate a random Curve
 
-        If start or end are not given, they are random
+        If start or end are not given, they are random.
 
         Args:
             closed (bool, optional): Wether to close the curve. Defaults to False.
-            start (Point): Start of the ribbon
-            end (Point): End of the ribbon
+            start (Point): Start of the ribbon. Defaults to None.
+            end (Point): End of the ribbon. Defaults to None.
 
         Returns:
             Curve: A random Curve

@@ -2,6 +2,10 @@ import random
 from typing import List
 from geometry.point import Point
 
+"""
+Generally useful functions used in random generation
+"""
+
 edgePadding = 0.1
 
 
@@ -14,7 +18,8 @@ def coinFlip() -> bool:
     """
     return random.choice([True, False])
 
-def check(p:float) -> bool:
+
+def check(p: float) -> bool:
     """
     Return true with probability p
 
@@ -26,7 +31,8 @@ def check(p:float) -> bool:
     """
     return random.random() < p
 
-def sampleFromDistribution(distribution:List[float]) -> int:
+
+def sampleFromDistribution(distribution: List[float]) -> int:
     """
     Return random result from a distribution
 
@@ -39,6 +45,7 @@ def sampleFromDistribution(distribution:List[float]) -> int:
     choices = range(1, len(distribution) + 1)
     return random.choices(population=choices, weights=distribution, k=1)[0]
 
+
 def randomCoordinate() -> float:
     """
     Return a random coordinate between -1 and 1
@@ -48,6 +55,7 @@ def randomCoordinate() -> float:
     """
     return (random.random() * 2 - 1) * (1 - edgePadding)
 
+
 def randomPoint() -> Point:
     """
     Return a random point inside the unit square.
@@ -56,4 +64,3 @@ def randomPoint() -> Point:
         Point: Point inside the unit square
     """
     return Point(randomCoordinate(), randomCoordinate())
-

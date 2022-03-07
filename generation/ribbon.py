@@ -13,6 +13,10 @@ from generation.utility import check
 
 class RibbonGenerator:
 
+    """
+    Generator for Ribbon objects
+    """
+
     def __init__(self, settings: Settings) -> None:
         self.curveGenerator = CurveGenerator(settings=settings)
 
@@ -140,5 +144,5 @@ class RibbonGenerator:
             s = self.fillScore(r)
             if s > self.fillScoreThreshold:
                 break
-            print(f"\t\t\tFill score {s}<{self.fillScoreThreshold}, discarded.")
+            print(f"\t\t\tFill score {s} < {self.fillScoreThreshold}, discarded.")
         return r

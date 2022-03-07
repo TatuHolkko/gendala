@@ -2,9 +2,13 @@ from typing import List
 from geometry.point import Point
 from math import pi
 
+"""
+Generally useful functions used in geometry
+"""
+
 Angle = float
 
-def avgPoint(points:List[Point]) -> Point:
+def avgPoint(points: List[Point]) -> Point:
     """
     Return an averaged point
 
@@ -14,10 +18,11 @@ def avgPoint(points:List[Point]) -> Point:
     Returns:
         Point: Average point
     """
-    p = Point(0,0)
+    p = Point(0, 0)
     for point in points:
         p = p + point
     return p * (1 / len(points))
+
 
 def deg(a: Angle) -> float:
     """
