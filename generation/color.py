@@ -28,7 +28,7 @@ class ColorGenerator:
         self.valDiffCoeff = settings.getItem("Colors", "valDiffCoeff", float)
         self.visualDiffThreshold = settings.getItem(
             "Colors", "visualDiffThreshold", float)
-        self.purityThreshold = 10
+        self.purityThreshold =  settings.getItem("Colors", "purityThreshold", float)
 
         while True:
             self.bg1 = self.randomColor(
@@ -88,9 +88,7 @@ class ColorGenerator:
     def fixHue(self, hue):
         sign = self.impurityDirection(hue=hue)
         if self.isPureHue(hue):
-            print("I:"+str(hue))
             hue = (hue + sign * self.purityThreshold) % 360
-            print("F:"+str(hue))
         return hue
     
     def impurityDirection(self, hue):
