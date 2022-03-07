@@ -69,6 +69,8 @@ class Environment():
             self.surf,
             settings=settings
             )
+        
+        print(settings)
 
     def debugRender(self) -> None:
         """
@@ -120,19 +122,31 @@ class Environment():
 
         g = LayerGenerator(self.settings)
 
+        n = 1
+
         for r, w in layers:
 
             if self.restartEvent.active:
                 break
 
+            print(f"Generating Layer {n}/{len(layers)}..." )
+
             l = g.getLayer(radius=r, width=w)
+
+            print("Done.")
 
             if self.restartEvent.active:
                 break
+            
+            print("Rendering Layer...")
 
             l.render(self.display)
 
+            print("Done.")
+
             self.display.flushBuffer()
+
+            n += 1
 
             
 

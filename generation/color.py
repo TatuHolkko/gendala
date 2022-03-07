@@ -51,9 +51,11 @@ class ColorGenerator:
 
             if self.visualDistance(self.bg1,
                                    self.fg1) < self.visualDiffThreshold:
+                print("\tForeground too similar to background, discarded.")
                 continue
             if self.visualDistance(self.bg2,
                                    self.fg2) < self.visualDiffThreshold:
+                print("\tForeground too similar to background, discarded.")
                 continue
             break
 

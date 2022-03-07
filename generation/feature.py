@@ -76,6 +76,8 @@ class FeatureGenerator:
                 start = Point(-1, leftConnection)
             if i == connectedRight and rightConnection:
                 end = Point(1, rightConnection)
+            print(f"\t\tGenerating Ribbon {i+1}/{n}...")
             feature.add(self.ribbonGenerator.getRibbon(start=start, end=end))
+            print(f"\t\tDone.")
 
         return feature

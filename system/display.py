@@ -171,7 +171,9 @@ class Display:
         pygame.display.update()
 
     def generateColors(self) -> None:
+        print("Generating colors...")
         colorGen = ColorGenerator(settings=self.settings)
+        print("Done.")
         self.bgC0, self.bgC1 = colorGen.getBackgroundColors()
         self.fgC0, self.fgC1 = colorGen.getLineColors()
 

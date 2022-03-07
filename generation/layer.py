@@ -127,20 +127,26 @@ class LayerGenerator:
 
         i = centerIndex
         while i > 0:
+            print(f"\tGenerating Feature {centerIndex-i+1}/{centerIndex}...")
             feature = self.featureGenerator.getFeature(
                 leftConnection=connections[i],
                 rightConnection=connections[i - 1]
             )
-
+            print("\tDone.")
+            print("\tCombining into complex feature...")
             surround(resultPattern, patternWidth, feature.getPattern())
+            print("\tDone.")
             patternWidth += 4
             i -= 1
 
+        print("\tNormailizing complex feature...")
         resultPattern.offsetX(-complexity)
         resultPattern.scaleX(1 / complexity)
         resultPattern.scaleYToLimits()
+        print("\tDone.")
 
         if divider:
+            print("\tGenerating divider...")
             dividerSpace = self.dividerWidth + self.dividerPadding * 2
             dividerY = 1 - dividerSpace / 2
             dividerCurve = Curve(Point(-1, -dividerY))
@@ -155,12 +161,14 @@ class LayerGenerator:
             resultPattern.scaleY(1 - dividerSpace / 2)
             resultPattern.offsetY(dividerSpace / 2)
             resultPattern.combine(dividerRibbon.getPattern())
-
+            print("\tDone.")
+        print("\tCreatig Layer object...")
         l=Layer(
             radius = radius,
             width = width,
             pattern = resultPattern,
             repeats = repeats)
+        print("\tDone.")
         return l
 
 

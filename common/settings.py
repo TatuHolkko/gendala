@@ -18,6 +18,14 @@ class Settings:
         """
         self.config = configparser.ConfigParser()
         self.config.read(iniPath)
+    
+    def __str__(self) -> str:
+        s = ""
+        for section, content in self.config.items():
+            s += section + ":\n"
+            for setting, value in content.items():
+                s += "\t" + setting + ": " + value + "\n"
+        return s
 
     def getBool(self, section: str, setting: str) -> bool:
         """

@@ -11,7 +11,6 @@ from generation.curve import CurveGenerator
 from generation.pattern import centerLine, randomLinePattern
 from generation.utility import check
 
-
 class RibbonGenerator:
 
     def __init__(self, settings: Settings) -> None:
@@ -107,14 +106,17 @@ class RibbonGenerator:
             closed = check(self.pClosed) and not (start or end)
             curve = None
             width = random.random() * self.maxWidth
+            print("\t\t\tGenerating curve...")
             while(True):
                 curve = self.curveGenerator.getCurve(
                     closed=closed, start=start, end=end)
                 try:
                     curve.round()
                 except GeometryException:
+                    print("\t\t\t\tNot roundable, discarded.")
                     continue
                 break
+            print("\t\t\tDone.")
             pattern = randomLinePattern()
             n = 1
             taperLength = clamp(random.uniform(self.minTaperLength, self.maxTaperLength), 0, 0.5)
@@ -127,6 +129,7 @@ class RibbonGenerator:
                 n=n)
             r.unCollideWidth()
             if r.width < self.collapseWidth:
+                print("\t\t\tPattern collapsed to a line.")
                 r = Ribbon(
                     curve=curve,
                     pattern=centerLine(),
@@ -134,6 +137,8 @@ class RibbonGenerator:
                     taperLength=taperLength,
                     width=0,
                     n=n)
-            if self.fillScore(r) > self.fillScoreThreshold:
+            s = self.fillScore(r)
+            if s > self.fillScoreThreshold:
                 break
+            print(f"\t\t\tFill score {s}<{self.fillScoreThreshold}, discarded.")
         return r

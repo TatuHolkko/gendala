@@ -83,6 +83,7 @@ class CurveGenerator:
             self.extend(curve, point)
         curve.removeDuplicates()
         if (len(curve.points) < 2) or (len(curve.points) < 3 and closed):
+            print("\t\t\t\tPoint locations invalid, discarded.")
             return self.getCurve(closed=closed, start=start, end=end)
         return curve
 
