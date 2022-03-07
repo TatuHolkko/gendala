@@ -218,8 +218,9 @@ class Environment():
     def exportScreen(self):
         name = str(uuid.uuid4()) + \
             ".png" if self.exportRandomName else self.exportName
-        pygame.image.save(self.surf,
-                          "../" + self.exportFolder + "/" + name)
+        path = "../" + self.exportFolder + "/" + name
+        pygame.image.save(self.surf, path)
+        print("Exported into: " + path)
 
     def eventLoop(self):
         """
