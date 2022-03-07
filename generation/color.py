@@ -74,7 +74,7 @@ class ColorGenerator:
         val = 1
         return self.randomColor(
             (fgHueMin, fgHueMax),
-            (1, 1),
+            (0.5, 0.7),
             (val, val))
 
     def randomColor(self, hueRange, satRange, valRange) -> Color:
