@@ -39,7 +39,8 @@ class ColorGenerator:
             self.bg1 = self.randomColor(
                 self.bgHueRange,
                 (0.6, 0.8),
-                (self.centerValueRange[0], self.centerValueRange[1]))
+                (self.centerValueRange[0], self.centerValueRange[1]),
+                allowPure=True)
 
             bg1Hue, _, _ = self.bg1.hsv()
 
@@ -49,7 +50,8 @@ class ColorGenerator:
             self.bg2 = self.randomColor(
                 (bg2HueMin, bg2HueMax),
                 (0.3, 0.7),
-                (0, 0.2))
+                (0, 0.2),
+                allowPure=True)
 
             self.fg1 = self.fgFromBg(self.bg1)
             self.fg2 = self.fgFromBg(self.bg2)
@@ -113,7 +115,8 @@ class ColorGenerator:
                     satRange: Tuple[float,
                                     float],
                     valRange: Tuple[float,
-                                    float]) -> Color:
+                                    float],
+                    allowPure: bool = False) -> Color:
         """
         Generate a random color using ranges for the hsv values.
 
@@ -123,12 +126,14 @@ class ColorGenerator:
             hueRange (Tuple[float,float]): Hue range (degrees)
             satRange (Tuple[float,float]): Saturation range (0 - 1)
             valRange (Tuple[float,float]): Value range (0 - 1)
+            allowPure (bool): If false, pure colors are shifted a bit.
 
         Returns:
             Color: Generated color
         """
         hue = random.uniform(hueRange[0], hueRange[1]) % 360
-        hue = self.fixHue(hue=hue) / 360.0
+        if not allowPure:
+            hue = self.fixHue(hue=hue) / 360.0
         sat = clamp(random.uniform(satRange[0], satRange[1]), 0, 1)
         val = clamp(random.uniform(valRange[0], valRange[1]), 0, 1)
         rgb = colorsys.hsv_to_rgb(hue, sat, val)
