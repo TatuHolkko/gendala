@@ -3,9 +3,10 @@ from typing import Callable                                           # nopep8
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"   # nopep8
 import pygame                                       # nopep8
 import uuid
-from common.settings import Settings
 import random
 import threading
+
+from common.settings import Settings
 from geometry.point import Point
 from hierarchy.curve import Curve
 from hierarchy.ribbon import Ribbon
@@ -31,19 +32,43 @@ class Environment():
         Args:
             settings (Settings):  Settings object
         """
+        self.settings = settings
+
+        displayFlags = None
+        if settings.getBool("Program", "hidden"):
+            displayFlags = pygame.HIDDEN
+        else:
+            displayFlags = pygame.SHOWN
+
+        self.debugActive = settings.getBool("Program", "debug")
+
+        self.exportMode = settings.getBool("Program", "export")
+        self.exportRandomName = settings.getBool("Program", "randomExportName")
+        self.exportName = settings.getItem("Program", "exportName", str)
+        self.exportFolder = settings.getItem("Program", "exportFolder", str)
+
+        self.exited = False
+
+        self.renderThread = None
+
+        self.renderingEvent = Event()
+        self.restartEvent = Event()
+        self.saveEvent = Event()
+
+        if self.exportMode:
+            self.saveEvent.queued = True
+
         pygame.init()
         pygame.display.set_caption("Gendala")
-        self.settings = settings
         self.surf = pygame.display.set_mode(
-            size=settings.getList("System", "resolution", int)
+            size=settings.getList("Program", "resolution", int),
+            flags=displayFlags
         )
-        self.display = Display(self.surf, settings=settings)
-        self.renderThread = None
-        self.debugActive = settings.getBool("Program", "debug")
-        self.exited = False
-        self.renderingEvent = Event()
-        self.saveEvent = Event()
-        self.restartEvent = Event()
+
+        self.display = Display(
+            self.surf,
+            settings=settings
+            )
 
     def debugRender(self) -> None:
         """
@@ -87,7 +112,7 @@ class Environment():
         wp = 0
         g = LayerGenerator(self.settings)
         for i in range(layers):
-            
+
             w = w0 + random.random() * 0.06 - 0.03
             r = r0 + wp + w
 
@@ -173,6 +198,12 @@ class Environment():
             self.startRender()
             self.restartEvent.queued = False
 
+    def exportScreen(self):
+        name = str(uuid.uuid4()) + \
+            ".png" if self.exportRandomName else self.exportName
+        pygame.image.save(self.surf,
+                          "../" + self.exportFolder + "/" + name)
+
     def eventLoop(self):
         """
         Blocking event loop
@@ -181,8 +212,9 @@ class Environment():
 
             if self.saveEvent.queued and not self.saveEvent.active and not self.renderingEvent.active:
                 self.saveEvent.active = True
-                pygame.image.save(self.surf,
-                                  "../results/" + str(uuid.uuid4()) + ".png")
+                self.exportScreen()
+                if self.exportMode:
+                    self.exited = True
                 self.saveEvent.active = False
                 self.saveEvent.queued = False
 
