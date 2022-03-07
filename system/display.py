@@ -68,6 +68,17 @@ class Display:
 
         if self.autoFlush:
             self.flushBuffer()
+        
+    def maxRadius(self) -> float:
+        """
+        Return the distance from center of screen
+        to the corner in the geospace of the screen.
+
+        Returns:
+            float: Distance from center to corner in the geospace of the screen
+        """
+        diagonal = hypot(self.width, self.height)
+        return diagonal / self.scale / 2
 
     def setAutoFlush(self, value: bool) -> None:
         """

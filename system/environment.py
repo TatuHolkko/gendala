@@ -1,5 +1,5 @@
 import os
-from typing import Callable                                           # nopep8
+from typing import Callable, List, Tuple                                           # nopep8
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"   # nopep8
 import pygame                                       # nopep8
 import uuid
@@ -106,15 +106,21 @@ class Environment():
         """
         Generate and render a set of layers
         """
-        layers = 12
+        layers:List[Tuple[float, float]] = []
         r0 = 0.02
         w0 = 0.08
         wp = 0
-        g = LayerGenerator(self.settings)
-        for i in range(layers):
-
+        r = r0
+        while r < self.display.maxRadius():
             w = w0 + random.random() * 0.06 - 0.03
             r = r0 + wp + w
+            layers.append((r, w))
+            r0 = r
+            wp = w
+
+        g = LayerGenerator(self.settings)
+
+        for r, w in layers:
 
             if self.restartEvent.active:
                 break
@@ -128,8 +134,7 @@ class Environment():
 
             self.display.flushBuffer()
 
-            r0 = r
-            wp = w
+            
 
     def generateRenderFunction(
             self,
