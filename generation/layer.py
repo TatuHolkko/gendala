@@ -1,6 +1,6 @@
 from copy import deepcopy
 from math import ceil, floor
-from common.utility import multiplePair
+from common.utility import multiplePair, Logger
 from geometry.point import Point
 from generation.feature import FeatureGenerator
 from generation.utility import check, sampleFromDistribution, randomCoordinate
@@ -17,15 +17,16 @@ class LayerGenerator:
     Generator for Layer objects
     """
 
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, logger: Logger) -> None:
         """
         Initialize the generator
 
         Args:
             settings (Settings): Settings object
         """
+        self.logger = logger
         self.lastRepeats = 2
-        self.featureGenerator = FeatureGenerator(settings=settings)
+        self.featureGenerator = FeatureGenerator(settings, logger)
         self.repeatCoeff = settings.getItem(
             "Layers", "featureWidthCoeff", float)
         self.pDivider = settings.getItem(
@@ -127,26 +128,26 @@ class LayerGenerator:
 
         i = centerIndex
         while i > 0:
-            print(f"\tGenerating Feature {centerIndex-i+1}/{centerIndex}...")
+            self.logger.layerPrint(f"\tGenerating Feature {centerIndex-i+1}/{centerIndex}...")
             feature = self.featureGenerator.getFeature(
                 leftConnection=connections[i],
                 rightConnection=connections[i - 1]
             )
-            print("\tDone.")
-            print("\tCombining into complex feature...")
+            self.logger.layerPrint("\tDone.")
+            self.logger.layerPrint("\tCombining into complex feature...")
             surround(resultPattern, patternWidth, feature.getPattern())
-            print("\tDone.")
+            self.logger.layerPrint("\tDone.")
             patternWidth += 4
             i -= 1
 
-        print("\tNormailizing complex feature...")
+        self.logger.layerPrint("\tNormailizing complex feature...")
         resultPattern.offsetX(-complexity)
         resultPattern.scaleX(1 / complexity)
         resultPattern.scaleYToLimits()
-        print("\tDone.")
+        self.logger.layerPrint("\tDone.")
 
         if divider:
-            print("\tGenerating divider...")
+            self.logger.layerPrint("\tGenerating divider...")
             dividerSpace = self.dividerWidth + self.dividerPadding * 2
             dividerY = 1 - dividerSpace / 2
             dividerCurve = Curve(Point(-1, -dividerY))
@@ -161,14 +162,14 @@ class LayerGenerator:
             resultPattern.scaleY(1 - dividerSpace / 2)
             resultPattern.offsetY(dividerSpace / 2)
             resultPattern.combine(dividerRibbon.getPattern())
-            print("\tDone.")
-        print("\tCreatig Layer object...")
+            self.logger.layerPrint("\tDone.")
+        self.logger.layerPrint("\tCreatig Layer object...")
         l = Layer(
             radius=radius,
             width=width,
             pattern=resultPattern,
             repeats=repeats)
-        print("\tDone.")
+        self.logger.layerPrint("\tDone.")
         return l
 
 

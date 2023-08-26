@@ -103,6 +103,19 @@ def gradient(v1: T, v2: T, s: float) -> T:
     d = v2 - v1
     return v1 + d * s
 
+class Logger:
+    def __init__(self) -> None:
+        self.maxLayer = 1
+        self.layer = 1
+    
+    def setLayer(self, value):
+        self.layer = value
+
+    def setMaxLayer(self, value):
+        self.maxLayer = value
+
+    def layerPrint(self, txt):
+        print("[" + str(self.layer).zfill(2) + "/" + str(self.maxLayer).zfill(2) + "] " + txt)
 
 class Color:
     """

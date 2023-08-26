@@ -7,6 +7,7 @@ import random
 import threading
 
 from common.settings import Settings
+from common.utility import Logger
 from geometry.point import Point
 from hierarchy.curve import Curve
 from hierarchy.ribbon import Ribbon
@@ -32,8 +33,8 @@ class Environment():
         Args:
             settings (Settings):  Settings object
         """
+        self.logger = Logger()
         self.settings = settings
-
         displayFlags = None
         if settings.getBool("Program", "hidden"):
             displayFlags = pygame.HIDDEN
@@ -67,7 +68,8 @@ class Environment():
 
         self.display = Display(
             self.surf,
-            settings=settings
+            settings,
+            self.logger
         )
 
         print(settings)
@@ -110,39 +112,46 @@ class Environment():
         """
         layers: List[Tuple[float, float]] = []
         r0 = 0.02
-        w0 = 0.08
+        w0 = 0.02
         wp = 0
         r = r0
+        n = 1
+        widthGrowRate = 1.05
         while r < self.display.maxRadius():
-            w = w0 + random.random() * 0.06 - 0.03
+            w = w0 * widthGrowRate**n
             r = r0 + wp + w
             layers.append((r, w))
             r0 = r
             wp = w
+            n += 1
 
-        g = LayerGenerator(self.settings)
+        self.logger.setMaxLayer(len(layers))
+
+        g = LayerGenerator(self.settings, self.logger)
 
         n = 1
 
         for r, w in layers:
 
+            self.logger.setLayer(n)
+
             if self.restartEvent.active:
                 break
 
-            print(f"Generating Layer {n}/{len(layers)}...")
+            self.logger.layerPrint(f"Generating Layer {n}...")
 
             l = g.getLayer(radius=r, width=w)
 
-            print("Done.")
+            self.logger.layerPrint("Done.")
 
             if self.restartEvent.active:
                 break
 
-            print("Rendering Layer...")
+            self.logger.layerPrint("Rendering Layer...")
 
             l.render(self.display)
 
-            print("Done.")
+            self.logger.layerPrint("Done.")
 
             self.display.flushBuffer()
 

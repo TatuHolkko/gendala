@@ -2,7 +2,7 @@ import random
 from math import pi
 from typing import List
 from common.settings import Settings
-from common.utility import clamp, gradient
+from common.utility import clamp, gradient, Logger
 from geometry.point import Point
 from geometry.utility import avgPoint
 from hierarchy.curve import GeometryException
@@ -17,8 +17,11 @@ class RibbonGenerator:
     Generator for Ribbon objects
     """
 
-    def __init__(self, settings: Settings) -> None:
-        self.curveGenerator = CurveGenerator(settings=settings)
+    def __init__(self, settings: Settings, logger: Logger) -> None:
+
+        self.logger = logger
+
+        self.curveGenerator = CurveGenerator(settings, logger)
 
         self.fillScoreAreaCoeff = settings.getItem(
             "Ribbons",
@@ -110,17 +113,17 @@ class RibbonGenerator:
             closed = check(self.pClosed) and not (start or end)
             curve = None
             width = random.random() * self.maxWidth
-            print("\t\t\tGenerating curve...")
+            self.logger.layerPrint("\t\t\tGenerating curve...")
             while(True):
                 curve = self.curveGenerator.getCurve(
                     closed=closed, start=start, end=end)
                 try:
                     curve.round()
                 except GeometryException:
-                    print("\t\t\t\tNot roundable, discarded.")
+                    self.logger.layerPrint("\t\t\t\tNot roundable, discarded.")
                     continue
                 break
-            print("\t\t\tDone.")
+            self.logger.layerPrint("\t\t\tDone.")
             pattern = randomLinePattern()
             n = 1
             taperLength = clamp(random.uniform(self.minTaperLength, self.maxTaperLength), 0, 0.5)
@@ -133,7 +136,7 @@ class RibbonGenerator:
                 n=n)
             r.unCollideWidth()
             if r.width < self.collapseWidth:
-                print("\t\t\tPattern collapsed to a line.")
+                self.logger.layerPrint("\t\t\tPattern collapsed to a line.")
                 r = Ribbon(
                     curve=curve,
                     pattern=centerLine(),
@@ -144,5 +147,5 @@ class RibbonGenerator:
             s = self.fillScore(r)
             if s > self.fillScoreThreshold:
                 break
-            print(f"\t\t\tFill score {s} < {self.fillScoreThreshold}, discarded.")
+            self.logger.layerPrint(f"\t\t\tFill score {s} < {self.fillScoreThreshold}, discarded.")
         return r

@@ -10,7 +10,7 @@ from typing import List
 from geometry.geospace import GeoSpace, GeoSpaceStack
 from geometry.line import Line
 from geometry.point import Point
-from common.utility import Color, gradient
+from common.utility import Color, gradient, Logger
 from common.settings import Settings
 
 
@@ -19,7 +19,7 @@ class Display:
     Display provides functions for rendering lines.
     """
 
-    def __init__(self, surf, settings: Settings) -> None:
+    def __init__(self, surf, settings: Settings, logger:Logger) -> None:
         """
         Initialize the Display object.
 
@@ -27,6 +27,7 @@ class Display:
             surf (pygame Surface): Surface to render into.
             settings (Settings):  Settings object
         """
+        self.logger = logger
         self.surf = surf
         self.width = surf.get_width()
         self.height = surf.get_height()
@@ -34,7 +35,7 @@ class Display:
         self.antialiasing = settings.getBool("Graphics", "antialiasing")
         self.autoFlush = settings.getBool("Graphics", "autoFlush")
         self.autoColor = True
-        self.scale = min(self.width, self.height) / 3
+        self.scale = min(self.width, self.height) / 2
         self.lineBuffer: List[Line] = []
         self.renderDisabled = False
         self.geoSpace = GeoSpace(
@@ -48,7 +49,7 @@ class Display:
         self.bgC1 = None
         self.fgC0 = None
         self.fgC1 = None
-        self.generateColors()
+        #self.generateColors()
         self.lineColor = Color(255, 255, 255)
 
     def drawLine(self, line: Line) -> None:
@@ -190,9 +191,9 @@ class Display:
         """
         Generate and update background and foreground color pairs.
         """
-        print("Generating colors...")
-        colorGen = ColorGenerator(settings=self.settings)
-        print("Done.")
+        self.logger.layerPrint("Generating colors...")
+        colorGen = ColorGenerator(self.settings, self.logger)
+        self.logger.layerPrint("Done.")
         self.bgC0, self.bgC1 = colorGen.getBackgroundColors()
         self.fgC0, self.fgC1 = colorGen.getLineColors()
 

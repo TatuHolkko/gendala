@@ -1,5 +1,6 @@
 import random
 from common.settings import Settings
+from common.utility import Logger
 from generation.ribbon import RibbonGenerator
 from geometry.point import Point
 from hierarchy.feature import Feature
@@ -11,14 +12,15 @@ class FeatureGenerator:
     Generator for Feature objects
     """
 
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, logger: Logger) -> None:
         """
         Initialize the generator
 
         Args:
             settings (Settings): Settings object
         """
-        self.ribbonGenerator = RibbonGenerator(settings=settings)
+        self.logger = logger
+        self.ribbonGenerator = RibbonGenerator(settings, logger)
         self.pMirrorX = settings.getItem(
             "SimpleFeatures", "P_mirrorX", float)
         self.pMirrorY = settings.getItem(
@@ -75,8 +77,8 @@ class FeatureGenerator:
                 start = Point(-1, leftConnection)
             if i == connectedRight and rightConnection:
                 end = Point(1, rightConnection)
-            print(f"\t\tGenerating Ribbon {i+1}/{n}...")
+            self.logger.layerPrint(f"\t\tGenerating Ribbon {i+1}/{n}...")
             feature.add(self.ribbonGenerator.getRibbon(start=start, end=end))
-            print(f"\t\tDone.")
+            self.logger.layerPrint(f"\t\tDone.")
 
         return feature

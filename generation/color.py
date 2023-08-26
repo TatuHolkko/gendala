@@ -2,7 +2,7 @@ import colorsys
 import random
 from typing import Tuple
 from common.settings import Settings
-from common.utility import Color, clamp
+from common.utility import Color, clamp, Logger
 from generation.utility import coinFlip
 
 
@@ -11,13 +11,14 @@ class ColorGenerator:
     Generator for background and foreground color pairs.
     """
 
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, logger:Logger) -> None:
         """
         Initialize the Color generator object.
 
         Args:
             settings (Settings):  Settings object
         """
+        self.logger = logger
         self.centerValueRange = settings.getList(
             "Colors", "centerValueRange", float)
         self.bgHueRange = settings.getList("Colors", "bgHueRange", float)
@@ -58,11 +59,11 @@ class ColorGenerator:
 
             if self.visualDistance(self.bg1,
                                    self.fg1) < self.visualDiffThreshold:
-                print("\tForeground too similar to background, discarded.")
+                self.logger.layerPrint("\tForeground too similar to background, discarded.")
                 continue
             if self.visualDistance(self.bg2,
                                    self.fg2) < self.visualDiffThreshold:
-                print("\tForeground too similar to background, discarded.")
+                self.logger.layerPrint("\tForeground too similar to background, discarded.")
                 continue
             break
 

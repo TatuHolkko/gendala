@@ -1,5 +1,6 @@
 import random
 from common.settings import Settings
+from common.utility import Logger
 from generation.utility import sampleFromDistribution, randomPoint
 from hierarchy.curve import Curve
 from geometry.point import Point
@@ -11,13 +12,14 @@ class CurveGenerator:
     Generator for Curve objects
     """
 
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, logger: Logger) -> None:
         """
         Initialize the generator
 
         Args:
             settings (Settings): Settings object
         """
+        self.logger = logger
         self.pdNPoints = settings.getList(
             section="Curves",
             setting="PD_complexity",
@@ -83,7 +85,7 @@ class CurveGenerator:
             self.extend(curve, point)
         curve.removeDuplicates()
         if (len(curve.points) < 2) or (len(curve.points) < 3 and closed):
-            print("\t\t\t\tPoint locations invalid, discarded.")
+            self.logger.layerPrint("\t\t\t\tPoint locations invalid, discarded.")
             return self.getCurve(closed=closed, start=start, end=end)
         return curve
 
