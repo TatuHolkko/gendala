@@ -18,9 +18,13 @@ save the mandala once the rendering is finished.
 Windows is a real pain in the ass with updating wallpapers from a script... but this solution seemed to work for me. The root directory contains a batch and a powershell script for automating wallpaper generation. The powershell script is for making windows refresh the wallpaper, and the batch script just bundles the python program and the wallpaper script together.
 
 In order to automate a new wallpaper:
-* Edit the `refreshwallpaper.ps1` so that it reflects your local path to the exported file, as defined in the `settings.ini`.
-* Add a shortcut to `wallpaper.bat` in your windows startup folder
-* (Optional) Set `"hidden"` setting from `settings.ini` to `true`. This hides the window so the wallpaper will be generated silently in the background (and it's a surprise when it's done!).
+* Edit the `refreshwallpaper.ps1` so that it reflects your local path to the exported file, as defined in the `settings.ini` (`exportFolder/exportName`).
+* Add a shortcut to `wallpaper.bat` in your windows startup folder.
+* From `settings.ini`
+   * Set `resolution` to your liking.
+   * Set `export` to `true`.
+   * Set `randomExportName` to `false`.
+   * (Optional) Set `hidden` to `true`. This hides the window so the wallpaper will be generated silently in the background (and it's a surprise when it's done!).
 
 ---
 
